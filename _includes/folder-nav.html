@@ -1,0 +1,25 @@
+{% assign nav_articles = site.html_pages | where_exp: "page", "page.dir != '/'" | where_exp: "page", "page.name != 'index.html'" %}
+{% assign nav_directories = nav_articles | map: "dir" | uniq | sort %}
+{% if include.mode == "floating" %}
+  <details class="folder-nav folder-nav--floating">
+    <summary>Browse folders</summary>
+    <div class="folder-nav-panel">
+      <a class="folder-nav-home" href="{{ '/' | relative_url }}">All articles</a>
+      <ul>
+        {% for directory in nav_directories %}
+          {% assign folder_name = directory | replace: "%20", " " | remove_first: "/guides/" | split: "/" | reject: "" | join: " / " | replace: "-", " " | replace: "_", " " | strip %}
+          <li><a href="{{ '/' | relative_url }}#category-{{ forloop.index }}">{{ folder_name | escape }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </details>
+{% else %}
+  <nav class="folder-nav folder-nav--sidebar" aria-label="Browse by folder">
+    <ul>
+      {% for directory in nav_directories %}
+        {% assign folder_name = directory | replace: "%20", " " | remove_first: "/guides/" | split: "/" | reject: "" | join: " / " | replace: "-", " " | replace: "_", " " | strip %}
+        <li><a href="#category-{{ forloop.index }}">{{ folder_name | escape }}</a></li>
+      {% endfor %}
+    </ul>
+  </nav>
+{% endif %}
