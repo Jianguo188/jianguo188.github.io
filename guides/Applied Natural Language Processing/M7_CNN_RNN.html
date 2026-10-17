@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A beginner-friendly guide to CNNs and RNNs for text, with everyday examples, memory cues, and practice questions.">
+  <title>M7 Beginner Study Guide: CNNs and RNNs for Text</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #213047;
+      --muted: #52647b;
+      --paper: #fff;
+      --canvas: #f1f5fa;
+      --blue: #2457a7;
+      --blue-pale: #eaf2ff;
+      --teal: #087e78;
+      --teal-pale: #e6f7f3;
+      --gold: #8a5b00;
+      --gold-pale: #fff5dc;
+      --line: #dce5ef;
+      --shadow: 0 10px 28px rgba(33, 48, 71, .08);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font: 16px/1.68 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: var(--blue); }
+    a:focus-visible, summary:focus-visible { outline: 3px solid #e4a91a; outline-offset: 3px; }
+    .hero {
+      padding: 56px 22px 46px;
+      color: #fff;
+      background: linear-gradient(135deg, #173c72, #2765a5 60%, #11877e);
+    }
+    .hero-inner, main, footer { width: min(100% - 32px, 980px); margin: 0 auto; }
+    .eyebrow {
+      margin: 0 0 10px;
+      color: #dcecff;
+      font-size: .82rem;
+      font-weight: 750;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    h1 { max-width: 780px; margin: 0; font-size: clamp(2.15rem, 5vw, 3.55rem); line-height: 1.08; }
+    .hero p:not(.eyebrow) { max-width: 730px; margin: 18px 0 0; color: #edf6ff; font-size: 1.12rem; }
+    .badge {
+      display: inline-block;
+      margin-top: 22px;
+      padding: 6px 12px;
+      border: 1px solid rgba(255,255,255,.48);
+      border-radius: 999px;
+      font-size: .9rem;
+    }
+    main { padding: 24px 0 50px; }
+    .card {
+      margin: 18px 0;
+      padding: clamp(20px, 4vw, 32px);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+    h2 { margin: 0 0 14px; font-size: clamp(1.45rem, 3vw, 2rem); line-height: 1.22; }
+    h3 { margin: 23px 0 8px; font-size: 1.18rem; line-height: 1.38; }
+    p { margin: 10px 0; }
+    .lead { color: var(--muted); font-size: 1.08rem; }
+    .toc { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 18px; }
+    .toc a {
+      padding: 7px 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #f8fbff;
+      text-decoration: none;
+      font-size: .9rem;
+    }
+    .callout {
+      margin: 18px 0;
+      padding: 15px 18px;
+      border-left: 5px solid var(--teal);
+      border-radius: 10px;
+      background: var(--teal-pale);
+    }
+    .callout.blue { border-color: var(--blue); background: var(--blue-pale); }
+    .callout.gold { border-color: #d29312; background: var(--gold-pale); }
+    .callout > :first-child { margin-top: 0; }
+    .callout > :last-child { margin-bottom: 0; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 14px; margin: 18px 0; }
+    .mini { padding: 17px; border: 1px solid var(--line); border-radius: 13px; background: #fbfdff; }
+    .mini h3 { margin: 0 0 7px; }
+    .mini p { margin: 0; color: var(--muted); }
+    .memory {
+      display: inline-block;
+      margin: 5px 0 9px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: #eef3f8;
+      font-weight: 750;
+    }
+    .flow { display: flex; flex-wrap: wrap; align-items: stretch; justify-content: center; gap: 9px; margin: 22px 0; }
+    .step {
+      flex: 1 1 120px;
+      max-width: 190px;
+      padding: 14px 11px;
+      border: 1px solid #bfd2ed;
+      border-radius: 12px;
+      background: var(--blue-pale);
+      text-align: center;
+    }
+    .step strong { display: block; color: #17447f; }
+    .arrow { align-self: center; color: var(--teal); font-weight: 800; }
+    .formula {
+      overflow-x: auto;
+      margin: 16px 0;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #f8fafc;
+      text-align: center;
+      font: 1rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    table { width: 100%; margin: 18px 0; border-collapse: collapse; border: 1px solid var(--line); }
+    th, td { padding: 11px 13px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: #edf3fa; }
+    ul, ol { padding-left: 1.35rem; }
+    li { margin: 6px 0; }
+    code {
+      padding: .12em .35em;
+      border-radius: 5px;
+      background: #eff3f8;
+      font: .92em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    details { margin: 12px 0; padding: 13px 15px; border: 1px solid var(--line); border-radius: 11px; background: #fbfdff; }
+    summary { cursor: pointer; font-weight: 700; }
+    details p { margin-bottom: 0; }
+    .sources li { overflow-wrap: anywhere; }
+    footer { padding: 0 0 32px; color: var(--muted); font-size: .9rem; }
+    @media (max-width: 560px) {
+      .hero { padding-top: 42px; }
+      .arrow { flex-basis: 100%; transform: rotate(90deg); }
+      th, td { padding: 9px; }
+    }
+    @media print {
+      body { background: #fff; font-size: 11pt; }
+      .hero { padding: 24px; }
+      main { width: 100%; padding-top: 10px; }
+      .card { box-shadow: none; break-inside: avoid; }
+      .toc { display: none; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Module 7 | Beginner study guide</p>
+      <h1>CNNs and RNNs for Text</h1>
+      <p>Two ways a computer can learn from words: spot nearby patterns, or follow a sentence step by step. Start with the everyday idea, then learn the vocabulary.</p>
+      <span class="badge">Plain-language explanations + real-world examples + memory cues</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="card" id="big-picture">
+      <h2>Start with the big picture</h2>
+      <p class="lead">A neural network cannot directly read a sentence. First, text is changed into numbers. Then a model learns which number patterns help with a task, such as sorting a review or finding a person's name.</p>
+      <div class="grid">
+        <article class="mini">
+          <h3>CNN: the phrase spotter</h3>
+          <p>Looks at short neighboring groups of words, searching for useful local patterns wherever they appear.</p>
+          <p><strong>Analogy:</strong> Scanning a review for a phrase like “stopped working.”</p>
+        </article>
+        <article class="mini">
+          <h3>RNN: the running note-taker</h3>
+          <p>Reads one token at a time and carries a changing summary of what it has seen so far.</p>
+          <p><strong>Analogy:</strong> Listening to a story while remembering earlier details.</p>
+        </article>
+      </div>
+      <div class="callout blue">
+        <strong>Real-world choice:</strong> To label a whole customer review as positive or negative, a CNN can look for helpful phrases anywhere in it. To label each word in “Maya joined Acme in Paris,” an RNN can use the word order and its running context to identify a person, company, and place.
+      </div>
+      <nav class="toc" aria-label="Guide contents">
+        <a href="#language">Text into numbers</a>
+        <a href="#cnn">CNNs</a>
+        <a href="#rnn">RNNs</a>
+        <a href="#compare">Compare them</a>
+        <a href="#toolbox">Course toolbox</a>
+        <a href="#practice">Self-check</a>
+      </nav>
+    </section>
+
+    <section class="card" id="language">
+      <h2>1. Before the network: text becomes numbers</h2>
+      <p>Neural networks do calculations on numbers. A typical text-classification pipeline begins with these steps:</p>
+      <div class="flow" aria-label="Text preprocessing steps">
+        <div class="step"><strong>1. Split</strong>“Great little camera”</div>
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <div class="step"><strong>2. Tokenize</strong><code>great</code> · <code>little</code> · <code>camera</code></div>
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <div class="step"><strong>3. Encode</strong>Tokens become IDs and vectors</div>
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <div class="step"><strong>4. Learn</strong>Model predicts a label</div>
+      </div>
+      <div class="grid">
+        <article class="mini">
+          <h3>Token</h3>
+          <p>A piece of text the model processes, often a word or subword piece.</p>
+        </article>
+        <article class="mini">
+          <h3>Token ID</h3>
+          <p>A number used as a label or lookup address for a token. ID 12 is not inherently “more” than ID 4.</p>
+        </article>
+        <article class="mini">
+          <h3>Embedding</h3>
+          <p>A list of numbers (a vector) representing a token. It gives the model a learnable way to work with words.</p>
+        </article>
+        <article class="mini">
+          <h3>Document matrix</h3>
+          <p>A table of word vectors: one row per token, with rows in sentence order. This is a convenient input shape for a text CNN.</p>
+        </article>
+      </div>
+      <p><strong>Two encodings in the course:</strong> the introductory slides demonstrate one-hot vectors, where each word gets its own mostly-zero row. The toolbox uses an embedding layer, which maps token IDs to denser vectors that the model can learn. Pre-trained embeddings are another option, but the toolbox's embedding layer is learned as part of its model.</p>
+      <h3>Why pad or truncate?</h3>
+      <p>Sentences have different lengths, while a batch is easier to process when examples have a common length. <strong>Padding</strong> adds placeholder tokens to shorter sequences. <strong>Truncation</strong> shortens sequences that exceed a chosen limit.</p>
+      <div class="callout gold">
+        <strong>Padding is not a real word.</strong> Treat it as a structural placeholder so the model does not learn that extra padding means something. Choose a reasonable maximum length: using the single longest document can waste time and memory.
+      </div>
+      <p>Cleaning text can help, but do it thoughtfully. The toolbox removes common words and short tokens; for a different task, removing <em>not</em> from “not safe” could erase the most important clue.</p>
+    </section>
+
+    <section class="card" id="cnn">
+      <h2>2. CNN: look for useful word neighborhoods</h2>
+      <p>A text <strong>convolutional neural network</strong> (CNN) slides small learned filters over neighboring word vectors. Each filter produces a score that says how strongly a local pattern matches what it has learned.</p>
+      <div class="callout blue">
+        <strong>Think of a search highlighter.</strong> In “The delivery was late, but the driver was kind,” a filter might learn to respond to a phrase that helps with a delivery-complaint category. It is a helpful analogy: the model learns numerical patterns from examples; it does not begin with a built-in English dictionary of complaint phrases.
+      </div>
+      <h3>How the filter moves</h3>
+      <p>Imagine each word as a row in a spreadsheet. A text filter covers a few adjacent rows and the complete width of each word vector. It moves along the sentence—not sideways through part of a word vector.</p>
+      <ul>
+        <li>A width-2 filter examines two neighboring tokens at a time, like a bigram-sized window.</li>
+        <li>A width-3 filter examines three tokens at a time; wider filters can find longer local patterns.</li>
+        <li>The filter's weights are learned during training and reused at every position. This is called <strong>weight sharing</strong>.</li>
+      </ul>
+      <div class="formula">Number of valid positions = sentence length − filter width + 1</div>
+      <p><strong>Example:</strong> An 8-token sentence with a width-3 filter has <code>8 − 3 + 1 = 6</code> possible window positions. A filter evaluates each of those six windows to make a feature map.</p>
+      <h3>From windows to a decision</h3>
+      <ol>
+        <li><strong>Convolution:</strong> score each local window; the collection of scores is a <strong>feature map</strong>.</li>
+        <li><strong>ReLU:</strong> a simple activation that turns negative scores into zero while keeping positive scores.</li>
+        <li><strong>Pooling:</strong> keep important responses while shrinking the feature map. Global max pooling keeps the largest response per filter, wherever it appeared.</li>
+        <li><strong>Combine:</strong> join the pooled filter outputs and send them to a dense layer.</li>
+        <li><strong>Predict:</strong> produce category scores or probabilities, such as spam/not spam.</li>
+      </ol>
+      <div class="memory"><strong>Memory cue:</strong> CNN = slide, score, keep the strongest, classify.</div>
+      <h3>Why use a CNN instead of connecting everything?</h3>
+      <p>A fully connected layer gives every input its own connections to later neurons. A CNN uses small windows, reuses the same filter across positions, and can use pooling to reduce the amount of information it carries forward. These choices can reduce complexity and help the model notice a useful phrase wherever it occurs.</p>
+      <p><strong>One trade-off:</strong> global max pooling remembers the strongest response, but not exactly where in the document that response occurred. Also, fewer parameters do not guarantee a model will never overfit.</p>
+    </section>
+
+    <section class="card" id="rnn">
+      <h2>3. RNN: keep a running summary of the sequence</h2>
+      <p>A <strong>recurrent neural network</strong> (RNN) processes tokens in order. At each position it combines the current token with a <strong>hidden state</strong>—a learned, compact summary carried from the preceding step.</p>
+      <div class="flow" aria-label="RNN processing steps">
+        <div class="step"><strong>Word 1</strong>Start a running summary</div>
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <div class="step"><strong>Word 2</strong>Update the summary</div>
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <div class="step"><strong>Word 3</strong>Use earlier context</div>
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <div class="step"><strong>Output</strong>Tag, classify, or predict</div>
+      </div>
+      <p>For example, when tagging “Maya and Leo work at Northstar in Toronto,” an RNN can carry clues forward as it reads. A sequence-labeling model can produce an output for each word: <code>Maya → PERSON</code>, <code>Northstar → ORGANIZATION</code>, <code>Toronto → LOCATION</code>. Real systems need suitable training examples and may also use information from both directions.</p>
+      <p>A simplified picture of its repeating step is:</p>
+      <div class="formula">new hidden state = combine(current token, previous hidden state)</div>
+      <p>The model reuses the same learned weights at every time step. This is <strong>parameter sharing</strong> through the sequence. The carried state is useful context—not a perfect recording of every earlier word.</p>
+      <h3>Three useful input/output patterns</h3>
+      <table>
+        <thead><tr><th>Pattern</th><th>What goes in and comes out?</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Many-to-one</strong></td><td>Many input tokens, one prediction for the sequence.</td><td>Classify an entire restaurant review as positive or negative.</td></tr>
+          <tr><td><strong>Many-to-many</strong></td><td>A prediction at each step of an input sequence.</td><td>Tag each word in a sentence with a part of speech or named entity.</td></tr>
+          <tr><td><strong>One-to-many</strong></td><td>One input, a sequence of outputs.</td><td>Generate a caption from an image or continue a text prompt.</td></tr>
+        </tbody>
+      </table>
+      <h3>RNN language model: predict what comes next</h3>
+      <p>A language-modeling RNN can learn to predict the next token from the earlier ones. For “we like NLP,” the training examples include <code>we → like</code> and <code>like → NLP</code>. At generation time, the model predicts a next token, adds it to the sequence, then predicts again.</p>
+      <h3>How does an RNN learn across time?</h3>
+      <p>Training sends prediction errors backward through the repeated steps. This is called <strong>backpropagation through time (BPTT)</strong>. It lets a later mistake affect the earlier steps that helped produce it.</p>
+      <div class="callout gold">
+        <strong>A difficulty for basic RNNs:</strong> as learning signals travel through a long sequence, they can become too small (<strong>vanishing gradients</strong>) or too large (<strong>exploding gradients</strong>). Exploding gradients can be limited with gradient clipping; gated alternatives such as <strong>LSTMs</strong> and <strong>GRUs</strong> are designed to help preserve useful information over longer spans.
+      </div>
+      <div class="memory"><strong>Memory cue:</strong> RNN = read in order, update memory, produce an output.</div>
+    </section>
+
+    <section class="card" id="compare">
+      <h2>4. CNN or RNN? Choose by the job</h2>
+      <table>
+        <thead><tr><th>Question</th><th>CNN</th><th>RNN</th></tr></thead>
+        <tbody>
+          <tr><td><strong>How does it read?</strong></td><td>Looks at short neighboring windows, often across the sentence in parallel.</td><td>Reads one step at a time and carries a hidden state.</td></tr>
+          <tr><td><strong>What is its natural strength?</strong></td><td>Finding local patterns that can occur in different positions.</td><td>Using order and earlier context in a sequence.</td></tr>
+          <tr><td><strong>Example from M7</strong></td><td>Classifying text, such as a newsgroup post.</td><td>Tagging each word for named entity recognition.</td></tr>
+          <tr><td><strong>What should you remember?</strong></td><td>Pooling can discard where a strong feature was found.</td><td>A vanilla RNN can struggle to retain information over long distances.</td></tr>
+        </tbody>
+      </table>
+      <p>Neither model is automatically best for every language task. The right choice depends on the data, the goal, and the practical constraints. Compare against a simple baseline rather than assuming a bigger or newer model must win.</p>
+      <div class="memory"><strong>Fast recall:</strong> CNN asks “Which local phrases matter?” RNN asks “What have I read so far?”</div>
+    </section>
+
+    <section class="card" id="toolbox">
+      <h2>5. The course toolbox: from reviews to predictions</h2>
+      <p>The M7 CNN toolbox walks through a real document-classification workflow using a subset of the <strong>20 Newsgroups</strong> dataset. Its four example categories cover atheism, religion, computer graphics, and space science.</p>
+      <ol>
+        <li><strong>Inspect the examples:</strong> read sample posts and check their category labels.</li>
+        <li><strong>Prepare the text:</strong> clean and tokenize posts, create a vocabulary, map tokens to IDs, and pad or truncate sequences.</li>
+        <li><strong>Build a CNN:</strong> use learned word embeddings and parallel filter widths of 2, 3, and 4 tokens to look for patterns of different lengths.</li>
+        <li><strong>Classify:</strong> global max pooling combines each filter's strongest response; dense layers make the final category prediction.</li>
+        <li><strong>Evaluate:</strong> inspect accuracy, a classification report, and a confusion matrix—not only the training score.</li>
+        <li><strong>Compare:</strong> the toolbox also evaluates a TF-IDF + Naive Bayes baseline on the same categories.</li>
+      </ol>
+      <div class="callout blue">
+        <strong>Case-study result:</strong> The toolbox lecture reports roughly 89% test accuracy for its CNN and 84% for its Naive Bayes comparison. Those figures describe this particular run and setup; they are not a promise about a new dataset. The confusion matrix also shows that posts about atheism and space can be hard to separate because their vocabulary sometimes overlaps.
+      </div>
+      <h3>Read evaluation like a fair referee</h3>
+      <ul>
+        <li><strong>Training set:</strong> examples the model learns from.</li>
+        <li><strong>Validation set:</strong> examples used during development to choose settings or a checkpoint.</li>
+        <li><strong>Test set:</strong> held back until the end for a fair final check.</li>
+      </ul>
+      <p>The course notebook is a teaching demonstration. For a rigorous evaluation, keep a separate validation set rather than repeatedly using the test set to choose the best model. Build vocabulary and preprocessing choices from training data, then apply them to validation and test data. A confusion matrix helps show <em>which</em> categories the model mixes up; per-class precision and recall help show performance for each category.</p>
+      <div class="callout gold">
+        <strong>Toolbox setup tip:</strong> The original and Colab-updated notebooks contain environment setup and deep-learning library instructions. Software versions can matter, so use the notebook that matches your environment and check its setup before running installation cells.
+      </div>
+      <p><strong>Quiz memory:</strong> The M7 quiz asks which CNN layer reduces the feature-map dimensions. The answer is the <strong>pooling layer</strong>. Softmax turns output scores into class probabilities; a fully connected layer combines features for a prediction; ReLU adds a non-linear step.</p>
+    </section>
+
+    <section class="card" id="recap">
+      <h2>6. One-minute recap</h2>
+      <ol>
+        <li>Text becomes tokens, IDs, and vector representations before a network can process it.</li>
+        <li>A text CNN slides reusable filters over neighboring word vectors to find useful local patterns.</li>
+        <li>Pooling shrinks feature maps; global max pooling keeps the strongest response per filter.</li>
+        <li>An RNN reads a sequence in order and passes a hidden state from one step to the next.</li>
+        <li>Many-to-one can classify a whole review; many-to-many can label every word.</li>
+        <li>BPTT trains the RNN through its sequence; vanilla RNNs can face vanishing or exploding gradients.</li>
+        <li>Use held-out evaluation and compare with a baseline before deciding whether a model is useful.</li>
+      </ol>
+      <div class="callout">
+        <strong>Remember it in one breath:</strong>
+        <span class="memory">CNN finds local patterns; RNN carries context in order.</span>
+      </div>
+    </section>
+
+    <section class="card" id="practice">
+      <h2>7. Quick self-check</h2>
+      <p>Try answering before opening each explanation.</p>
+      <details>
+        <summary>A sentence has 8 tokens. How many valid windows does a width-3 filter see?</summary>
+        <p>Six: <code>8 − 3 + 1 = 6</code> possible positions.</p>
+      </details>
+      <details>
+        <summary>What does a text CNN filter cover when it examines three neighboring words?</summary>
+        <p>Three complete neighboring word-vector rows, spanning the embedding dimension. It moves along token positions, not sideways through a partial word vector.</p>
+      </details>
+      <details>
+        <summary>What does global max pooling keep, and what can it lose?</summary>
+        <p>It keeps the strongest response from each filter, but loses the exact location where that response occurred.</p>
+      </details>
+      <details>
+        <summary>Why is an RNN's hidden state useful?</summary>
+        <p>It carries a learned summary of earlier sequence steps into the current step, so the prediction can depend on word order and prior context.</p>
+      </details>
+      <details>
+        <summary>Which model pattern fits one sentiment label for a whole review?</summary>
+        <p>Many-to-one: many word inputs contribute to one document-level output.</p>
+      </details>
+      <details>
+        <summary>What does the pooling layer do in the CNN quiz?</summary>
+        <p>It downsamples the feature maps, reducing their size. Softmax has a different job: turning output scores into class probabilities.</p>
+      </details>
+      <details>
+        <summary>Why should the test set be saved for a final check?</summary>
+        <p>If you repeatedly use test results to choose a model or tune settings, the test set is no longer an independent check of how the model may perform on new data.</p>
+      </details>
+    </section>
+
+    <section class="card" id="sources">
+      <h2>Materials reviewed</h2>
+      <p>This guide brings together the Week 06 module overview, quiz, four lecture slide decks and transcripts, the CNN toolbox handout and transcript, both toolbox notebooks, their visual aids, and the existing study notes and practice notebook. The recordings are linked below; their provided transcripts were used to review lesson content.</p>
+      <ul class="sources">
+        <li><a href="../M7%20Overview.docx">M7 module overview</a> | <a href="../Quiz6.docx">Quiz 6</a></li>
+        <li><a href="../M7%20-%20Non-Linear%20Text%20Classification%20using%20Convolutional%20Neural%20Networks%20%28CNN%29%20and%20Introduction%20to%20Language%20Models%20using%20Recurrent%20Neural%20Networks%20%28RNN%29/M7T1L1_Convolutional_Neural_Network_part1.pdf">CNN Part 1 slides</a> | <a href="../M7%20-%20Non-Linear%20Text%20Classification%20using%20Convolutional%20Neural%20Networks%20%28CNN%29%20and%20Introduction%20to%20Language%20Models%20using%20Recurrent%20Neural%20Networks%20%28RNN%29/M7T1L1_Convolutional_Neural_Network_part1.txt">transcript</a> | <a href="../M7%20-%20Non-Linear%20Text%20Classification%20using%20Convolutional%20Neural%20Networks%20%28CNN%29%20and%20Introduction%20to%20Language%20Models%20using%20Recurrent%20Neural%20Networks%20%28RNN%29/M7T1L1_Convolutional_Neural_Network_part1.mp4">recording</a></li>
+        <li><a href="../M7%20-%20Non-Linear%20Text%20Classification%20using%20Convolutional%20Neural%20Networks%20%28CNN%29%20and%20Introduction%20to%20Language%20Models%20using%20Recurrent%20Neural%20Networks%20%28RNN%29/M7T1L2_Convolutional_Neural_Network_part2%20V032923.pdf">CNN Part 2 slides</a> | <a href="../M7%20-%20Non-Linear%20Text%20Classification%20using%20Convolutional%20Neural%20Networks%20%28CNN%29%20and%20Introduction%20to%20Language%20Models%20using%20Recurrent%20Neural%20Networks%20%28RNN%29/M7T1L2_Convolutional_Neural_Network_part2.txt">transcript</a> | <a href="../M7%20-%20Non-Linear%20Text%20Classification%20using%20Convolutional%20Neural%20Networks%20%28CNN%29%20and%20Introduction%20to%20Language%20Models%20using%20Recurrent%20Neural%20Networks%20%28RNN%29/M7T1L2_Convolutional_Neural_Network_part2.mp4">recording</a></li>
+        <li><a href="../M7%20-%20Non-Linear%20Text%20Classification%20using%20Convolutional%20Neural%20Networks%20%28CNN%29%20and%20Introduction%20to%20Language%20Models%20using%20Recurrent%20Neural%20Networks%20%28RNN%29/M7T2L1_Recurrent_Neural_Networks_RNN_part%201.pdf">RNN Part 1 slides</a> | <a href="../M7%20-%20Non-Linear%20Text%20Classification%20using%20Convolutional%20Neural%20Networks%20%28CNN%29%20and%20Introduction%20to%20Language%20Models%20using%20Recurrent%20Neural%20Networks%20%28RNN%29/M7T2L1_Recurrent_Neural_Networks_RNN_part1.txt">transcript</a> | <a href="../M7%20-%20Non-Linear%20Text%20Classification%20using%20Convolutional%20Neural%20Networks%20%28CNN%29%20and%20Introduction%20to%20Language%20Models%20using%20Recurrent%20Neural%20Networks%20%28RNN%29/M7T2L1_Recurrent_Neural_Networks_RNN_part1.mp4">recording</a></li>
+        <li><a href="../M7%20-%20Non-Linear%20Text%20Classification%20using%20Convolutional%20Neural%20Networks%20%28CNN%29%20and%20Introduction%20to%20Language%20Models%20using%20Recurrent%20Neural%20Networks%20%28RNN%29/M7T2L2_Recurrent_Neural_Networks_RNN_part%202.pdf">RNN Part 2 slides</a> | <a href="../M7%20-%20Non-Linear%20Text%20Classification%20using%20Convolutional%20Neural%20Networks%20%28CNN%29%20and%20Introduction%20to%20Language%20Models%20using%20Recurrent%20Neural%20Networks%20%28RNN%29/M7T2L2_Recurrent_Neural_Networks_RNN_part2_REV.txt">transcript</a> | <a href="../M7%20-%20Non-Linear%20Text%20Classification%20using%20Convolutional%20Neural%20Networks%20%28CNN%29%20and%20Introduction%20to%20Language%20Models%20using%20Recurrent%20Neural%20Networks%20%28RNN%29/M7T2L2_Recurrent_Neural_Networks_RNN_part2.mp4">recording</a></li>
+        <li><a href="../M7%20-%20Toolbox%20on%20CNN%20for%20Text%20Classification/M7%20Toolbox.docx">CNN toolbox handout</a> | <a href="../M7%20-%20Toolbox%20on%20CNN%20for%20Text%20Classification/CNN_transcript.txt">toolbox transcript</a> | <a href="../M7%20-%20Toolbox%20on%20CNN%20for%20Text%20Classification/CNN_for_text_toolbox.ipynb">original CNN toolbox notebook</a> | <a href="../M7%20-%20Toolbox%20on%20CNN%20for%20Text%20Classification/CNN_for_text_toolbox_UpdatedForColab.ipynb">Colab-updated notebook</a> | <a href="../M7%20-%20Toolbox%20on%20CNN%20for%20Text%20Classification/M7_%20Toolbox%20on%20CNN%20For%20Text%20Classification.mp4">recording</a></li>
+        <li>Toolbox visuals: <a href="../M7%20-%20Toolbox%20on%20CNN%20for%20Text%20Classification/word_embedding.png">word embedding</a>, <a href="../M7%20-%20Toolbox%20on%20CNN%20for%20Text%20Classification/matrix.png">document matrix</a>, <a href="../M7%20-%20Toolbox%20on%20CNN%20for%20Text%20Classification/embedding_dimension.png">filter and embedding dimensions</a>, and <a href="../M7%20-%20Toolbox%20on%20CNN%20for%20Text%20Classification/CNN_text.jpg">CNN overview image</a>.</li>
+        <li><a href="M7_Beginner_Study_Guide_CNN_RNN.md">Existing M7 study notes</a> | <a href="From_Scratch_CNN_and_RNN.ipynb">from-scratch CNN and RNN practice notebook</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>M7 CNN and RNN | Beginner study guide | Designed to read on screen or print to PDF.</p>
+  </footer>
+</body>
+</html>

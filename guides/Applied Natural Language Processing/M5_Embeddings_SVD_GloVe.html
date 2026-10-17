@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A beginner-friendly guide to word context, co-occurrence matrices, dimensionality reduction, SVD, GloVe, and word similarity.">
+  <title>M5 Beginner Study Guide: Word Embeddings, SVD, and GloVe</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #203047;
+      --muted: #53657b;
+      --paper: #fff;
+      --canvas: #f2f6fb;
+      --blue: #2457a7;
+      --blue-pale: #eaf2ff;
+      --teal: #087e78;
+      --teal-pale: #e6f7f3;
+      --gold: #8a5b00;
+      --gold-pale: #fff5dc;
+      --line: #dce5ef;
+      --shadow: 0 10px 28px rgba(32, 48, 71, .08);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font: 16px/1.68 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: var(--blue); }
+    a:focus-visible, summary:focus-visible { outline: 3px solid #e4a91a; outline-offset: 3px; }
+    .hero {
+      padding: 58px 22px 48px;
+      color: #fff;
+      background: linear-gradient(135deg, #153d73, #2767a7 60%, #12877f);
+    }
+    .hero-inner, main, footer { width: min(100% - 32px, 980px); margin: 0 auto; }
+    .eyebrow {
+      margin: 0 0 10px;
+      color: #dcecff;
+      font-size: .82rem;
+      font-weight: 750;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    h1 { max-width: 820px; margin: 0; font-size: clamp(2.1rem, 5vw, 3.6rem); line-height: 1.08; }
+    .hero p:not(.eyebrow) { max-width: 760px; margin: 18px 0 0; color: #edf6ff; font-size: 1.12rem; }
+    .badge {
+      display: inline-block;
+      margin-top: 24px;
+      padding: 7px 12px;
+      border: 1px solid rgba(255,255,255,.48);
+      border-radius: 999px;
+      font-size: .9rem;
+    }
+    main { padding: 26px 0 52px; }
+    .card {
+      margin: 18px 0;
+      padding: clamp(20px, 4vw, 32px);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+    h2 { margin: 0 0 14px; font-size: clamp(1.45rem, 3vw, 2rem); line-height: 1.22; }
+    h3 { margin: 24px 0 8px; font-size: 1.18rem; line-height: 1.38; }
+    p { margin: 10px 0; }
+    .lead { color: var(--muted); font-size: 1.08rem; }
+    .toc { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 18px; }
+    .toc a {
+      padding: 7px 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #f8fbff;
+      text-decoration: none;
+      font-size: .9rem;
+    }
+    .callout {
+      margin: 18px 0;
+      padding: 15px 18px;
+      border-left: 5px solid var(--teal);
+      border-radius: 10px;
+      background: var(--teal-pale);
+    }
+    .callout.blue { border-color: var(--blue); background: var(--blue-pale); }
+    .callout.gold { border-color: #d29312; background: var(--gold-pale); }
+    .callout > :first-child { margin-top: 0; }
+    .callout > :last-child { margin-bottom: 0; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 14px; margin: 18px 0; }
+    .mini { padding: 17px; border: 1px solid var(--line); border-radius: 13px; background: #fbfdff; }
+    .mini h3 { margin: 0 0 7px; }
+    .mini p { margin: 0; color: var(--muted); }
+    .memory {
+      display: inline-block;
+      margin: 5px 0 9px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: #eef3f8;
+      font-weight: 750;
+    }
+    .flow { display: flex; flex-wrap: wrap; align-items: stretch; justify-content: center; gap: 9px; margin: 22px 0; }
+    .step {
+      flex: 1 1 125px;
+      max-width: 195px;
+      padding: 14px 11px;
+      border: 1px solid #bfd2ed;
+      border-radius: 12px;
+      background: var(--blue-pale);
+      text-align: center;
+    }
+    .step strong { display: block; color: #17447f; }
+    .arrow { align-self: center; color: var(--teal); font-weight: 800; }
+    .formula {
+      overflow-x: auto;
+      margin: 16px 0;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #f8fafc;
+      text-align: center;
+      font: 1rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    table { width: 100%; margin: 18px 0; border-collapse: collapse; border: 1px solid var(--line); }
+    th, td { padding: 11px 13px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: #edf3fa; }
+    ul, ol { padding-left: 1.35rem; }
+    li { margin: 6px 0; }
+    code {
+      padding: .12em .35em;
+      border-radius: 5px;
+      background: #eff3f8;
+      font: .92em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    details { margin: 12px 0; padding: 13px 15px; border: 1px solid var(--line); border-radius: 11px; background: #fbfdff; }
+    summary { cursor: pointer; font-weight: 700; }
+    details p { margin-bottom: 0; }
+    .sources li { overflow-wrap: anywhere; }
+    footer { padding: 0 0 34px; color: var(--muted); font-size: .9rem; }
+    @media (max-width: 560px) {
+      .hero { padding-top: 42px; }
+      .arrow { flex-basis: 100%; transform: rotate(90deg); }
+      th, td { padding: 9px; }
+    }
+    @media print {
+      body { background: #fff; font-size: 11pt; }
+      .hero { padding: 24px; }
+      main { width: 100%; padding-top: 10px; }
+      .card { box-shadow: none; break-inside: avoid; }
+      .toc { display: none; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Module 5 | Beginner study guide</p>
+      <h1>Word Embeddings, SVD, and GloVe</h1>
+      <p>Learn how words can be represented as numbers that reflect the company they keep, how SVD compresses context counts, and how GloVe learns from word-pair statistics.</p>
+      <span class="badge">Plain-language explanations + real-world examples + memory cues</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="card" id="big-picture">
+      <h2>Start with the big picture</h2>
+      <p class="lead">Words are not numbers, but computers need numbers to compare them. M5 introduces ways to describe a word using its surrounding words, then turn that description into a shorter, dense vector called an <strong>embedding</strong>.</p>
+      <div class="flow" aria-label="Word representation story">
+        <div class="step"><strong>Text</strong>“The café serves warm coffee”</div>
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <div class="step"><strong>Count neighbors</strong>Which words appear nearby?</div>
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <div class="step"><strong>Compress or learn</strong>SVD or GloVe</div>
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <div class="step"><strong>Use vectors</strong>Compare related words</div>
+      </div>
+      <div class="callout blue">
+        <strong>Real-world example: search and recommendations.</strong> If people who search for “warm coffee” also read about espresso and cafés, patterns of nearby words can help a system connect related text. The vectors are learned from usage patterns; they are not hand-written dictionary definitions.
+      </div>
+      <nav class="toc" aria-label="Guide contents">
+        <a href="#terms">Key terms</a>
+        <a href="#cooccurrence">Co-occurrence</a>
+        <a href="#svd">SVD</a>
+        <a href="#similarity">Similarity</a>
+        <a href="#glove">GloVe</a>
+        <a href="#limits">Limitations</a>
+        <a href="#practice">Self-check</a>
+      </nav>
+    </section>
+
+    <section class="card" id="terms">
+      <h2>1. A few ideas before the math</h2>
+      <div class="grid">
+        <article class="mini">
+          <h3>Vocabulary</h3>
+          <p>The set of distinct words the system is considering. A vocabulary of 20,000 words can mean 20,000 possible word features.</p>
+        </article>
+        <article class="mini">
+          <h3>Dimension</h3>
+          <p>One coordinate or feature in a vector. A vector with 20,000 coordinates lives in a 20,000-dimensional space.</p>
+        </article>
+        <article class="mini">
+          <h3>Sparse</h3>
+          <p>A table where most entries are zero. A document usually contains only a small portion of all possible words.</p>
+        </article>
+        <article class="mini">
+          <h3>Dense embedding</h3>
+          <p>A shorter list of learned numbers representing a word. Most coordinates may have non-zero values.</p>
+        </article>
+      </div>
+      <p>For example, a simple bag-of-words representation of “coffee tastes good” might mark the vocabulary entries for <code>coffee</code>, <code>tastes</code>, and <code>good</code> as present and leave thousands of unrelated vocabulary entries at zero.</p>
+      <div class="callout gold">
+        <strong>Why reduce dimensions?</strong> Huge sparse tables use storage, slow computation, and can make patterns harder to work with. Compressing a representation can keep useful structure with fewer numbers and can make a 2D or 3D visualization possible.
+      </div>
+    </section>
+
+    <section class="card" id="cooccurrence">
+      <h2>2. Co-occurrence: words describe their neighbors</h2>
+      <p>A <strong>co-occurrence matrix</strong> counts how often one word appears near another in a text collection. First choose a <strong>context window</strong>: the number of neighboring words to look at around a center word.</p>
+      <div class="callout blue">
+        <strong>Everyday analogy:</strong> Imagine keeping a tally of which people appear together in the same small group. If two people often share groups, their “who they spend time with” profiles may be similar. A word-context matrix makes a similar tally for words.
+      </div>
+      <h3>Example with a context window</h3>
+      <p>Take the phrase “the best coffee tastes warm.” With a window of one word on each side, the neighbors of <em>coffee</em> are <em>best</em> and <em>tastes</em>. The matrix adds counts for these center/context pairs.</p>
+      <p>In the lecture's example corpus, “it was the best of times” and “it was the worst of times,” the word <em>best</em> shares nearby context words with <em>worst</em>. Words used in similar surroundings can develop similar context profiles.</p>
+      <p>If the vocabulary has <em>d</em> distinct words, a word-word co-occurrence matrix has shape <strong>d × d</strong>:</p>
+      <div class="formula">row = center word &nbsp; | &nbsp; column = context word &nbsp; | &nbsp; entry = how often they co-occur</div>
+      <p>For a matrix entry <code>X[i,j]</code>, row <code>i</code> represents one center word and column <code>j</code> one context word. The number records how often context word <code>j</code> appears near center word <code>i</code>, according to the chosen window and counting rule.</p>
+      <div class="memory"><strong>Memory cue:</strong> Co-occurrence asks, “Who appears near whom?”</div>
+      <h3>Changing the window changes the evidence</h3>
+      <ul>
+        <li>A small window focuses on close neighbors and can highlight local word relationships.</li>
+        <li>A larger window includes more surrounding words and can capture broader topic associations.</li>
+        <li>A very broad context may blur some local patterns. The useful window depends on the task and corpus.</li>
+      </ul>
+      <div class="callout gold">
+        <strong>Keep matrix sizes straight:</strong> A document-term matrix has one row per document and one column per vocabulary word, so it is typically <em>number of documents × vocabulary size</em>. A word-word co-occurrence matrix has the vocabulary on both axes, so it is <em>vocabulary size × vocabulary size</em>.
+      </div>
+    </section>
+
+    <section class="card" id="svd">
+      <h2>3. SVD: compress a large table into fewer coordinates</h2>
+      <p><strong>Singular Value Decomposition</strong> (SVD) is a way to factor a matrix into simpler mathematical pieces. For a matrix <code>X</code>, its factorization is written:</p>
+      <div class="formula">X = U Σ V<sup>T</sup></div>
+      <p>You do not need to calculate these pieces by hand to understand the main idea:</p>
+      <ul>
+        <li><strong>U</strong> and <strong>V</strong> describe directions or patterns in the data.</li>
+        <li><strong>Σ</strong> holds singular values that rank the strength of those patterns.</li>
+        <li><strong>Truncated SVD</strong> keeps only the first <em>k</em> components and discards the rest.</li>
+      </ul>
+      <p>Instead of storing <em>d</em> context counts for each word, we can represent it with <em>k</em> coordinates, where <em>k</em> is much smaller than <em>d</em>. For example, compressing 10,000 context-count features to 100 components reduces the vector length dramatically.</p>
+      <div class="callout blue">
+        <strong>Everyday analogy: a photo thumbnail.</strong> A full-resolution image may contain millions of pixel values. A compressed thumbnail preserves much of its recognizable structure using less data. Truncated SVD similarly gives a lower-rank approximation of a large matrix, though its coordinates are mathematical patterns, not named concepts such as “warmth” or “food.”
+      </div>
+      <h3>What is a latent dimension?</h3>
+      <p>A <strong>latent dimension</strong> is a learned coordinate in the compressed representation. The strongest components capture broad patterns in the matrix; keeping more components generally preserves more of its structure, but also makes the vectors larger.</p>
+      <p>SVD is used in many ways. Standard PCA specifically centers data and relates to variance; truncated SVD on a word co-occurrence matrix is a low-rank factorization of that matrix. For this guide, remember that SVD compresses and approximates the input matrix—the exact meaning of each component is not normally a neat human label.</p>
+      <div class="memory"><strong>Memory cue:</strong> SVD = split the table, keep the strongest directions, use fewer coordinates.</div>
+      <h3>Why can compression help?</h3>
+      <ul>
+        <li><strong>Smaller vectors:</strong> less data to store and process.</li>
+        <li><strong>Noise reduction:</strong> weaker patterns can be left out of the approximation.</li>
+        <li><strong>Useful visualization:</strong> two or three dimensions can be plotted, though a projection may hide important details.</li>
+        <li><strong>Potentially useful features:</strong> compressed representations can help downstream models, but improvement is not automatic.</li>
+      </ul>
+    </section>
+
+    <section class="card" id="similarity">
+      <h2>4. Comparing word vectors</h2>
+      <p>Once words have vectors, we can compare them. <strong>Cosine similarity</strong> compares the angle between two vectors rather than simply checking the size of their values.</p>
+      <div class="formula">cosine similarity(a, b) = (a · b) / (length(a) × length(b))</div>
+      <p>A score closer to 1 means the vectors point in a more similar direction; around 0 means they are roughly unrelated in direction; negative values mean they point in opposite directions. The scale and interpretation can depend on how embeddings were built.</p>
+      <div class="callout">
+        <strong>Real-world example: finding related menu items.</strong> A restaurant app might compare vectors for “espresso” and “latte.” If the words share contexts such as café menus and coffee orders, they may have more similar vectors than “espresso” and “bicycle.” That similarity may help search or recommendations—but it does not prove the items are identical.
+      </div>
+      <p>For GloVe, the slides also mention Euclidean distance as a way to compare vectors. The appropriate measure depends on the representation and the task; cosine similarity is a common way to focus on vector direction.</p>
+      <div class="callout gold">
+        <strong>Do not over-read a plot.</strong> A 2D picture is only a projection of a higher-dimensional space. Nearby dots can be suggestive, but a visualization does not prove that all word meanings or relationships are faithfully represented.
+      </div>
+    </section>
+
+    <section class="card" id="glove">
+      <h2>5. GloVe: learn from global co-occurrence statistics</h2>
+      <p><strong>GloVe</strong> stands for <strong>Global Vectors for Word Representation</strong>. It starts from counts of word pairs across a corpus and learns dense vectors so that word-vector relationships reflect those global co-occurrence statistics.</p>
+      <p>The lecture's running example uses the two phrases “it was the best of times” and “it was the worst of times,” with a window of two. It reports that <em>it</em> appears near <em>was</em> twice. If the row total for contexts of <em>it</em> is six, the conditional probability is:</p>
+      <div class="formula">P(was | it) = count(was near it) / all counted contexts of it = 2 / 6</div>
+      <p>GloVe uses global co-occurrence information to learn word and context vectors. A simplified version of its learning relationship is:</p>
+      <div class="formula">word vector · context vector + biases ≈ log(co-occurrence count)</div>
+      <p>The <strong>dot product</strong> is a way to compare vectors. The logarithm helps work with counts that can vary greatly. <strong>Bias terms</strong> account for word-specific frequency effects. A <strong>weighting function</strong> reduces the influence of extremely rare or extremely frequent pairs so that noisy or overly common events do not dominate the objective.</p>
+      <div class="callout blue">
+        <strong>Real-world example: seasons and weather.</strong> In a sufficiently varied corpus, <em>summer</em> may appear with <em>warm</em>, <em>sunny</em>, and <em>holiday</em>; <em>winter</em> may appear with <em>cold</em>, <em>snow</em>, and <em>coat</em>. GloVe can learn vectors that reflect these repeated associations.
+      </div>
+      <h3>How do SVD and GloVe relate?</h3>
+      <table>
+        <thead><tr><th>Approach</th><th>What it starts from</th><th>How it gets compact vectors</th><th>Easy memory hook</th></tr></thead>
+        <tbody>
+          <tr><td><strong>SVD embeddings</strong></td><td>A co-occurrence count matrix.</td><td>Factorize the matrix and retain a chosen number of components.</td><td>Compress the count table.</td></tr>
+          <tr><td><strong>GloVe</strong></td><td>Global word-pair co-occurrence statistics.</td><td>Learn word and context vectors by minimizing a weighted objective based on log counts.</td><td>Fit vectors to the count patterns.</td></tr>
+        </tbody>
+      </table>
+      <p>Both use co-occurrence information, but they are not the same algorithm. SVD directly factorizes a matrix; GloVe trains vectors to fit weighted relationships in the co-occurrence data.</p>
+      <div class="memory"><strong>Memory cue:</strong> SVD compresses counts; GloVe learns vectors from weighted global counts.</div>
+      <h3>Relationships between vectors</h3>
+      <p>The slides demonstrate that word-vector differences can sometimes capture relationships, such as gender-related differences across word pairs. These patterns depend on the training data and model; they are not guaranteed linguistic laws.</p>
+    </section>
+
+    <section class="card" id="limits">
+      <h2>6. What embeddings can and cannot tell you</h2>
+      <ul>
+        <li><strong>They learn from the corpus, not from truth.</strong> Missing, rare, or biased language in the data affects the vectors.</li>
+        <li><strong>Small datasets are noisy.</strong> If a word hardly appears, its learned neighbors may be unhelpful or surprising.</li>
+        <li><strong>Coordinates are not definitions.</strong> An embedding dimension is usually a mathematical feature, not a named meaning.</li>
+        <li><strong>Similarity is not equivalence.</strong> Two words can occur in similar contexts without being interchangeable.</li>
+        <li><strong>Classic GloVe is static.</strong> A word such as <em>bank</em> usually gets one vector that mixes its financial and riverside uses, rather than a different vector for each sentence.</li>
+        <li><strong>Compression loses detail.</strong> Keeping fewer dimensions uses less space but cannot preserve every detail from the original matrix.</li>
+      </ul>
+      <div class="callout gold">
+        <strong>Study takeaway:</strong> Use an embedding as a useful summary of how words behave in the particular data used to train it—not as a perfect, unbiased, context-aware definition.
+      </div>
+    </section>
+
+    <section class="card" id="course">
+      <h2>7. What the M5 notebook and quiz emphasize</h2>
+      <p>The M5 beginner notebook builds a small word-word co-occurrence table from sentences, lets you change the context-window size, applies truncated SVD to get small word vectors, plots a two-dimensional view, and compares words using cosine similarity. It also introduces the GloVe objective and practices changing the window, vector size, and corpus.</p>
+      <p>The quiz reinforces the central ideas: a co-occurrence matrix is vocabulary-by-vocabulary, it captures word relationships that simple bag-of-words and TF-IDF do not directly represent, and truncated SVD can produce dense lower-dimensional vectors. It also checks that GloVe uses corpus-wide occurrence statistics and weighted learning.</p>
+      <div class="callout blue">
+        <strong>Fast quiz distinction:</strong> If a corpus has <em>n</em> documents and a vocabulary of <em>d</em> words, the term-document matrix is commonly <code>n × d</code>. The word-word co-occurrence matrix is <code>d × d</code>, not <code>n × n</code>.
+      </div>
+      <p>The supplied lesson recordings are linked below; this guide uses their accompanying transcripts to review the lecture content.</p>
+    </section>
+
+    <section class="card" id="recap">
+      <h2>8. One-minute recap</h2>
+      <ol>
+        <li>Words that occur in similar surroundings may have related usage patterns.</li>
+        <li>A context window determines which nearby words count as neighbors.</li>
+        <li>A word-word co-occurrence matrix has one vocabulary word on each axis.</li>
+        <li>Truncated SVD approximates a large matrix with fewer coordinates.</li>
+        <li>GloVe fits word and context vectors to global co-occurrence statistics using a weighted objective.</li>
+        <li>Cosine similarity compares vector direction; it is a clue about learned usage, not a guarantee of identical meaning.</li>
+        <li>Results depend on the size, quality, and biases of the training corpus.</li>
+      </ol>
+      <div class="callout">
+        <strong>Remember it in one breath:</strong>
+        <span class="memory">Count word neighbors, compress or fit the counts, then compare the resulting vectors carefully.</span>
+      </div>
+    </section>
+
+    <section class="card" id="practice">
+      <h2>9. Quick self-check</h2>
+      <p>Try answering each one before opening the explanation.</p>
+      <details>
+        <summary>A vocabulary has 2,000 words. What shape is a word-word co-occurrence matrix?</summary>
+        <p><code>2,000 × 2,000</code>, because the vocabulary supplies both the center-word rows and the context-word columns.</p>
+      </details>
+      <details>
+        <summary>What changes when you make a context window larger?</summary>
+        <p>More distant neighbors can be counted as context. This can reveal broader associations but may blur close, local relationships.</p>
+      </details>
+      <details>
+        <summary>What does truncated SVD do in this lesson?</summary>
+        <p>It factorizes a matrix and keeps a smaller set of components, producing a lower-dimensional approximation and compact word representations.</p>
+      </details>
+      <details>
+        <summary>Does the first coordinate of an embedding mean “happiness” or “size”?</summary>
+        <p>Usually no. Embedding coordinates are latent mathematical features and often do not have a simple human-readable label by themselves.</p>
+      </details>
+      <details>
+        <summary>How is GloVe different from directly applying SVD to counts?</summary>
+        <p>SVD factorizes the matrix directly. GloVe learns word and context vectors that fit weighted relationships based on global co-occurrence counts.</p>
+      </details>
+      <details>
+        <summary>If cosine similarity is high, are two words guaranteed to be synonyms?</summary>
+        <p>No. They may appear in similar contexts, but similarity depends on the corpus and does not prove that words are interchangeable.</p>
+      </details>
+      <details>
+        <summary>Why might an embedding trained on a tiny corpus give strange word neighbors?</summary>
+        <p>The word may appear too rarely, the contexts may be too limited, or random variation and corpus bias may dominate the small amount of evidence.</p>
+      </details>
+      <details>
+        <summary>What should a word-word co-occurrence matrix count?</summary>
+        <p>For each center word, it counts context words found within the chosen context window, according to the selected counting rule.</p>
+      </details>
+    </section>
+
+    <section class="card" id="sources">
+      <h2>Materials reviewed</h2>
+      <p>This guide synthesizes the M5 overview, both lecture slide decks and transcripts, the beginner notebook, and the quiz—including its image-based questions. Lecture recordings are linked for reference; their provided transcripts were used to review the lesson content.</p>
+      <ul class="sources">
+        <li><a href="../M5%20Overview.docx">M5 overview</a> | <a href="../Quiz4.docx">Quiz 4</a></li>
+        <li><a href="../M5%20-%20Embeddings%20Dimensionality%20Reduction/M5T1L1_SVD-cooccurrence-embeddings.pdf">SVD and co-occurrence slides</a> | <a href="../M5%20-%20Embeddings%20Dimensionality%20Reduction/M5T1L1_SVD_and_Co_occurrance_Matrices.txt">transcript</a> | <a href="../M5%20-%20Embeddings%20Dimensionality%20Reduction/M5T1L1_SVD_and_Co_occurrance_Matrices.mp4">recording</a></li>
+        <li><a href="../M5%20-%20Embeddings%20Dimensionality%20Reduction/M5T2L1_Glove.pdf">GloVe slides</a> | <a href="../M5%20-%20Embeddings%20Dimensionality%20Reduction/M5T2L1_Glove.txt">transcript</a> | <a href="../M5%20-%20Embeddings%20Dimensionality%20Reduction/M5T2L1_Glove.mp4">recording</a></li>
+        <li><a href="M5_Embeddings_Dimensionality_Reduction_Beginner_Guide.ipynb">M5 hands-on beginner notebook</a></li>
+      </ul>
+      <p><strong>Accuracy note:</strong> SVD and GloVe both use co-occurrence information but are distinct methods. PCA's variance-maximization intuition should not be confused with every use of truncated SVD. A compressed embedding is an approximation, and its usefulness must be checked against the task and data.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>M5 Word Embeddings and Dimensionality Reduction | Beginner study guide | Designed to read on screen or print to PDF.</p>
+  </footer>
+</body>
+</html>
