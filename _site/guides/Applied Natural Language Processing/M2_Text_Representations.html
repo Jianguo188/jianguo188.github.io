@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/assets/css/folder-nav.css">
+
+  <meta name="description" content="A beginner-friendly guide to one-hot encoding, Bag of Words, and TF-IDF for representing text numerically.">
+  <title>M2 Beginner Study Guide: Text Representations</title>
+  <style>
+    :root {
+      --ink: #1f2937;
+      --muted: #536273;
+      --paper: #fff;
+      --canvas: #f2f6fa;
+      --blue: #155e8a;
+      --blue-pale: #e8f4fb;
+      --green-pale: #e9f7ef;
+      --gold-pale: #fff5d9;
+      --line: #d7e0e8;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font: 17px/1.65 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: #075985; }
+    a:focus-visible, summary:focus-visible { outline: 3px solid #f0a202; outline-offset: 3px; }
+    .page { max-width: 1020px; margin: 0 auto; padding: 28px 20px 64px; }
+    header, main, footer {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 8px 26px rgb(31 41 55 / 5%);
+    }
+    header { padding: clamp(24px, 5vw, 52px); border-top: 7px solid var(--blue); }
+    main { margin-top: 20px; padding: clamp(20px, 4vw, 42px); }
+    footer { margin-top: 20px; padding: 20px 26px; color: var(--muted); }
+    h1, h2, h3 { line-height: 1.2; }
+    h1 { max-width: 780px; margin: 0 0 14px; font-size: clamp(2rem, 5vw, 3.2rem); }
+    h2 { margin: 0 0 16px; font-size: clamp(1.45rem, 3vw, 2rem); }
+    h3 { margin: 24px 0 8px; font-size: 1.18rem; }
+    p { margin: 10px 0 16px; }
+    .eyebrow { color: var(--blue); font-weight: 750; letter-spacing: .07em; text-transform: uppercase; }
+    .lede { max-width: 780px; color: var(--muted); font-size: 1.15rem; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+    .chip { padding: 5px 11px; border-radius: 999px; background: var(--blue-pale); color: #123f5b; font-size: .9rem; font-weight: 650; }
+    nav { margin-top: 24px; padding: 18px 20px; border-radius: 12px; background: var(--canvas); }
+    nav strong { display: block; margin-bottom: 6px; }
+    nav ul { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0; padding-left: 20px; }
+    section { scroll-margin-top: 16px; padding-top: 30px; }
+    section + section { margin-top: 28px; border-top: 1px solid var(--line); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+    .card { padding: 17px 18px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+    .card h3 { margin-top: 0; }
+    .callout { margin: 18px 0; padding: 15px 18px; border-left: 5px solid var(--blue); border-radius: 8px; background: var(--blue-pale); }
+    .memory { border-left-color: #23804a; background: var(--green-pale); }
+    .caution { border-left-color: #b77900; background: var(--gold-pale); }
+    .formula { overflow-x: auto; margin: 14px 0; padding: 14px 18px; border-radius: 10px; background: #f4f7fa; font: 1rem/1.8 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    table { width: 100%; border-collapse: collapse; min-width: 520px; }
+    th, td { padding: 10px 12px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: var(--blue-pale); }
+    ol, ul { padding-left: 1.35em; }
+    li { margin: 5px 0; }
+    details { margin: 12px 0; padding: 13px 16px; border: 1px solid var(--line); border-radius: 10px; }
+    summary { cursor: pointer; color: #123f5b; font-weight: 700; }
+    .small { color: var(--muted); font-size: .93rem; }
+    .sources li { overflow-wrap: anywhere; margin-bottom: 9px; }
+    @media (max-width: 600px) {
+      body { font-size: 16px; }
+      .page { padding: 12px 10px 36px; }
+      header, main { border-radius: 12px; }
+      nav ul { display: block; }
+    }
+    @media print {
+      body { background: #fff; color: #000; font-size: 11pt; }
+      .page { max-width: none; padding: 0; }
+      header, main, footer { box-shadow: none; border-color: #aaa; }
+      nav { display: none; }
+      section { break-inside: avoid; }
+      a { color: #000; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  
+
+
+  <details class="folder-nav folder-nav--floating">
+    <summary>Browse topics</summary>
+    <div class="folder-nav-panel">
+      <a class="folder-nav-home" href="/">All guides</a>
+      <ul>
+        
+          
+          <li><a href="/#category-1">Applied Natural Language Processing</a></li>
+        
+          
+          <li><a href="/#category-2">Data Analytics Business 2</a></li>
+        
+          
+          <li><a href="/#category-3">Data Analytics Business</a></li>
+        
+      </ul>
+    </div>
+  </details>
+
+
+  <div class="page">
+    <header>
+      <p class="eyebrow">Module 2</p>
+      <h1>Turning Words into Numbers</h1>
+      <p class="lede">A beginner-friendly guide to three classic ways to represent text for computers: one-hot encoding, Bag of Words, and TF-IDF. Learn what each method records, what it forgets, and when it can be useful.</p>
+      <div class="chips" aria-label="Topics">
+        <span class="chip">Simple explanations</span>
+        <span class="chip">Worked example</span>
+        <span class="chip">Side-by-side comparison</span>
+        <span class="chip">Self-checks</span>
+      </div>
+      <nav aria-label="Guide contents">
+        <strong>Jump to a section</strong>
+        <ul>
+          <li><a href="#roadmap">Learning map</a></li>
+          <li><a href="#vocabulary">Key terms</a></li>
+          <li><a href="#one-hot">One-hot encoding</a></li>
+          <li><a href="#bow">Bag of Words</a></li>
+          <li><a href="#tfidf">TF-IDF</a></li>
+          <li><a href="#worked-example">Real-world example</a></li>
+          <li><a href="#compare">Compare the methods</a></li>
+          <li><a href="#self-check">Self-check</a></li>
+          <li><a href="#sources">Materials reviewed</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <section id="roadmap">
+        <h2>1. The learning map</h2>
+        <p>Computers and machine-learning algorithms work with numbers. Text begins as words, so we need a <strong>text representation</strong>: a consistent way to turn words or documents into numbers.</p>
+        <div class="callout"><strong>The three methods build on one another:</strong> one-hot encoding gives a word an identity vector; Bag of Words (BoW) counts words in a document; TF-IDF keeps the document structure but adjusts counts so common words carry less weight.</div>
+        <p>Imagine a library that wants to search support tickets. A computer cannot directly compare the raw sentences the way a person reads them. These representations make documents measurable so a program can search, compare, group, or classify them.</p>
+      </section>
+
+      <section id="vocabulary">
+        <h2>2. A few useful terms</h2>
+        <div class="grid">
+          <article class="card"><h3>Corpus</h3><p>A collection of documents, such as all the reviews or help-desk tickets being studied.</p></article>
+          <article class="card"><h3>Token</h3><p>A unit of text selected by a tokenizer—often a word. For simple examples, spaces separate the tokens.</p></article>
+          <article class="card"><h3>Vocabulary</h3><p>The unique tokens chosen from the corpus. Each vocabulary item gets its own consistent position in a vector.</p></article>
+          <article class="card"><h3>Vector and dimension</h3><p>A list of numbers is a vector. If the vocabulary has <em>D</em> terms, each document vector has <em>D</em> positions (dimensions).</p></article>
+          <article class="card"><h3>Sparse</h3><p>A vector or matrix is sparse when most entries are zero. In text, each document usually uses only a small fraction of the full vocabulary.</p></article>
+          <article class="card"><h3>Document-term matrix</h3><p>A table whose rows represent documents and whose columns represent vocabulary terms. Each cell stores a value for a word in a document.</p></article>
+        </div>
+      </section>
+
+      <section id="one-hot">
+        <h2>3. One-hot encoding: give each word an ID card</h2>
+        <p>First, choose an ordered vocabulary. Each individual word becomes a vector filled with zeros, except for a single <code>1</code> in that word’s assigned position.</p>
+        <p>For the vocabulary <code>[tea, coffee, cocoa]</code>:</p>
+        <div class="formula">
+          tea     → [1, 0, 0]<br>
+          coffee  → [0, 1, 0]<br>
+          cocoa   → [0, 0, 1]
+        </div>
+        <p>The vector position acts like the word’s ID number. A sentence can be represented as a sequence of these word vectors. If instead we collapse the sequence into one document vector, we can mark which vocabulary words appear; that single vector does not preserve the order of the words.</p>
+        <div class="grid">
+          <article class="card"><h3>Why it is useful</h3><p>It is simple and clearly identifies which vocabulary item a token represents.</p></article>
+          <article class="card"><h3>Why it can be costly</h3><p>Every vector needs one position per vocabulary item. A vocabulary of 100,000 words means very long vectors, most entries of which may be zero.</p></article>
+          <article class="card"><h3>What it does not know</h3><p>Each word is treated as unrelated to every other word. “Coffee” and “tea” are no closer than “coffee” and “volcano.”</p></article>
+        </div>
+        <div class="callout memory"><strong>Memory cue:</strong> one-hot gives each word one bright <em>spot</em> in a long row of zeros.</div>
+      </section>
+
+      <section id="bow">
+        <h2>4. Bag of Words: count the words in a document</h2>
+        <p>One-hot encoding identifies a word. <strong>Bag of Words</strong> summarizes a whole document by counting how many times each vocabulary word occurs. It treats the document like a bag of word tiles: it remembers which tiles and how many, but not their order.</p>
+        <p>Suppose the vocabulary is <code>[tea, coffee, cocoa]</code>:</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Document</th><th>BoW vector</th><th>What it means</th></tr></thead>
+            <tbody>
+              <tr><td><code>tea coffee tea</code></td><td><code>[2, 1, 0]</code></td><td>“tea” occurs twice, “coffee” once, “cocoa” not at all.</td></tr>
+              <tr><td><code>coffee cocoa</code></td><td><code>[0, 1, 1]</code></td><td>“coffee” and “cocoa” occur once each.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>For <em>N</em> documents and a vocabulary of <em>D</em> terms, the document-term matrix has <em>N</em> rows and <em>D</em> columns. A fixed vocabulary gives every document vector the same length, even if the original documents have different lengths.</p>
+        <div class="callout caution"><strong>What is lost?</strong> Word order and grammar. “Dog bites person” and “person bites dog” contain the same words, so a simple count vector cannot tell who did the biting. BoW also gives a common word and a distinctive word equal weight when both occur once.</div>
+        <div class="callout memory"><strong>Memory cue:</strong> Bag of Words is a word-count shopping list: it records <em>what</em> and <em>how many</em>, not <em>where</em>.</div>
+      </section>
+
+      <section id="tfidf">
+        <h2>5. TF-IDF: give distinctive words more weight</h2>
+        <p>Raw counts can overvalue words that appear in almost every document. <strong>TF-IDF</strong> (Term Frequency–Inverse Document Frequency) gives a word a larger weight when it is frequent in one document but less common across the whole collection.</p>
+        <div class="grid">
+          <article class="card"><h3>TF: Term Frequency</h3><p>How much this term appears in this document. A simple normalized version divides its count by the total number of tokens in the document.</p></article>
+          <article class="card"><h3>IDF: Inverse Document Frequency</h3><p>How uncommon the term is across the corpus. A term that occurs in every document has little power to distinguish one document from another.</p></article>
+        </div>
+        <div class="formula" role="math" aria-label="Term frequency equals term count in document divided by total term count in document; inverse document frequency equals logarithm of corpus size divided by number of documents containing the term; TF-IDF equals term frequency times inverse document frequency">
+          TF(t, d) = count of t in d / total token count in d<br>
+          IDF(t, D) = log( number of documents N / number of documents containing t )<br>
+          TF-IDF(t, d, D) = TF(t, d) × IDF(t, D)
+        </div>
+        <p>The lecture’s example uses <code>log(N / DF)</code>, where <code>DF</code> is the number of documents containing the word. If a word occurs in every document, then <code>N / DF = 1</code>, and <code>log(1) = 0</code>: that ubiquitous word receives no distinguishing weight in this version. Libraries may use smoothed formulas or other conventions, so check which formula a tool implements.</p>
+        <div class="callout"><strong>Interpretation:</strong> a high TF-IDF score means “this word is relatively characteristic of this document in this collection.” It does <em>not</em> mean the word is universally important or that the computer understands its meaning.</div>
+        <div class="callout memory"><strong>Memory cue:</strong> TF asks “often <em>here</em>?”; IDF asks “rare <em>across the collection</em>?”; TF-IDF combines both.</div>
+      </section>
+
+      <section id="worked-example">
+        <h2>6. Worked real-world example: find delivery-delay tickets</h2>
+        <p>Imagine a help desk wants to retrieve messages about delivery problems. Consider these short example documents:</p>
+        <ul>
+          <li><strong>D1:</strong> “password reset reset”</li>
+          <li><strong>D2:</strong> “password login”</li>
+          <li><strong>D3:</strong> “delivery late”</li>
+        </ul>
+        <p>This tiny collection is only an illustration. It lets us see how the numbers are built—not a measured result from the course.</p>
+        <h3>Step A: build a shared vocabulary and count words</h3>
+        <p>Use the vocabulary <code>[delivery, late, login, password, reset]</code>. A document’s BoW vector has one slot per term, in exactly that order.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Document</th><th>delivery</th><th>late</th><th>login</th><th>password</th><th>reset</th></tr></thead>
+            <tbody>
+              <tr><th>D1</th><td>0</td><td>0</td><td>0</td><td>1</td><td>2</td></tr>
+              <tr><th>D2</th><td>0</td><td>0</td><td>1</td><td>1</td><td>0</td></tr>
+              <tr><th>D3</th><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Step B: calculate one TF-IDF score</h3>
+        <p>For “reset” in D1, the term occurs twice among three tokens, so <code>TF = 2/3</code>. “Reset” appears in only one of the three documents, so using the lecture’s formula <code>IDF = ln(3/1) ≈ 1.099</code>. Its TF-IDF weight is:</p>
+        <div class="formula">TF-IDF(reset, D1) = (2/3) × ln(3) ≈ 0.732</div>
+        <p>By contrast, “password” occurs in two of the three documents, so its IDF is smaller: <code>ln(3/2) ≈ 0.405</code>. In D1 its TF is <code>1/3</code>, giving a TF-IDF weight of about <code>0.135</code>. The distinctive word “reset” weighs more for D1 than the shared word “password.”</p>
+        <p>In a real help-desk archive, this weighting can help a search system recognize that “late” or “delivery” is more useful for finding delivery tickets than generic words appearing in nearly every ticket.</p>
+      </section>
+
+      <section id="compare">
+        <h2>7. Compare the three methods</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Method</th><th>What it represents</th><th>What its values say</th><th>Main limitation</th></tr></thead>
+            <tbody>
+              <tr><td><strong>One-hot</strong></td><td>Usually an individual token (or a sequence/matrix of token vectors)</td><td>Which vocabulary item this token is</td><td>Very wide, sparse vectors; no similarity or meaning between words</td></tr>
+              <tr><td><strong>Bag of Words</strong></td><td>A document</td><td>How many times each vocabulary term occurs</td><td>Ignores word order and treats all terms without corpus-level importance weighting</td></tr>
+              <tr><td><strong>TF-IDF</strong></td><td>A document</td><td>How frequent a term is here, adjusted for how widespread it is elsewhere</td><td>Still ignores word order and deeper meaning; depends on the corpus</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>How to remember the progression</h3>
+        <ol>
+          <li><strong>One-hot:</strong> “Which word is this?”</li>
+          <li><strong>BoW:</strong> “Which words, and how many, are in this document?”</li>
+          <li><strong>TF-IDF:</strong> “Which words make this document stand out from the others?”</li>
+        </ol>
+        <div class="callout caution"><strong>Shared limitation:</strong> all three are discrete, vocabulary-based representations. Basic BoW and TF-IDF do not preserve word positions or understand synonyms and context. “Great” and “excellent” remain different columns, and “not helpful” may look like counts of “not” and “helpful” without understanding their combined meaning.</div>
+        <p>These methods remain useful when you want a transparent, relatively simple baseline—for example, keyword search, document retrieval, clustering, or traditional text classification. They are not the only way to represent language; later course topics include word embeddings and transformer models.</p>
+      </section>
+
+      <section id="self-check">
+        <h2>8. Self-check</h2>
+        <details>
+          <summary>1. If a vocabulary has 8,000 terms, how long is a basic BoW vector for one document?</summary>
+          <p>It has 8,000 positions—one for every vocabulary term—regardless of how short the document is.</p>
+        </details>
+        <details>
+          <summary>2. What does the BoW vector [2, 0, 1] mean for vocabulary [tea, coffee, cocoa]?</summary>
+          <p>The document contains “tea” twice, “coffee” zero times, and “cocoa” once.</p>
+        </details>
+        <details>
+          <summary>3. Does a high TF-IDF score mean the word is important in every document?</summary>
+          <p>No. It means the term is relatively frequent in that particular document and uncommon across the collection used to compute IDF.</p>
+        </details>
+        <details>
+          <summary>4. Why does a word found in every document have IDF equal to zero in the lecture formula?</summary>
+          <p>If it occurs in all N documents, then DF = N, so log(N/DF) = log(1) = 0. It does not help distinguish one document from another under this formula.</p>
+        </details>
+        <details>
+          <summary>5. Which methods preserve the order of words in a document?</summary>
+          <p>Basic BoW and TF-IDF do not. One-hot vectors for each token can be kept as an ordered sequence or matrix, but a single pooled document vector does not retain word order.</p>
+        </details>
+        <details>
+          <summary>6. A search result should favor terms that occur often in one ticket but rarely in the archive. Which representation fits that goal?</summary>
+          <p>TF-IDF, because it combines within-document frequency with inverse collection-wide document frequency.</p>
+        </details>
+      </section>
+
+      
+    </main>
+    <footer>
+      <p><strong>Quick recall:</strong> one-hot identifies a word; BoW counts words; TF-IDF counts words while down-weighting terms shared across many documents. All three simplify or discard context in different ways.</p>
+    </footer>
+  </div>
+</body>
+</html>

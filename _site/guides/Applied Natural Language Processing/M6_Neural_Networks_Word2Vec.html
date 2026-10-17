@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/assets/css/folder-nav.css">
+
+  <meta name="description" content="A plain-language M6 study guide to neural networks, model evaluation, and Word2Vec, including CBOW and Skip-gram.">
+  <title>M6 Beginner Study Guide: Neural Networks and Word2Vec</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #203047;
+      --muted: #53657b;
+      --paper: #fff;
+      --canvas: #f2f6fb;
+      --blue: #2457a7;
+      --blue-pale: #eaf2ff;
+      --teal: #087e78;
+      --teal-pale: #e6f7f3;
+      --gold: #8a5b00;
+      --gold-pale: #fff5dc;
+      --line: #dce5ef;
+      --shadow: 0 10px 28px rgba(32, 48, 71, .08);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font: 16px/1.68 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: var(--blue); }
+    a:focus-visible, summary:focus-visible { outline: 3px solid #e4a91a; outline-offset: 3px; }
+    .hero {
+      padding: 58px 22px 48px;
+      color: #fff;
+      background: linear-gradient(135deg, #153d73, #2767a7 60%, #12877f);
+    }
+    .hero-inner, main, footer { width: min(100% - 32px, 980px); margin: 0 auto; }
+    .eyebrow {
+      margin: 0 0 10px;
+      color: #dcecff;
+      font-size: .82rem;
+      font-weight: 750;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    h1 { max-width: 790px; margin: 0; font-size: clamp(2.1rem, 5vw, 3.6rem); line-height: 1.08; }
+    .hero p:not(.eyebrow) { max-width: 750px; margin: 18px 0 0; color: #edf6ff; font-size: 1.12rem; }
+    .badge {
+      display: inline-block;
+      margin-top: 24px;
+      padding: 7px 12px;
+      border: 1px solid rgba(255,255,255,.48);
+      border-radius: 999px;
+      font-size: .9rem;
+    }
+    main { padding: 26px 0 52px; }
+    .card {
+      margin: 18px 0;
+      padding: clamp(20px, 4vw, 32px);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+    h2 { margin: 0 0 14px; font-size: clamp(1.45rem, 3vw, 2rem); line-height: 1.22; }
+    h3 { margin: 24px 0 8px; font-size: 1.18rem; line-height: 1.38; }
+    p { margin: 10px 0; }
+    .lead { color: var(--muted); font-size: 1.08rem; }
+    .toc { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 18px; }
+    .toc a {
+      padding: 7px 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #f8fbff;
+      text-decoration: none;
+      font-size: .9rem;
+    }
+    .callout {
+      margin: 18px 0;
+      padding: 15px 18px;
+      border-left: 5px solid var(--teal);
+      border-radius: 10px;
+      background: var(--teal-pale);
+    }
+    .callout.blue { border-color: var(--blue); background: var(--blue-pale); }
+    .callout.gold { border-color: #d29312; background: var(--gold-pale); }
+    .callout > :first-child { margin-top: 0; }
+    .callout > :last-child { margin-bottom: 0; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 14px; margin: 18px 0; }
+    .mini { padding: 17px; border: 1px solid var(--line); border-radius: 13px; background: #fbfdff; }
+    .mini h3 { margin: 0 0 7px; }
+    .mini p { margin: 0; color: var(--muted); }
+    .memory {
+      display: inline-block;
+      margin: 5px 0 9px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: #eef3f8;
+      font-weight: 750;
+    }
+    .flow { display: flex; flex-wrap: wrap; align-items: stretch; justify-content: center; gap: 9px; margin: 22px 0; }
+    .step {
+      flex: 1 1 125px;
+      max-width: 195px;
+      padding: 14px 11px;
+      border: 1px solid #bfd2ed;
+      border-radius: 12px;
+      background: var(--blue-pale);
+      text-align: center;
+    }
+    .step strong { display: block; color: #17447f; }
+    .arrow { align-self: center; color: var(--teal); font-weight: 800; }
+    .formula {
+      overflow-x: auto;
+      margin: 16px 0;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #f8fafc;
+      text-align: center;
+      font: 1rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    table { width: 100%; margin: 18px 0; border-collapse: collapse; border: 1px solid var(--line); }
+    th, td { padding: 11px 13px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: #edf3fa; }
+    ul, ol { padding-left: 1.35rem; }
+    li { margin: 6px 0; }
+    code {
+      padding: .12em .35em;
+      border-radius: 5px;
+      background: #eff3f8;
+      font: .92em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    details { margin: 12px 0; padding: 13px 15px; border: 1px solid var(--line); border-radius: 11px; background: #fbfdff; }
+    summary { cursor: pointer; font-weight: 700; }
+    details p { margin-bottom: 0; }
+    .sources li { overflow-wrap: anywhere; }
+    footer { padding: 0 0 34px; color: var(--muted); font-size: .9rem; }
+    @media (max-width: 560px) {
+      .hero { padding-top: 42px; }
+      .arrow { flex-basis: 100%; transform: rotate(90deg); }
+      th, td { padding: 9px; }
+    }
+    @media print {
+      body { background: #fff; font-size: 11pt; }
+      .hero { padding: 24px; }
+      main { width: 100%; padding-top: 10px; }
+      .card { box-shadow: none; break-inside: avoid; }
+      .toc { display: none; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  
+
+
+  <details class="folder-nav folder-nav--floating">
+    <summary>Browse topics</summary>
+    <div class="folder-nav-panel">
+      <a class="folder-nav-home" href="/">All guides</a>
+      <ul>
+        
+          
+          <li><a href="/#category-1">Applied Natural Language Processing</a></li>
+        
+          
+          <li><a href="/#category-2">Data Analytics Business 2</a></li>
+        
+          
+          <li><a href="/#category-3">Data Analytics Business</a></li>
+        
+      </ul>
+    </div>
+  </details>
+
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Module 6 | Beginner study guide</p>
+      <h1>Neural Networks and Word2Vec</h1>
+      <p>Learn how a neural network improves a prediction, how Word2Vec learns word vectors from context, and why CBOW and Skip-gram play a fill-in-the-blank game in opposite directions.</p>
+      <span class="badge">Plain-language explanations + real-world examples + memory cues</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="card" id="big-picture">
+      <h2>Start with the big picture</h2>
+      <p class="lead">M6 connects two ideas. Neural networks learn useful patterns from numeric inputs. Word2Vec uses a small neural-network task to turn words into compact vectors that reflect how they appear in text.</p>
+      <div class="flow" aria-label="M6 learning story">
+        <div class="step"><strong>Text</strong>Customer reviews, articles, messages</div>
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <div class="step"><strong>Numbers</strong>Text features or word vectors</div>
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <div class="step"><strong>Learn</strong>Predict, check the mistake, adjust</div>
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <div class="step"><strong>Use</strong>Classify text or compare words</div>
+      </div>
+      <div class="callout blue">
+        <strong>Real-world picture:</strong> A help desk could classify an incoming message as “billing,” “delivery,” or “account access.” A search system could compare word vectors to find text about similar topics. The first use predicts a label; the second uses learned word representations.
+      </div>
+      <nav class="toc" aria-label="Guide contents">
+        <a href="#neuron">Neural networks</a>
+        <a href="#learning">How learning works</a>
+        <a href="#metrics">How to judge results</a>
+        <a href="#embeddings">Word vectors</a>
+        <a href="#word2vec">Word2Vec</a>
+        <a href="#toolboxes">Course examples</a>
+        <a href="#practice">Self-check</a>
+      </nav>
+    </section>
+
+    <section class="card" id="neuron">
+      <h2>1. A neural network is a chain of adjustable calculators</h2>
+      <p>An artificial neuron takes input numbers, gives each input an adjustable importance (a <strong>weight</strong>), adds a <strong>bias</strong>, and applies an <strong>activation function</strong>.</p>
+      <div class="formula">weighted input + bias &rarr; activation &rarr; output</div>
+      <p>For example, a review classifier might receive numeric features related to “excellent,” “broken,” and “refund.” A learned positive weight for “excellent” can push the result toward “positive”; a negative weight for “broken” can push it toward “negative.” A real network learns these weights from examples rather than relying on rules we manually write.</p>
+      <div class="grid">
+        <article class="mini">
+          <h3>Weights</h3>
+          <p>Adjustable knobs that describe how much an input contributes.</p>
+        </article>
+        <article class="mini">
+          <h3>Bias</h3>
+          <p>An extra adjustable offset, so the model can shift its response.</p>
+        </article>
+        <article class="mini">
+          <h3>Activation</h3>
+          <p>A function applied after the weighted sum. Nonlinear activations let networks learn more than straight-line relationships.</p>
+        </article>
+      </div>
+      <h3>Activations: different output behaviors</h3>
+      <table>
+        <thead><tr><th>Activation</th><th>Plain-language behavior</th><th>Common role in the M6 material</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Linear</strong></td><td>Leaves the value unrestricted.</td><td>Output for a continuous prediction, such as a price estimate.</td></tr>
+          <tr><td><strong>Sigmoid</strong></td><td>Squashes a value between 0 and 1.</td><td>One probability for a yes/no prediction.</td></tr>
+          <tr><td><strong>Softmax</strong></td><td>Turns class scores into probabilities that add to 1.</td><td>Choose among several categories, such as billing, delivery, or account help.</td></tr>
+          <tr><td><strong>ReLU</strong></td><td>Changes negative values to zero and leaves positive values unchanged.</td><td>A common hidden-layer activation in deep networks.</td></tr>
+          <tr><td><strong>Tanh</strong></td><td>Squashes values into the range −1 to 1.</td><td>One activation option discussed for hidden layers.</td></tr>
+        </tbody>
+      </table>
+      <p><strong>Important distinction:</strong> an activation does not itself make optimization easy by guaranteeing a convex loss. Nonlinear activations let the network represent nonlinear patterns; the choice of activations and optimizer affects training behavior.</p>
+      <div class="memory"><strong>Memory cue:</strong> Weight = importance; bias = starting nudge; activation = response shape.</div>
+      <h3>Layers build up a prediction</h3>
+      <ul>
+        <li><strong>Input layer:</strong> receives features as numbers.</li>
+        <li><strong>Hidden layer(s):</strong> mix and transform features into useful intermediate patterns.</li>
+        <li><strong>Output layer:</strong> produces the final score, probability, or category.</li>
+      </ul>
+      <p>In a <strong>fully connected</strong> layer, each unit connects to every unit in the next layer. That flexibility can help fit complicated relationships, but adds parameters and can overfit when a model is too large for its data.</p>
+    </section>
+
+    <section class="card" id="learning">
+      <h2>2. How the network learns: guess, compare, adjust</h2>
+      <div class="flow" aria-label="Training loop">
+        <div class="step"><strong>1. Forward pass</strong>Make a prediction</div>
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <div class="step"><strong>2. Loss</strong>Measure the mistake</div>
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <div class="step"><strong>3. Backpropagation</strong>Trace which weights contributed</div>
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <div class="step"><strong>4. Update</strong>Nudge weights to reduce future error</div>
+      </div>
+      <h3>Forward pass: make the guess</h3>
+      <p>The input travels from the first layer through hidden layers to the output. Each layer calculates weighted sums and applies its activation. For example, a message classifier might output probabilities: <code>billing 0.15</code>, <code>delivery 0.75</code>, <code>account 0.10</code>.</p>
+      <h3>Loss: measure how wrong the guess was</h3>
+      <p>A <strong>loss function</strong> compares the prediction with the correct answer. If the true class is “delivery,” a high probability for “delivery” generally means a smaller classification loss. Training tries to make the loss smaller.</p>
+      <h3>Backpropagation: send learning signals backward</h3>
+      <p><strong>Backpropagation</strong> applies the chain rule to calculate how each parameter affected the loss, starting at the output and working backward through the network.</p>
+      <p><strong>Gradient descent</strong> uses those gradients to update parameters a small amount in a direction intended to reduce the loss. The <strong>learning rate</strong> controls the step size: too large can make learning unstable; too small can make it slow.</p>
+      <div class="memory"><strong>Memory cue:</strong> Forward = predict. Backward = learn from the mistake.</div>
+      <h3>Iterations, epochs, and batches</h3>
+      <table>
+        <thead><tr><th>Term</th><th>Simple meaning</th><th>Example with 1,000 messages</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Iteration</strong></td><td>One parameter update.</td><td>One update after processing one message or one mini-batch.</td></tr>
+          <tr><td><strong>Epoch</strong></td><td>One complete pass through the training set.</td><td>After all 1,000 messages have been processed once.</td></tr>
+          <tr><td><strong>Stochastic gradient descent</strong></td><td>Update using one example at a time.</td><td>About 1,000 iterations in an epoch if using one message per update.</td></tr>
+          <tr><td><strong>Mini-batch gradient descent</strong></td><td>Update using a small group at a time.</td><td>With batches of 50, about 20 updates per epoch.</td></tr>
+          <tr><td><strong>Batch gradient descent</strong></td><td>Update using all examples together.</td><td>One update uses all 1,000; this may require substantial memory.</td></tr>
+        </tbody>
+      </table>
+      <p>A small batch can balance memory use and update efficiency. These training styles describe how much data contributes to an update; they are not the same thing as the train/test split.</p>
+      <div class="callout gold">
+        <strong>Overfitting:</strong> the model memorizes details of its training examples instead of learning patterns that transfer to new examples. A large network can overfit, especially with little data. A good training score alone does not prove the model will work on future messages.
+      </div>
+    </section>
+
+    <section class="card" id="metrics">
+      <h2>3. How can we tell whether a text classifier is useful?</h2>
+      <p>The M6 classification toolbox tests several algorithms on news-group categories. A measurement should match the practical cost of different mistakes.</p>
+      <div class="grid">
+        <article class="mini">
+          <h3>Accuracy</h3>
+          <p>Out of all predictions, what fraction was correct? Useful as a quick overview, but can hide failure on a rare class.</p>
+        </article>
+        <article class="mini">
+          <h3>Precision</h3>
+          <p>Of the items labeled as a category, what fraction truly belongs there? Important when false alarms are costly.</p>
+        </article>
+        <article class="mini">
+          <h3>Recall</h3>
+          <p>Of all the real items in a category, what fraction did the model find? Important when missing a case is costly.</p>
+        </article>
+        <article class="mini">
+          <h3>F1 score</h3>
+          <p>A combined measure that is high when both precision and recall are high. It is the harmonic mean, not an ordinary average.</p>
+        </article>
+      </div>
+      <p>Consider a support system flagging possible urgent safety complaints. <strong>Recall</strong> matters if missing a dangerous report is unacceptable. But if every message is flagged, the team is overwhelmed; <strong>precision</strong> matters too. Which metric matters more depends on how the system will be used.</p>
+      <h3>Confusion matrix: see the mix-ups</h3>
+      <p>A confusion matrix compares actual categories with predicted categories. Correct predictions lie along its diagonal; other cells show which categories were confused. For example, a news classifier might confuse two topic groups that use similar vocabulary.</p>
+      <h3>ROC AUC, in simple terms</h3>
+      <p>ROC AUC summarizes how well model scores rank positive examples above negative examples across decision thresholds. It is not the same as accuracy, and its precise interpretation depends on how a multiclass problem is evaluated.</p>
+      <div class="callout blue">
+        <strong>Course classifier toolbox:</strong> it illustrates accuracy with a Perceptron, recall with linear SVM, precision with RBF SVM, F1 with Multinomial Naive Bayes, ROC AUC and a confusion matrix with Logistic Regression, and accuracy for a two-layer neural network. These are demonstrations of metrics and workflows, not evidence that each algorithm should only be judged by its assigned metric.
+      </div>
+      <p><strong>Fair evaluation:</strong> fit preprocessing (such as TF-IDF) on training data, then use that fitted transformation on test data. Use validation data for model choices, and reserve the test set for a final check. Repeatedly tuning against the test set makes the final score less independent.</p>
+    </section>
+
+    <section class="card" id="embeddings">
+      <h2>4. Word vectors: from word labels to useful coordinates</h2>
+      <p>Text models need numbers for words. <strong>One-hot encoding</strong> gives every vocabulary word its own vector position. With vocabulary <code>[apple, orange, fruit, car]</code>, an encoding could be:</p>
+      <div class="formula">apple = [1, 0, 0, 0] &nbsp;&nbsp; orange = [0, 1, 0, 0]</div>
+      <p>This identifies the word, but does not express that apple and orange are both fruits. Different words have no built-in similarity in their one-hot vectors. A vocabulary of one million words also means one-million-value vectors, mostly zeros.</p>
+      <p>A <strong>dense embedding</strong> represents each word with a shorter list of learned real numbers. In an embedding space, words used in similar contexts may end up with more similar vectors.</p>
+      <div class="callout gold">
+        <strong>Real-world example: search.</strong> If someone searches for “automobile repair,” a system with useful word representations may connect it with text about “car maintenance.” It is using learned patterns in word usage—not looking up a guaranteed dictionary synonym.
+      </div>
+      <p>Word2Vec is a method for learning such vectors from surrounding words. It makes training examples out of ordinary text, so it does not need a human to label every word as “car,” “fruit,” or “emotion.” This is called <strong>self-supervised learning</strong>.</p>
+      <div class="memory"><strong>Memory cue:</strong> One-hot says “which word?”; an embedding also learns “which words are used similarly?”</div>
+    </section>
+
+    <section class="card" id="word2vec">
+      <h2>5. Word2Vec: two opposite guessing games</h2>
+      <p>Word2Vec trains on short windows of neighboring words. It repeatedly asks one of two questions, adjusts its network to answer better, and uses a learned layer's weights as the word vectors.</p>
+      <div class="grid">
+        <article class="mini">
+          <h3>CBOW: context predicts the center</h3>
+          <p>Given the neighboring words, guess the missing word.</p>
+          <p><strong>Memory hook:</strong> “Fill the blank from the surrounding clues.”</p>
+        </article>
+        <article class="mini">
+          <h3>Skip-gram: center predicts context</h3>
+          <p>Given one word, guess words likely to appear nearby.</p>
+          <p><strong>Memory hook:</strong> “Start with the word; guess its neighbors.”</p>
+        </article>
+      </div>
+      <div class="callout blue">
+        <strong>Walk-through:</strong> In “The cat sat on the mat,” look at <em>cat</em> with a window of one word on either side. CBOW uses nearby words such as “the” and “sat” to guess <em>cat</em>. Skip-gram uses <em>cat</em> to predict nearby words such as “the” and “sat.”
+      </div>
+      <table>
+        <thead><tr><th>Question</th><th>CBOW</th><th>Skip-gram</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Input</strong></td><td>Words around a target</td><td>One center word</td></tr>
+          <tr><td><strong>Prediction</strong></td><td>The center word</td><td>Nearby context words</td></tr>
+          <tr><td><strong>Classic intuition</strong></td><td>Fill in the blank</td><td>Guess the neighbors</td></tr>
+          <tr><td><strong>Typical trade-off</strong></td><td>Often faster; combines context and can work well for frequent words.</td><td>Often slower; can provide useful learning signals for less frequent words when there is enough data.</td></tr>
+        </tbody>
+      </table>
+      <p>The course materials describe CBOW as tending toward broader or more syntactic associations and Skip-gram as capturing more specific semantic relationships. Treat that as a useful teaching intuition, not a universal rule: results depend on corpus size and quality, word frequency, context window, model settings, and the evaluation task.</p>
+      <h3>What is the context window?</h3>
+      <p>The <strong>window size</strong> controls how many nearby words count as context during training. A narrow window emphasizes closer neighbors; a wider window can include more distant context. The best choice depends on the corpus and goal.</p>
+      <h3>Why does the training corpus matter?</h3>
+      <p>An embedding only learns patterns it sees. In the toolbox, a model trained on the comparatively small 20 Newsgroups subset does not give convincing answers to every word relationship. The lesson compares it with a Gensim model trained on a vastly larger Google News corpus, which gives a much more plausible result for <code>king + woman − man</code>, such as “queen.”</p>
+      <p>This is a demonstration, not a guarantee that the analogy will always work. The result depends on how often the words appear and how they are used in the training text. Larger and more relevant data can help, but does not remove bias or make every vector arithmetic relationship meaningful.</p>
+      <h3>Word similarity is a clue, not a dictionary</h3>
+      <p>Cosine similarity compares the direction of two vectors. Words with similar context patterns may appear near each other in vector space. A small corpus can yield odd neighbors; a similarity score does not prove that two words have identical meanings.</p>
+      <div class="callout gold">
+        <strong>Static embedding limitation:</strong> classic Word2Vec gives a word type one learned vector. So the word <em>bank</em> typically has one vector whether the sentence means a financial bank or a river bank. The vector combines uses found in the training corpus rather than changing for each sentence.
+      </div>
+      <div class="memory"><strong>Fast recall:</strong> CBOW = context to center. Skip-gram = center to context.</div>
+    </section>
+
+    <section class="card" id="toolboxes">
+      <h2>6. What the M6 notebooks demonstrate</h2>
+      <h3>Classification algorithms toolbox</h3>
+      <p>The classifier notebook fetches a subset of scikit-learn's 20 Newsgroups dataset, examines labeled text, converts text to TF-IDF features, trains multiple classifiers, and checks their predictions with classification metrics and a confusion matrix. TF-IDF turns a document into numbers that give more weight to words that help distinguish documents.</p>
+      <p>It compares a Perceptron, linear and RBF-kernel SVMs, Multinomial Naive Bayes, Logistic Regression, and a small dense neural network. These examples show that the same text features can be used by different models; no single model wins automatically on every problem.</p>
+      <h3>Word2Vec toolbox</h3>
+      <p>The Word2Vec notebook preprocesses newsgroup sentences, trains CBOW and Skip-gram embeddings, compares nearby words and visualizes vectors. It contrasts a model trained on the course dataset with a pretrained Google News model. Its own examples illustrate how data size and the frequency of a target word affect the quality of results.</p>
+      <h3>Companion practice</h3>
+      <p>The existing beginner notebook and study notes provide smaller examples of neurons, forward passes, gradient updates, CBOW context windows, and Skip-gram training. Use them to follow the ideas with toy data before returning to the larger toolboxes.</p>
+      <div class="callout">
+        <strong>Good study sequence:</strong> learn the neuron and training loop first, then understand CBOW and Skip-gram by making examples from short sentences, then run the toolboxes and inspect the evaluation or nearest-word results.
+      </div>
+    </section>
+
+    <section class="card" id="recap">
+      <h2>7. One-minute recap</h2>
+      <ol>
+        <li>A neural network combines numeric inputs with learned weights and biases.</li>
+        <li>Activations help the network represent nonlinear patterns.</li>
+        <li>Forward pass makes a guess; loss measures the error; backpropagation calculates learning signals; gradient descent updates parameters.</li>
+        <li>One epoch is a pass through the training set; each iteration updates parameters using a batch of examples.</li>
+        <li>Precision asks “Of the things I flagged, how many were right?” Recall asks “Of the real cases, how many did I find?”</li>
+        <li>Word2Vec learns word vectors by predicting from context or predicting context from a word.</li>
+        <li>CBOW predicts the center word; Skip-gram predicts its neighbors.</li>
+        <li>Embeddings reflect patterns in their training corpus and can be biased, incomplete, or ambiguous.</li>
+      </ol>
+      <div class="callout">
+        <strong>Remember it in one breath:</strong>
+        <span class="memory">Predict, measure, update; context predicts center (CBOW), center predicts context (Skip-gram).</span>
+      </div>
+    </section>
+
+    <section class="card" id="practice">
+      <h2>8. Quick self-check</h2>
+      <p>Try to answer first; open each item to check yourself.</p>
+      <details>
+        <summary>What is the difference between a weight and a hyperparameter?</summary>
+        <p>A weight is learned from training data. A hyperparameter, such as hidden-layer size, learning rate, or context-window size, is selected as part of setting up or tuning the model.</p>
+      </details>
+      <details>
+        <summary>What do “forward pass” and “backpropagation” mean?</summary>
+        <p>The forward pass sends input through the network to make a prediction. Backpropagation works backward from the loss to calculate how parameters affected the error.</p>
+      </details>
+      <details>
+        <summary>With 1,000 examples and a mini-batch of 50, about how many iterations make one epoch?</summary>
+        <p>About 20 iterations, because each update processes 50 examples and one epoch processes all 1,000.</p>
+      </details>
+      <details>
+        <summary>If missing an urgent message is worse than reviewing an extra one, which metric should you pay close attention to?</summary>
+        <p>Recall: it measures how many real urgent messages the model successfully finds. You should still inspect precision to understand the false-alarm burden.</p>
+      </details>
+      <details>
+        <summary>How does CBOW learn the word “cat” in “the cat sat” with a one-word window?</summary>
+        <p>It uses the neighboring context—“the” and “sat”—to predict the center word “cat.”</p>
+      </details>
+      <details>
+        <summary>What does Skip-gram do with the word “cat” in the same sentence?</summary>
+        <p>It uses “cat” as the input and tries to predict its nearby context words, such as “the” and “sat.”</p>
+      </details>
+      <details>
+        <summary>Why might a small-corpus model fail the “king + woman − man” analogy?</summary>
+        <p>The words may be rare or have too few varied examples for reliable relationships to be learned. Word-vector arithmetic depends on the model and corpus; it is not guaranteed.</p>
+      </details>
+      <details>
+        <summary>Why does classic Word2Vec not automatically distinguish the two meanings of “bank”?</summary>
+        <p>It assigns one static vector to the word type, so the vector combines uses rather than changing with each sentence's context.</p>
+      </details>
+    </section>
+
+  </main>
+
+  <footer>
+    <p>M6 Neural Networks and Word2Vec | Beginner study guide | Designed to read on screen or print to PDF.</p>
+  </footer>
+</body>
+</html>

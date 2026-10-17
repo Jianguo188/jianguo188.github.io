@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/assets/css/folder-nav.css">
+
+  <meta name="description" content="A plain-language, beginner-friendly guide to transformer models, attention, BERT, and GPT.">
+  <title>M9 Beginner Study Guide: Transformer Models</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #203047;
+      --muted: #53657b;
+      --paper: #ffffff;
+      --canvas: #f2f6fb;
+      --blue: #2457a7;
+      --blue-pale: #eaf2ff;
+      --teal: #087e78;
+      --teal-pale: #e6f7f3;
+      --gold: #8a5b00;
+      --gold-pale: #fff5dc;
+      --line: #dce5ef;
+      --shadow: 0 10px 30px rgba(32, 48, 71, .08);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font: 16px/1.65 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: var(--blue); }
+    a:focus-visible, summary:focus-visible {
+      outline: 3px solid #f0b429;
+      outline-offset: 3px;
+    }
+    .hero {
+      padding: 58px 22px 48px;
+      background: linear-gradient(135deg, #153e75, #2767a7 62%, #168b85);
+      color: #fff;
+    }
+    .hero-inner, main, footer { width: min(100% - 32px, 980px); margin: 0 auto; }
+    .eyebrow {
+      margin: 0 0 10px;
+      color: #dcecff;
+      font-size: .82rem;
+      font-weight: 750;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    h1 { max-width: 760px; margin: 0; font-size: clamp(2.15rem, 5vw, 3.65rem); line-height: 1.08; }
+    .hero p { max-width: 720px; margin: 18px 0 0; color: #edf6ff; font-size: 1.12rem; }
+    .hero-tag {
+      display: inline-block;
+      margin-top: 24px;
+      padding: 7px 12px;
+      border: 1px solid rgba(255,255,255,.48);
+      border-radius: 999px;
+      font-size: .9rem;
+    }
+    main { padding: 26px 0 52px; }
+    .card {
+      margin: 18px 0;
+      padding: clamp(20px, 4vw, 32px);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+    h2 { margin: 0 0 14px; font-size: clamp(1.45rem, 3vw, 2rem); line-height: 1.2; }
+    h3 { margin: 24px 0 8px; font-size: 1.18rem; line-height: 1.35; }
+    p { margin: 10px 0; }
+    .lead { color: var(--muted); font-size: 1.08rem; }
+    .toc {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-top: 18px;
+    }
+    .toc a {
+      padding: 7px 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #f8fbff;
+      text-decoration: none;
+      font-size: .9rem;
+    }
+    .callout {
+      margin: 18px 0;
+      padding: 16px 18px;
+      border-left: 5px solid var(--teal);
+      border-radius: 10px;
+      background: var(--teal-pale);
+    }
+    .callout.blue { border-color: var(--blue); background: var(--blue-pale); }
+    .callout.gold { border-color: #d29312; background: var(--gold-pale); }
+    .callout > :first-child { margin-top: 0; }
+    .callout > :last-child { margin-bottom: 0; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+      gap: 14px;
+      margin: 18px 0;
+    }
+    .mini {
+      padding: 17px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: #fbfdff;
+    }
+    .mini h3 { margin: 0 0 7px; }
+    .mini p { margin: 0; color: var(--muted); }
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: stretch;
+      justify-content: center;
+      gap: 9px;
+      margin: 22px 0;
+    }
+    .step {
+      flex: 1 1 120px;
+      max-width: 190px;
+      padding: 14px 11px;
+      border: 1px solid #bfd2ed;
+      border-radius: 12px;
+      background: var(--blue-pale);
+      text-align: center;
+    }
+    .step strong { display: block; color: #17447f; }
+    .arrow { align-self: center; color: var(--teal); font-weight: 800; }
+    .memory {
+      display: inline-block;
+      margin: 5px 0 9px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: #eef3f8;
+      font-weight: 750;
+    }
+    table {
+      width: 100%;
+      margin: 18px 0;
+      border-collapse: collapse;
+      border: 1px solid var(--line);
+    }
+    th, td { padding: 12px 13px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: #edf3fa; }
+    ul, ol { padding-left: 1.35rem; }
+    li { margin: 6px 0; }
+    code {
+      padding: .12em .35em;
+      border-radius: 5px;
+      background: #eff3f8;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: .92em;
+    }
+    .formula {
+      overflow-x: auto;
+      margin: 16px 0;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #f8fafc;
+      text-align: center;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 1rem;
+    }
+    details {
+      margin: 12px 0;
+      padding: 13px 15px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fbfdff;
+    }
+    summary { cursor: pointer; font-weight: 700; }
+    details p { margin-bottom: 0; }
+    .sources li { overflow-wrap: anywhere; }
+    footer { padding: 0 0 34px; color: var(--muted); font-size: .9rem; }
+    @media (max-width: 560px) {
+      .hero { padding-top: 42px; }
+      .arrow { flex-basis: 100%; transform: rotate(90deg); }
+      th, td { padding: 9px; }
+    }
+    @media print {
+      body { background: #fff; font-size: 11pt; }
+      .hero { padding: 24px; }
+      main { width: 100%; padding-top: 10px; }
+      .card { box-shadow: none; break-inside: avoid; }
+      a { color: inherit; text-decoration: none; }
+      .toc { display: none; }
+    }
+  </style>
+</head>
+<body>
+  
+
+
+  <details class="folder-nav folder-nav--floating">
+    <summary>Browse topics</summary>
+    <div class="folder-nav-panel">
+      <a class="folder-nav-home" href="/">All guides</a>
+      <ul>
+        
+          
+          <li><a href="/#category-1">Applied Natural Language Processing</a></li>
+        
+          
+          <li><a href="/#category-2">Data Analytics Business 2</a></li>
+        
+          
+          <li><a href="/#category-3">Data Analytics Business</a></li>
+        
+      </ul>
+    </div>
+  </details>
+
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Module 9 | Beginner study guide</p>
+      <h1>Transformer Models</h1>
+      <p>Learn the big idea behind attention, how encoder and decoder models differ, and when to think of BERT or GPT. No advanced math required.</p>
+      <span class="hero-tag">Plain-language explanations + everyday examples + memory cues</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="card" id="start">
+      <h2>Start with the big picture</h2>
+      <p class="lead">A transformer is a kind of AI model that works with sequences, such as words in a sentence. Its special skill is deciding which other words are useful for understanding or producing each word.</p>
+      <div class="callout blue">
+        <strong>Imagine reading a mystery:</strong> When you see “Jordan left the bat by the bank,” you use nearby clues to decide whether <em>bank</em> means a riverside or a place for money. A transformer does something similar: it uses context to build a more useful understanding of each word.
+      </div>
+      <p>Transformers became important after the 2017 research paper <em>Attention Is All You Need</em>. They were first introduced for machine translation and are now used for many language tasks.</p>
+      <nav class="toc" aria-label="Guide contents">
+        <a href="#terms">Key terms</a>
+        <a href="#workflow">How it works</a>
+        <a href="#attention">Attention</a>
+        <a href="#families">Model families</a>
+        <a href="#bert-gpt">BERT &amp; GPT</a>
+        <a href="#practice">Practice</a>
+      </nav>
+    </section>
+
+    <section class="card" id="terms">
+      <h2>1. Four terms to know first</h2>
+      <div class="grid">
+        <article class="mini">
+          <h3>Token</h3>
+          <p>A small piece of text the model processes. It may be a whole word, part of a word, or punctuation.</p>
+          <p><strong>Example:</strong> “unbelievable” might be split into smaller pieces.</p>
+        </article>
+        <article class="mini">
+          <h3>Embedding</h3>
+          <p>A list of numbers representing a token. Think of it as putting a word on a map of meaning.</p>
+          <p><strong>Example:</strong> “puppy” and “dog” tend to have related representations.</p>
+        </article>
+        <article class="mini">
+          <h3>Pre-training</h3>
+          <p>Learning broad patterns from a very large collection of text before tackling one specific task.</p>
+          <p><strong>Analogy:</strong> Learning general language before training for a particular job.</p>
+        </article>
+        <article class="mini">
+          <h3>Fine-tuning</h3>
+          <p>Further training a pre-trained model for a focused use, often with examples for that task.</p>
+          <p><strong>Example:</strong> Adapting a general model to label customer reviews as positive or negative.</p>
+        </article>
+      </div>
+      <div class="callout">
+        <strong>Why pre-train?</strong> Training a large model from the beginning takes lots of text, computing time, energy, and money. Starting with a model that already learned language patterns can make a specialized task more practical.
+      </div>
+      <p><strong>Self-supervised learning</strong> creates a learning exercise from the text itself, so every sentence can provide a practice example even when a person has not labeled it. For instance, hide a word and ask the model to recover it.</p>
+    </section>
+
+    <section class="card" id="workflow">
+      <h2>2. The transformer, step by step</h2>
+      <p>At a high level, text is turned into tokens and number representations. The model adds information about word order, lets tokens exchange useful clues, then uses the result to understand or generate text.</p>
+      <div class="flow" aria-label="Transformer processing steps">
+        <div class="step"><strong>1. Text</strong>“I loved the film”</div>
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <div class="step"><strong>2. Tokens</strong>Text pieces</div>
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <div class="step"><strong>3. Vectors + order</strong>Numbers with position clues</div>
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <div class="step"><strong>4. Attention</strong>Share relevant context</div>
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <div class="step"><strong>5. Result</strong>Understand or continue text</div>
+      </div>
+      <h3>Why does word order matter?</h3>
+      <p>“The dog chased the cat” and “The cat chased the dog” contain nearly the same words but mean different things. Transformers do not read one word at a time in the same way an RNN or LSTM does, so they need position information. <strong>Positional encoding</strong> gives the model clues about where tokens occur in the sequence.</p>
+      <p>Some classic explanations describe adding position clues to the word representation. Modern transformer systems can use different positional methods; the key idea is simply that the model must know order.</p>
+      <div class="memory"><strong>Memory cue:</strong> Word meaning + seat number = a word in context.</div>
+      <h3>What is inside a block?</h3>
+      <ul>
+        <li><strong>Attention:</strong> lets each token gather useful information from other tokens.</li>
+        <li><strong>Feed-forward network:</strong> processes each token's updated representation further.</li>
+        <li><strong>Residual (skip) connection:</strong> carries earlier information forward, helping deeper networks learn.</li>
+        <li><strong>Normalization:</strong> keeps intermediate values on manageable scales and helps training behave well.</li>
+      </ul>
+      <p>These blocks can be stacked. Each layer can refine the context, much as rereading a paragraph can improve your understanding.</p>
+    </section>
+
+    <section class="card" id="attention">
+      <h2>3. Attention: the model's highlighter</h2>
+      <p><strong>Self-attention</strong> lets a token compare itself with other tokens in the same sequence and combine the most relevant clues. This helps the model connect words that may be far apart.</p>
+      <div class="callout gold">
+        <strong>Real-world example: resolving “it”</strong>
+        <p>“The soup was too hot, so I left it to cool.” When representing <em>it</em>, attention can give more weight to <em>soup</em> than to <em>hot</em> or <em>cool</em>. Context helps identify what “it” refers to.</p>
+      </div>
+      <h3>Query, Key, and Value without the scary math</h3>
+      <p>For each token, the model makes three learned representations. Think of a library search:</p>
+      <ul>
+        <li><strong>Query:</strong> “What clue am I looking for?”</li>
+        <li><strong>Key:</strong> “What information does this token offer?”</li>
+        <li><strong>Value:</strong> “What information should I pass along if this token is relevant?”</li>
+      </ul>
+      <p>The model compares a query with keys to assign attention weights. It then combines the values using those weights. A higher weight means “use more of this token's information for this step.” It is a learned relevance score, not a guarantee that the model truly understands a word as a human does.</p>
+      <div class="formula" aria-label="Scaled dot-product attention formula">
+        Attention(Q, K, V) = softmax(QK<sup>T</sup> / &radic;d<sub>k</sub>) V
+      </div>
+      <p><strong>In words:</strong> compare questions (Q) with clues (K), turn the match scores into weights (softmax), then use the weights to mix information (V). The division by &radic;d<sub>k</sub> helps keep the scores at a useful scale.</p>
+      <h3>Why multiple heads?</h3>
+      <p><strong>Multi-head attention</strong> runs several attention calculations in parallel. One head might focus on who did what; another might notice a pronoun's reference or a phrase boundary. Their results are combined.</p>
+      <div class="memory"><strong>Memory cue:</strong> Query asks. Key matches. Value shares. Heads look for different clues.</div>
+    </section>
+
+    <section class="card" id="families">
+      <h2>4. Three transformer arrangements</h2>
+      <p>Different tasks need different ways of looking at text. Remember them as <strong>read</strong>, <strong>write</strong>, and <strong>read then write</strong>.</p>
+      <table>
+        <thead>
+          <tr><th>Arrangement</th><th>Plain-language job</th><th>Typical fit</th><th>Examples</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Encoder-only</strong></td>
+            <td>Read the available text and build a rich representation of it. It can look at context on both sides of a token.</td>
+            <td>Classifying, extracting, or understanding text.</td>
+            <td>BERT, RoBERTa, ALBERT</td>
+          </tr>
+          <tr>
+            <td><strong>Decoder-only</strong></td>
+            <td>Continue a sequence. When predicting the next token, it is restricted to the earlier tokens.</td>
+            <td>Generating text one token at a time.</td>
+            <td>GPT-style models</td>
+          </tr>
+          <tr>
+            <td><strong>Encoder-decoder</strong></td>
+            <td>Read an input, then produce a related output.</td>
+            <td>Translation and other input-to-output rewriting tasks.</td>
+            <td>T5, BART</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout blue">
+        <strong>Encoder-decoder example:</strong> The encoder reads “Where is the train station?” The decoder uses that input to produce “¿Dónde está la estación de tren?” in Spanish. While producing each word, the decoder can also consult the encoded input.
+      </div>
+      <p><strong>Bidirectional</strong> here means an encoder can use both earlier and later context in its input. <strong>Causal</strong> or left-to-right attention means a decoder cannot peek at future tokens while predicting the next one.</p>
+      <p>Transformer training can process many input positions in parallel, unlike a standard recurrent network that must pass information step by step. Generation is still commonly sequential: each new token becomes context for the next one.</p>
+    </section>
+
+    <section class="card" id="bert-gpt">
+      <h2>5. BERT and GPT: the memorable difference</h2>
+      <div class="grid">
+        <article class="mini">
+          <h3>BERT = fill the gap</h3>
+          <p>BERT is an encoder-based model. During its original pre-training, some tokens were masked and the model learned to predict them using both left and right context.</p>
+          <p><strong>Practice prompt:</strong> “The customer returned the [MASK] because it was broken.” Context helps guess a likely missing word.</p>
+        </article>
+        <article class="mini">
+          <h3>GPT = continue the story</h3>
+          <p>GPT is a decoder-only, autoregressive model. It predicts a next token from the tokens already provided, then repeats the process to generate a sequence.</p>
+          <p><strong>Practice prompt:</strong> “The customer returned the package because…” The model continues from what came before.</p>
+        </article>
+      </div>
+      <div class="memory"><strong>Memory cue:</strong> BERT looks around a blank. GPT goes on from the beginning.</div>
+      <h3>How does BERT learn from text?</h3>
+      <ul>
+        <li><strong>Masked language modeling (MLM):</strong> hide a token and predict it. This creates a practice question from ordinary text.</li>
+        <li><strong>Next sentence prediction (NSP):</strong> in the original BERT training setup, predict whether one sentence follows another. Not every later model uses this objective.</li>
+      </ul>
+      <p>The module's example: Sentence A, “The man went to the store.” Sentence B, “He bought a gallon of milk.” The sentences fit together as a plausible continuation. Compare with an unrelated sentence such as “Penguins are flightless.”</p>
+      <h3>What do they do in everyday systems?</h3>
+      <ul>
+        <li><strong>Review sorting:</strong> an encoder-based model can help classify “The screen is bright, but the battery dies quickly” as mixed or negative, depending on the labels and training.</li>
+        <li><strong>Support inbox:</strong> an encoder can classify incoming messages as billing, delivery, or account-help requests so they reach the right team.</li>
+        <li><strong>Drafting:</strong> a decoder-based model can suggest the next sentence in an email or create a first draft from a prompt.</li>
+        <li><strong>Translation:</strong> an encoder-decoder model can read a sentence in one language and generate its translation in another.</li>
+      </ul>
+      <div class="callout gold">
+        <strong>A useful qualification:</strong> BERT is especially associated with understanding and classifying text. It is not the same kind of next-word text generator as GPT. A translation or summary system that must produce a new sequence is often built with an encoder-decoder model, though many modern systems use other designs too.
+      </div>
+    </section>
+
+    <section class="card" id="applications">
+      <h2>6. Problems transformers can help solve</h2>
+      <table>
+        <thead><tr><th>Task</th><th>What it means</th><th>Everyday example</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Sentiment analysis</strong></td><td>Estimate the feeling or opinion in text.</td><td>Sort product feedback into positive, neutral, or negative.</td></tr>
+          <tr><td><strong>Named Entity Recognition (NER)</strong></td><td>Find names, places, dates, organizations, and other entities.</td><td>From “Maya visits Boston on Tuesday,” identify Maya, Boston, and Tuesday.</td></tr>
+          <tr><td><strong>Part-of-Speech tagging (POS)</strong></td><td>Label a word's grammatical role.</td><td>In “They book a table,” <em>book</em> is a verb; in “Read the book,” it is a noun.</td></tr>
+          <tr><td><strong>Summarization</strong></td><td>Make a shorter version that keeps important information.</td><td>Turn a long meeting transcript into a few key points.</td></tr>
+          <tr><td><strong>Machine translation</strong></td><td>Translate text from one language into another.</td><td>Translate a travel question before asking for directions.</td></tr>
+          <tr><td><strong>Question answering</strong></td><td>Use supplied text or knowledge to produce an answer.</td><td>Ask a store's help page, “How do I return an item?”</td></tr>
+        </tbody>
+      </table>
+      <p>These are examples of tasks a transformer can support, not a promise that every model is equally good at each one. The architecture, training data, task setup, and evaluation all matter.</p>
+    </section>
+
+    <section class="card" id="remember">
+      <h2>7. One-minute recap</h2>
+      <ol>
+        <li>Text becomes tokens; tokens become number representations.</li>
+        <li>Position information helps the model distinguish word order.</li>
+        <li>Attention lets tokens use relevant clues from other tokens.</li>
+        <li>Encoder-only models are a natural fit for many text-understanding tasks.</li>
+        <li>Decoder-only models generate by predicting one next token at a time.</li>
+        <li>Encoder-decoder models read an input and produce a related sequence.</li>
+        <li>BERT is the classic “fill in the blank” memory hook; GPT is “continue the text.”</li>
+      </ol>
+      <div class="callout">
+        <strong>Fast recall:</strong> <span class="memory">Order + context + attention</span> are the core ideas. For architecture, remember <span class="memory">read / write / read then write</span>.
+      </div>
+    </section>
+
+    <section class="card" id="practice">
+      <h2>8. Quick self-check</h2>
+      <p>Try answering before opening each answer.</p>
+      <details>
+        <summary>Why does a transformer need position information?</summary>
+        <p>Because order changes meaning, and attention alone does not tell the model which token came first or where a token sits in the sequence.</p>
+      </details>
+      <details>
+        <summary>What does self-attention help a token do?</summary>
+        <p>Compare itself with other tokens in the same sequence and combine information that is useful for its current representation.</p>
+      </details>
+      <details>
+        <summary>Which family would you first consider for labeling a review as positive or negative?</summary>
+        <p>An encoder-only model is a natural starting point because the task is to understand and classify the supplied text.</p>
+      </details>
+      <details>
+        <summary>Which family would you first consider for generating a continuation to a story?</summary>
+        <p>A decoder-only model, such as a GPT-style model, because it is trained to predict and generate what comes next.</p>
+      </details>
+      <details>
+        <summary>Which family is a natural fit for translating one sentence into another language?</summary>
+        <p>An encoder-decoder model is a classic fit: encode the source sentence, then generate the target sentence while consulting the source representation.</p>
+      </details>
+      <details>
+        <summary>What do Query, Key, and Value mean in the library-search analogy?</summary>
+        <p>Query asks what is needed; Key helps decide whether a token is relevant; Value is the information to gather from that token.</p>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    <p>M9 Transformer Models | Beginner study guide | Designed to read on screen or print to PDF.</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/assets/css/folder-nav.css">
+
+  <meta name="description" content="A beginner-friendly guide to logistic regression, perceptrons, and support vector machines for text classification.">
+  <title>M4 Beginner Study Guide: Linear Text Classification</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #203047;
+      --muted: #53657b;
+      --paper: #fff;
+      --canvas: #f2f6fb;
+      --blue: #2457a7;
+      --blue-pale: #eaf2ff;
+      --teal: #087e78;
+      --teal-pale: #e6f7f3;
+      --gold: #8a5b00;
+      --gold-pale: #fff5dc;
+      --line: #dce5ef;
+      --shadow: 0 10px 28px rgba(32, 48, 71, .08);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font: 16px/1.68 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: var(--blue); }
+    a:focus-visible, summary:focus-visible { outline: 3px solid #e4a91a; outline-offset: 3px; }
+    .hero {
+      padding: 58px 22px 48px;
+      color: #fff;
+      background: linear-gradient(135deg, #153d73, #2767a7 60%, #12877f);
+    }
+    .hero-inner, main, footer { width: min(100% - 32px, 980px); margin: 0 auto; }
+    .eyebrow {
+      margin: 0 0 10px;
+      color: #dcecff;
+      font-size: .82rem;
+      font-weight: 750;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    h1 { max-width: 800px; margin: 0; font-size: clamp(2.1rem, 5vw, 3.6rem); line-height: 1.08; }
+    .hero p:not(.eyebrow) { max-width: 750px; margin: 18px 0 0; color: #edf6ff; font-size: 1.12rem; }
+    .badge {
+      display: inline-block;
+      margin-top: 24px;
+      padding: 7px 12px;
+      border: 1px solid rgba(255,255,255,.48);
+      border-radius: 999px;
+      font-size: .9rem;
+    }
+    main { padding: 26px 0 52px; }
+    .card {
+      margin: 18px 0;
+      padding: clamp(20px, 4vw, 32px);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+    h2 { margin: 0 0 14px; font-size: clamp(1.45rem, 3vw, 2rem); line-height: 1.22; }
+    h3 { margin: 24px 0 8px; font-size: 1.18rem; line-height: 1.38; }
+    p { margin: 10px 0; }
+    .lead { color: var(--muted); font-size: 1.08rem; }
+    .toc { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 18px; }
+    .toc a {
+      padding: 7px 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #f8fbff;
+      text-decoration: none;
+      font-size: .9rem;
+    }
+    .callout {
+      margin: 18px 0;
+      padding: 15px 18px;
+      border-left: 5px solid var(--teal);
+      border-radius: 10px;
+      background: var(--teal-pale);
+    }
+    .callout.blue { border-color: var(--blue); background: var(--blue-pale); }
+    .callout.gold { border-color: #d29312; background: var(--gold-pale); }
+    .callout > :first-child { margin-top: 0; }
+    .callout > :last-child { margin-bottom: 0; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 14px; margin: 18px 0; }
+    .mini { padding: 17px; border: 1px solid var(--line); border-radius: 13px; background: #fbfdff; }
+    .mini h3 { margin: 0 0 7px; }
+    .mini p { margin: 0; color: var(--muted); }
+    .memory {
+      display: inline-block;
+      margin: 5px 0 9px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: #eef3f8;
+      font-weight: 750;
+    }
+    .flow { display: flex; flex-wrap: wrap; align-items: stretch; justify-content: center; gap: 9px; margin: 22px 0; }
+    .step {
+      flex: 1 1 125px;
+      max-width: 195px;
+      padding: 14px 11px;
+      border: 1px solid #bfd2ed;
+      border-radius: 12px;
+      background: var(--blue-pale);
+      text-align: center;
+    }
+    .step strong { display: block; color: #17447f; }
+    .arrow { align-self: center; color: var(--teal); font-weight: 800; }
+    .formula {
+      overflow-x: auto;
+      margin: 16px 0;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #f8fafc;
+      text-align: center;
+      font: 1rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    table { width: 100%; margin: 18px 0; border-collapse: collapse; border: 1px solid var(--line); }
+    th, td { padding: 11px 13px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: #edf3fa; }
+    ul, ol { padding-left: 1.35rem; }
+    li { margin: 6px 0; }
+    code {
+      padding: .12em .35em;
+      border-radius: 5px;
+      background: #eff3f8;
+      font: .92em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    details { margin: 12px 0; padding: 13px 15px; border: 1px solid var(--line); border-radius: 11px; background: #fbfdff; }
+    summary { cursor: pointer; font-weight: 700; }
+    details p { margin-bottom: 0; }
+    .sources li { overflow-wrap: anywhere; }
+    footer { padding: 0 0 34px; color: var(--muted); font-size: .9rem; }
+    @media (max-width: 560px) {
+      .hero { padding-top: 42px; }
+      .arrow { flex-basis: 100%; transform: rotate(90deg); }
+      th, td { padding: 9px; }
+    }
+    @media print {
+      body { background: #fff; font-size: 11pt; }
+      .hero { padding: 24px; }
+      main { width: 100%; padding-top: 10px; }
+      .card { box-shadow: none; break-inside: avoid; }
+      .toc { display: none; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  
+
+
+  <details class="folder-nav folder-nav--floating">
+    <summary>Browse topics</summary>
+    <div class="folder-nav-panel">
+      <a class="folder-nav-home" href="/">All guides</a>
+      <ul>
+        
+          
+          <li><a href="/#category-1">Applied Natural Language Processing</a></li>
+        
+          
+          <li><a href="/#category-2">Data Analytics Business 2</a></li>
+        
+          
+          <li><a href="/#category-3">Data Analytics Business</a></li>
+        
+      </ul>
+    </div>
+  </details>
+
+
+  <header class="hero">
+    <div class="hero-inner">
+      <p class="eyebrow">Module 4 | Beginner study guide</p>
+      <h1>Linear Text Classification</h1>
+      <p>Understand three ways to sort text: logistic regression gives probabilities, the perceptron learns by correcting mistakes, and an SVM looks for the widest safety margin.</p>
+      <span class="badge">Plain-language explanations + real-world examples + memory cues</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="card" id="overview">
+      <h2>Start with the big picture</h2>
+      <p class="lead">A text classifier takes a message, turns it into numbers, and uses those numbers to choose a category. M4 studies three linear classifiers that share one basic calculation but learn and interpret it differently.</p>
+      <div class="callout blue">
+        <strong>Real-world example: sorting a support inbox.</strong> A help desk might label messages as <em>billing</em> or <em>technical support</em>. Words such as “refund” may push a message toward billing; “screen frozen” may push it toward technical support. The model learns which clues matter from labeled examples.
+      </div>
+      <div class="flow" aria-label="Text classification workflow">
+        <div class="step"><strong>1. Message</strong>“The app keeps crashing”</div>
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <div class="step"><strong>2. Text features</strong>Words become numbers</div>
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <div class="step"><strong>3. Linear score</strong>Weighted combination</div>
+        <span class="arrow" aria-hidden="true">&rarr;</span>
+        <div class="step"><strong>4. Prediction</strong>Probability or class</div>
+      </div>
+      <p><strong>Three memory hooks:</strong> logistic regression asks “how likely?”, perceptron asks “which side?”, and SVM asks “which boundary leaves the biggest cushion?”</p>
+      <nav class="toc" aria-label="Guide contents">
+        <a href="#represent">Represent text</a>
+        <a href="#score">Linear score</a>
+        <a href="#logistic">Logistic regression</a>
+        <a href="#perceptron">Perceptron</a>
+        <a href="#svm">SVM</a>
+        <a href="#compare">Compare models</a>
+        <a href="#practice">Self-check</a>
+      </nav>
+    </section>
+
+    <section class="card" id="represent">
+      <h2>1. First turn text into numbers</h2>
+      <p>Computers cannot directly calculate with a sentence, so we represent its words with numeric features. Two common choices in the course are:</p>
+      <div class="grid">
+        <article class="mini">
+          <h3>Bag of Words</h3>
+          <p>Counts or marks words from a vocabulary. It records which words occur, but mostly ignores their order.</p>
+          <p><strong>Example:</strong> “refund delayed refund” gives the word <em>refund</em> a larger count than <em>delayed</em>.</p>
+        </article>
+        <article class="mini">
+          <h3>TF-IDF</h3>
+          <p>Weights words by how useful they are for distinguishing documents. Common words often get less weight than informative ones.</p>
+          <p><strong>Example:</strong> “the” is less distinctive than “overheating” in a product complaint.</p>
+        </article>
+      </div>
+      <p>After vectorization, a document might be represented as <code>x = [0.0, 0.7, 0.2, ...]</code>. Each position corresponds to a feature, such as a vocabulary term. The vector can have thousands of dimensions, even though diagrams often show only two.</p>
+      <div class="callout gold">
+        <strong>Keep the pipeline consistent:</strong> Fit the text vectorizer using training documents, then use that same fitted vectorizer to transform new and test documents. Otherwise, the model may receive features in a different vocabulary or order.
+      </div>
+    </section>
+
+    <section class="card" id="score">
+      <h2>2. A shared idea: the linear score</h2>
+      <p>All three models can begin with a weighted score:</p>
+      <div class="formula">score = f(x) = w · x + b</div>
+      <ul>
+        <li><strong>x</strong> is the document's feature vector.</li>
+        <li><strong>w</strong> contains learned weights—one importance value per feature.</li>
+        <li><strong>b</strong> is a bias or intercept that shifts the boundary.</li>
+        <li><strong>w · x</strong> is the dot product: multiply corresponding numbers and add them.</li>
+      </ul>
+      <p>Suppose a spam model gives “free prize” a positive weight and “meeting agenda” a negative weight. The words present in an email push its score in one direction or the other. The classifier then interprets that score according to its own rules.</p>
+      <h3>The decision boundary</h3>
+      <p>The line where the score equals zero separates the two predictions: <code>w · x + b = 0</code>. With two features it is a line; with three it is a plane; with many text features it is called a <strong>hyperplane</strong>. “Linear” describes this boundary in the feature space—even when the original text is complicated.</p>
+      <div class="callout">
+        <strong>Linear separability</strong> means one such flat boundary can separate every example of one class from every example of the other. Real-world messages can overlap and contain noise, so perfect separation is not always possible.
+      </div>
+    </section>
+
+    <section class="card" id="logistic">
+      <h2>3. Logistic regression: “How likely is it?”</h2>
+      <p>A raw linear score can be any real number. Logistic regression passes it through the <strong>sigmoid</strong> function, which squeezes it into a value from 0 to 1:</p>
+      <div class="formula">sigmoid(s) = 1 / (1 + e<sup>−s</sup>)</div>
+      <p>The output is treated as the estimated probability of the positive class. A score of zero becomes probability 0.5; a strongly positive score moves toward 1, and a strongly negative score moves toward 0.</p>
+      <div class="callout blue">
+        <strong>Example: customer feedback.</strong> A review classifier estimates a 0.82 probability that feedback is positive. A business can use that probability to decide which reviews need human attention, rather than receiving only an unexplained “positive” label.
+      </div>
+      <h3>From probability to a label</h3>
+      <p>A common default is to predict positive when the probability is at least 0.5. But 0.5 is a choice, not a law. If missing a safety complaint is costly, a system might lower the threshold to catch more possible complaints, accepting that more ordinary messages will also be flagged.</p>
+      <p>Changing the threshold changes the operating point without retraining the model. ROC curves and AUC help compare classifier performance over different thresholds.</p>
+      <h3>How does it learn?</h3>
+      <p>The model compares its predicted probabilities with the correct training labels using a likelihood-based objective, often expressed as <strong>log loss</strong>. It adjusts weights to make correct predictions more likely. There is usually no simple closed-form answer for the weights, so an optimizer such as gradient descent updates them step by step.</p>
+      <p><strong>Gradient descent analogy:</strong> imagine walking downhill in fog. The gradient estimates the direction of steepest increase in error, so the optimizer steps in the opposite direction. The step size is the <strong>learning rate</strong>: too big can overshoot; too small can make learning slow.</p>
+      <div class="memory"><strong>Memory cue:</strong> Logistic regression = linear score → sigmoid → probability.</div>
+      <p>Despite its name, logistic regression is commonly used for classification. Its standard decision boundary is linear in the chosen features.</p>
+    </section>
+
+    <section class="card" id="perceptron">
+      <h2>4. Perceptron: learn by correcting mistakes</h2>
+      <p>The perceptron is a simple <strong>hard classifier</strong>. It uses the sign of the score: one side means positive, the other negative. Unlike logistic regression, it does not directly return a probability.</p>
+      <div class="callout blue">
+        <strong>Example: quick spam sorting.</strong> If an email falls on the model's “spam” side, the perceptron calls it spam. If a labeled spam email lands on the non-spam side, the training algorithm adjusts the weights so that this example is more likely to be placed correctly next time.
+      </div>
+      <h3>The update idea</h3>
+      <p>During training, the perceptron looks at examples one by one. If a document is misclassified, it moves the weights toward the correct label. For labels <code>y = −1</code> or <code>+1</code>, a common update is:</p>
+      <div class="formula">if y × score ≤ 0: update weights in the direction y × x</div>
+      <p>Repeat this process over the training data. If the data are linearly separable, the standard perceptron can find a separating boundary. If they are not, it may keep making changes without settling, so implementations set a maximum number of passes (epochs).</p>
+      <p><strong>Important:</strong> the perceptron can stop at any boundary that works on separable training data. It does not try to find the most robust or widest-margin boundary, and the chosen solution can depend on the order examples are presented.</p>
+      <div class="memory"><strong>Memory cue:</strong> Perceptron = guess a side; when wrong, nudge the boundary.</div>
+    </section>
+
+    <section class="card" id="svm">
+      <h2>5. SVM: leave the biggest possible cushion</h2>
+      <p>A <strong>Support Vector Machine</strong> (SVM) also finds a decision boundary, but it does not settle for just any separating line. It aims to maximize the <strong>margin</strong>—the space between the boundary and the closest training examples.</p>
+      <div class="callout blue">
+        <strong>Everyday analogy: a road between two neighborhoods.</strong> If one group of homes is on each side of a road, a wider road provides more buffer. Small shifts or noisy measurements are less likely to put a home on the wrong side. SVM looks for this widest buffer between classes.
+      </div>
+      <h3>Support vectors</h3>
+      <p>The closest examples to the boundary are called <strong>support vectors</strong>. They strongly influence where the SVM places its margin. Far-away examples are less important to the boundary than these edge cases.</p>
+      <p>For the idealized hard-margin case, labels are often written <code>−1</code> and <code>+1</code>, and the closest examples sit on margin boundaries at score <code>−1</code> and <code>+1</code>. The decision boundary is at score zero. The total margin width is <code>2 / ||w||</code>, so maximizing the margin corresponds to minimizing the weight-vector length while respecting the margin constraints.</p>
+      <h3>Real data: soft margins and C</h3>
+      <p>Text categories often overlap; for instance, a message can discuss both billing and a technical problem. A <strong>soft-margin SVM</strong> allows some examples inside the margin or even on the wrong side.</p>
+      <ul>
+        <li><strong>Large C:</strong> penalizes margin violations more strongly and prioritizes fitting training examples.</li>
+        <li><strong>Small C:</strong> tolerates more violations in exchange for a wider, more regularized margin.</li>
+      </ul>
+      <h3>Kernel trick: a curved boundary without drawing all the curves</h3>
+      <p>If a straight line cannot separate the data, a <strong>kernel</strong> lets the SVM compare examples as if they had been mapped into a richer feature space. A straight boundary there can correspond to a curved boundary in the original space. The <strong>RBF kernel</strong> is one common choice.</p>
+      <div class="callout gold">
+        <strong>Practical text tip:</strong> Linear SVMs are often a strong starting point for sparse, high-dimensional bag-of-words or TF-IDF features. Nonlinear kernels can be computationally expensive on large text datasets. SVM scores are not automatically calibrated probabilities.
+      </div>
+      <div class="memory"><strong>Memory cue:</strong> SVM = choose the boundary with the widest cushion.</div>
+    </section>
+
+    <section class="card" id="compare">
+      <h2>6. Compare the three models</h2>
+      <table>
+        <thead><tr><th>Model</th><th>Everyday question</th><th>What it outputs</th><th>How it learns</th><th>Key caution</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Logistic regression</strong></td><td>“How likely is this class?”</td><td>Probability, then a thresholded class</td><td>Adjusts weights to reduce probability-based loss</td><td>Linear boundary unless features or model change</td></tr>
+          <tr><td><strong>Perceptron</strong></td><td>“Which side is this on?”</td><td>Hard class</td><td>Corrects misclassified examples</td><td>Basic version may not converge on non-separable data</td></tr>
+          <tr><td><strong>SVM</strong></td><td>“Which boundary leaves the widest cushion?”</td><td>Class and decision score</td><td>Maximizes margin, with soft-margin penalties if needed</td><td>Probability output needs additional calibration</td></tr>
+        </tbody>
+      </table>
+      <div class="grid">
+        <article class="mini">
+          <h3>Need probabilities?</h3>
+          <p>Logistic regression provides them directly. Threshold choice should reflect the cost of mistakes.</p>
+        </article>
+        <article class="mini">
+          <h3>Want the simplest learning demo?</h3>
+          <p>Perceptron makes the “learn from a mistake” update easy to visualize.</p>
+        </article>
+        <article class="mini">
+          <h3>Want a strong text baseline?</h3>
+          <p>Try a linear SVM with TF-IDF and evaluate it on held-out data.</p>
+        </article>
+      </div>
+      <p>These are starting points rather than rules. The best choice depends on the dataset, evaluation goal, and the consequences of false positives and false negatives.</p>
+    </section>
+
+    <section class="card" id="workflow">
+      <h2>7. A practical text-classification workflow</h2>
+      <ol>
+        <li><strong>Define labels:</strong> decide what categories mean and make examples consistent.</li>
+        <li><strong>Split examples:</strong> keep training data for learning and held-out validation/test data for evaluation.</li>
+        <li><strong>Vectorize text:</strong> fit Bag-of-Words or TF-IDF on training text; apply the same transformation to the held-out text.</li>
+        <li><strong>Train a baseline:</strong> compare models such as logistic regression, perceptron, and a linear SVM.</li>
+        <li><strong>Evaluate for the real goal:</strong> inspect accuracy and per-class precision/recall or a confusion matrix; do not rely on training accuracy alone.</li>
+        <li><strong>Adjust responsibly:</strong> tune thresholds, regularization, or kernels using validation data, then report a final score from a test set not used for tuning.</li>
+      </ol>
+      <div class="callout gold">
+        <strong>Real-world mistake costs differ:</strong> A spam filter may tolerate a few missed junk messages, but a fraud alert system may prioritize recall to catch more suspicious activity—even if it reviews more legitimate cases. Choose a threshold and metric based on the job, not a default number alone.
+      </div>
+    </section>
+
+    <section class="card" id="recap">
+      <h2>8. One-minute recap</h2>
+      <ol>
+        <li>Text becomes numeric features such as Bag-of-Words or TF-IDF.</li>
+        <li>The linear score is a weighted sum plus a bias.</li>
+        <li>The perceptron uses a hard sign and updates when it makes a mistake.</li>
+        <li>Logistic regression applies a sigmoid to produce a class probability.</li>
+        <li>An SVM chooses a maximum-margin boundary shaped by its support vectors.</li>
+        <li>Kernels can model nonlinear boundaries; soft margins handle overlap.</li>
+        <li>Evaluate held-out examples and match your metrics and threshold to the real-world cost of errors.</li>
+      </ol>
+      <div class="callout">
+        <strong>Remember it in one breath:</strong>
+        <span class="memory">Perceptron corrects; logistic estimates probability; SVM widens the margin.</span>
+      </div>
+    </section>
+
+    <section class="card" id="practice">
+      <h2>9. Quick self-check</h2>
+      <p>Try answering before opening each explanation.</p>
+      <details>
+        <summary>What does the linear score <code>w · x + b</code> represent?</summary>
+        <p>It is a weighted sum of the document's numeric features plus a bias. It gives a raw score before the model decides whether to return a probability or a class.</p>
+      </details>
+      <details>
+        <summary>Why does logistic regression produce a probability?</summary>
+        <p>It applies a sigmoid function to the linear score, mapping any real-valued score to a number between 0 and 1.</p>
+      </details>
+      <details>
+        <summary>Does a 0.5 classification threshold have to be used?</summary>
+        <p>No. It is a common default. A different threshold may be more appropriate when false positives and false negatives have different costs.</p>
+      </details>
+      <details>
+        <summary>What happens when the perceptron misclassifies a training example?</summary>
+        <p>It adjusts its weights in the direction of that example's true label. The basic algorithm aims to find a separator, not the widest-margin separator.</p>
+      </details>
+      <details>
+        <summary>What is a support vector?</summary>
+        <p>It is a training example near or inside the SVM margin that helps determine the final boundary.</p>
+      </details>
+      <details>
+        <summary>What does a larger SVM C value generally encourage?</summary>
+        <p>It penalizes margin violations more strongly, placing more emphasis on fitting training examples and less on allowing a broad margin.</p>
+      </details>
+      <details>
+        <summary>Why might an RBF kernel help with concentric circles?</summary>
+        <p>A straight line cannot separate the circles in the original two-dimensional space. The kernel compares points as if in a richer feature space, which can produce a curved boundary back in the original space.</p>
+      </details>
+      <details>
+        <summary>Which model should you choose if you need a probability without extra calibration?</summary>
+        <p>Logistic regression directly returns probability estimates. Standard perceptrons and SVM decision scores are not probabilities.</p>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    <p>M4 Linear Text Classification | Beginner study guide | Designed to read on screen or print to PDF.</p>
+  </footer>
+</body>
+</html>

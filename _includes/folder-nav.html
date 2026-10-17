@@ -2,9 +2,9 @@
 {% assign nav_directories = nav_articles | map: "dir" | uniq | sort %}
 {% if include.mode == "floating" %}
   <details class="folder-nav folder-nav--floating">
-    <summary>Browse folders</summary>
+    <summary>Browse topics</summary>
     <div class="folder-nav-panel">
-      <a class="folder-nav-home" href="{{ '/' | relative_url }}">All articles</a>
+      <a class="folder-nav-home" href="{{ '/' | relative_url }}">All guides</a>
       <ul>
         {% for directory in nav_directories %}
           {% assign folder_name = directory | replace: "%20", " " | remove_first: "/guides/" | split: "/" | reject: "" | join: " / " | replace: "-", " " | replace: "_", " " | strip %}

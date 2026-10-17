@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/assets/css/folder-nav.css">
+
+  <meta name="description" content="A beginner-friendly guide to text classification, Naive Bayes, and classification evaluation.">
+  <title>M3 Beginner Study Guide: Text Classification</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1f2937;
+      --muted: #536273;
+      --paper: #ffffff;
+      --canvas: #f2f6fa;
+      --blue: #155e8a;
+      --blue-pale: #e8f4fb;
+      --gold: #7b4e00;
+      --gold-pale: #fff5d9;
+      --line: #d7e0e8;
+      --green-pale: #e9f7ef;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font: 17px/1.65 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: #075985; }
+    a:focus-visible, summary:focus-visible {
+      outline: 3px solid #f0a202;
+      outline-offset: 3px;
+    }
+    .page { max-width: 1020px; margin: 0 auto; padding: 28px 20px 64px; }
+    header, main, footer {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 8px 26px rgb(31 41 55 / 5%);
+    }
+    header { padding: clamp(24px, 5vw, 52px); border-top: 7px solid var(--blue); }
+    main { margin-top: 20px; padding: clamp(20px, 4vw, 42px); }
+    footer { margin-top: 20px; padding: 20px 26px; color: var(--muted); }
+    h1, h2, h3 { line-height: 1.2; }
+    h1 { max-width: 780px; margin: 0 0 14px; font-size: clamp(2rem, 5vw, 3.2rem); }
+    h2 { margin: 0 0 16px; font-size: clamp(1.45rem, 3vw, 2rem); }
+    h3 { margin: 24px 0 8px; font-size: 1.18rem; }
+    p { margin: 10px 0 16px; }
+    .eyebrow { color: var(--blue); font-weight: 750; letter-spacing: .07em; text-transform: uppercase; }
+    .lede { max-width: 760px; color: var(--muted); font-size: 1.15rem; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+    .chip { padding: 5px 11px; border-radius: 999px; background: var(--blue-pale); color: #123f5b; font-size: .9rem; font-weight: 650; }
+    nav { margin-top: 24px; padding: 18px 20px; border-radius: 12px; background: var(--canvas); }
+    nav strong { display: block; margin-bottom: 6px; }
+    nav ul { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0; padding-left: 20px; }
+    section { scroll-margin-top: 16px; padding-top: 30px; }
+    section + section { margin-top: 28px; border-top: 1px solid var(--line); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+    .card { padding: 17px 18px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+    .card h3 { margin-top: 0; }
+    .callout { margin: 18px 0; padding: 15px 18px; border-left: 5px solid var(--blue); border-radius: 8px; background: var(--blue-pale); }
+    .caution { border-left-color: #b77900; background: var(--gold-pale); }
+    .memory { border-left-color: #23804a; background: var(--green-pale); }
+    .formula { overflow-x: auto; margin: 14px 0; padding: 14px 18px; border-radius: 10px; background: #f4f7fa; font: 1rem/1.8 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    table { width: 100%; border-collapse: collapse; min-width: 520px; }
+    th, td { padding: 10px 12px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: var(--blue-pale); }
+    ol, ul { padding-left: 1.35em; }
+    li { margin: 5px 0; }
+    details { margin: 12px 0; padding: 13px 16px; border: 1px solid var(--line); border-radius: 10px; }
+    summary { cursor: pointer; color: #123f5b; font-weight: 700; }
+    .small { color: var(--muted); font-size: .93rem; }
+    .sources li { overflow-wrap: anywhere; margin-bottom: 9px; }
+    @media (max-width: 600px) {
+      body { font-size: 16px; }
+      .page { padding: 12px 10px 36px; }
+      header, main { border-radius: 12px; }
+      nav ul { display: block; }
+    }
+    @media print {
+      body { background: #fff; color: #000; font-size: 11pt; }
+      .page { max-width: none; padding: 0; }
+      header, main, footer { box-shadow: none; border-color: #aaa; }
+      nav { display: none; }
+      section { break-inside: avoid; }
+      a { color: #000; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  
+
+
+  <details class="folder-nav folder-nav--floating">
+    <summary>Browse topics</summary>
+    <div class="folder-nav-panel">
+      <a class="folder-nav-home" href="/">All guides</a>
+      <ul>
+        
+          
+          <li><a href="/#category-1">Applied Natural Language Processing</a></li>
+        
+          
+          <li><a href="/#category-2">Data Analytics Business 2</a></li>
+        
+          
+          <li><a href="/#category-3">Data Analytics Business</a></li>
+        
+      </ul>
+    </div>
+  </details>
+
+
+  <div class="page">
+    <header>
+      <p class="eyebrow">Module 3</p>
+      <h1>Text Classification: Teach a Computer to Sort Words</h1>
+      <p class="lede">A plain-language guide to supervised learning, Naive Bayes, and checking whether a classifier is actually useful, with real-world scenarios such as spam filtering, review sorting, and medical screening.</p>
+      <div class="chips" aria-label="Topics">
+        <span class="chip">Beginner friendly</span>
+        <span class="chip">Worked examples</span>
+        <span class="chip">Memory cues</span>
+        <span class="chip">Self-checks</span>
+      </div>
+      <nav aria-label="Guide contents">
+        <strong>Jump to a section</strong>
+        <ul>
+          <li><a href="#map">Learning map</a></li>
+          <li><a href="#foundations">Classification basics</a></li>
+          <li><a href="#bayes">Naive Bayes</a></li>
+          <li><a href="#evaluation">Evaluation</a></li>
+          <li><a href="#workflow">End-to-end workflow</a></li>
+          <li><a href="#self-check">Self-check</a></li>
+          <li><a href="#sources">Materials reviewed</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <section id="map">
+        <h2>1. The learning map</h2>
+        <p>By the end, you should be able to explain what text classification does, describe how Naive Bayes makes a prediction, and choose sensible ways to check the model. The module’s story is:</p>
+        <div class="callout"><strong>Words → numbers → a predicted category → a careful check.</strong> A model cannot work directly with the meaning of a raw email; we first represent its words as measurable features.</div>
+        <div class="grid">
+          <article class="card"><h3>First: represent text</h3><p>Turn each document into a row of numbers describing which words occur and how often.</p></article>
+          <article class="card"><h3>Then: learn patterns</h3><p>Use examples with known labels to estimate which categories and words tend to occur together.</p></article>
+          <article class="card"><h3>Finally: check mistakes</h3><p>Compare predictions with known answers. Accuracy alone may conceal costly errors.</p></article>
+        </div>
+      </section>
+
+      <section id="foundations">
+        <h2>2. Classification basics</h2>
+        <h3>Learning from labeled examples</h3>
+        <p><strong>Supervised learning</strong> means learning from examples that already have answers. For instance, a training set might contain thousands of emails, each marked “spam” or “not spam.” The inputs are the emails; the known labels are the answers the model is learning to predict.</p>
+        <p>The computer learns a rule, often written <code>f(x) → y</code>: take input <code>x</code> and return a prediction <code>y</code>. Once learned, the rule can be used on a new email whose label is not yet known.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Task</th><th>What is predicted?</th><th>Everyday example</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Classification</strong></td><td>A category (discrete label)</td><td>Spam or not spam; positive or negative review; one of ten handwritten digits</td></tr>
+              <tr><td><strong>Regression</strong></td><td>A number on a continuous scale</td><td>Apartment rent from its size and number of bedrooms</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>How do words become numbers?</h3>
+        <p>A common starting point is a <strong>bag-of-words</strong> representation. Build a vocabulary of the words seen in the data, then record each document using those vocabulary features. A <strong>document-term matrix</strong> has one row per document and one column per word or feature. Its entries can be word counts or weighted values such as TF-IDF.</p>
+        <div class="callout"><strong>Analogy:</strong> imagine a checklist with one column for “refund,” one for “winner,” and one for “meeting.” An email’s row records how often each word appears. The label (spam/not spam) is stored separately for training.</div>
+        <p>Bag-of-words mostly forgets word order. “Dog bites person” and “person bites dog” can look very similar if they contain the same words. This simple representation is useful, but it loses grammar and context.</p>
+        <div class="callout memory"><strong>Memory cue:</strong> classification chooses a <em>class</em>; regression estimates a <em>number</em>.</div>
+      </section>
+
+      <section id="bayes">
+        <h2>3. Naive Bayes: classify by combining clues</h2>
+        <p><strong>Naive Bayes</strong> is a probabilistic classifier. It estimates which label is most plausible by combining (1) how common that label is overall and (2) how likely the observed words are under that label.</p>
+        <h3>Bayes’ rule in everyday language</h3>
+        <div class="formula" role="math" aria-label="Probability of label given words is proportional to the probability of the words given the label times the prior probability of the label">
+          P(label | words) ∝ P(words | label) × P(label)
+        </div>
+        <div class="grid">
+          <article class="card"><h3>Prior: P(label)</h3><p>How common is this category before seeing this particular message? If 60 of 100 training reviews are positive, the positive prior is 0.60.</p></article>
+          <article class="card"><h3>Likelihood: P(words | label)</h3><p>How often do these words appear in examples with this category? “Excellent” may be more likely in positive reviews than negative ones.</p></article>
+          <article class="card"><h3>Posterior: P(label | words)</h3><p>After considering the words, how plausible is the category? The model compares this score across possible labels.</p></article>
+        </div>
+        <p>Bayes’ rule also includes <code>P(words)</code>, the overall probability of seeing the words. For a single document being compared across labels, this denominator is the same for each candidate label. So we can compare the numerators—likelihood times prior—without calculating that shared denominator.</p>
+
+        <h3>Why “naive”?</h3>
+        <p>The method makes a simplifying assumption: <strong>given the label, each feature is treated as independent of the others</strong>. In a positive review, the model acts as though seeing “great” tells it nothing extra about whether “movie” will appear, once the category is known. Real language does not work so independently, which is why the assumption is called naive.</p>
+        <p>This shortcut turns a complicated probability for a whole document into a product of simpler word probabilities:</p>
+        <div class="formula" role="math" aria-label="Probability of all words given a label is approximated as the product of each word probability given the label">
+          P(words₁, words₂, … | label) ≈ P(words₁ | label) × P(words₂ | label) × …
+        </div>
+
+        <h3>Worked example: a tiny review sorter</h3>
+        <p><em>Illustrative toy counts for learning—not results measured by the course.</em> Imagine 100 labeled reviews: 60 positive and 40 negative. In a small vocabulary, suppose the word “nice” appears 30 times among positive words and 5 times among negative words; “helpful” appears 20 and 7 times, respectively. Suppose the class totals are 52 positive word tokens and 37 negative word tokens. To avoid giving unseen words a probability of zero, use add-one (Laplace) smoothing for this illustration.</p>
+        <p>For a review containing “nice helpful,” compare:</p>
+        <div class="formula">
+          Positive score = 0.60 × P(nice | positive) × P(helpful | positive)<br>
+          Negative score = 0.40 × P(nice | negative) × P(helpful | negative)
+        </div>
+        <p>With a three-word vocabulary, the smoothed estimates are:</p>
+        <div class="formula">
+          P(nice | positive) = (30 + 1) / (52 + 3) = 31/55<br>
+          P(helpful | positive) = (20 + 1) / (52 + 3) = 21/55<br>
+          P(nice | negative) = (5 + 1) / (37 + 3) = 6/40<br>
+          P(helpful | negative) = (7 + 1) / (37 + 3) = 8/40
+        </div>
+        <p>The positive score is about 0.130; the negative score is 0.012. Since the positive score is larger, the toy classifier predicts <strong>positive</strong>. These are unnormalized comparison scores, not final probabilities that must add to 1.</p>
+        <div class="callout caution"><strong>Zero-count caution:</strong> without smoothing, one word never seen in a class can make the entire product zero. Add-one smoothing is a common fix for count-based Naive Bayes, although the lecture slides focus on the underlying count-based likelihood idea.</div>
+
+        <h3>Generative versus discriminative models</h3>
+        <p>Naive Bayes is called <strong>generative</strong> because it models how features might arise within each class (the class prior and the class-conditional word distribution). A <strong>discriminative</strong> model, such as logistic regression, focuses more directly on predicting the label from the features or separating one class from another. Both can be used to classify; they learn in different ways.</p>
+        <div class="callout memory"><strong>Memory cue:</strong> Naive Bayes asks, “If this were a positive review, how likely are these words?” Then it asks the same for the negative class and compares.</div>
+        <div class="grid">
+          <article class="card"><h3>Strengths</h3><ul><li>Simple and quick to train from counts.</li><li>A useful baseline for text tasks such as spam detection and sentiment.</li><li>Can work well even though its independence assumption is imperfect.</li></ul></article>
+          <article class="card"><h3>Limitations</h3><ul><li>Bag-of-words may discard word order and meaning in context.</li><li>Word-independence is an approximation, not a fact about language.</li><li>Unseen words need careful handling, commonly with smoothing.</li></ul></article>
+        </div>
+      </section>
+
+      <section id="evaluation">
+        <h2>4. Evaluation: understand the kinds of mistakes</h2>
+        <p>A model should be checked on examples that were not used to fit it. Compare its predictions with the known correct labels. A <strong>confusion matrix</strong> organizes those comparisons: rows show the actual class, columns show the predicted class, and the diagonal contains correct predictions. Off-diagonal cells show which categories are being confused.</p>
+        <h3>Binary classification and the “positive” class</h3>
+        <p>For two categories, choose which one counts as <em>positive</em> for the question at hand. In a spam filter, “spam” could be positive; in a disease-screening example, “disease present” could be positive. This choice determines the names of the error types.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th></th><th>Predicted positive</th><th>Predicted negative</th></tr></thead>
+            <tbody>
+              <tr><th>Actually positive</th><td><strong>True positive (TP)</strong><br>Correctly found a positive case</td><td><strong>False negative (FN)</strong><br>Missed a positive case</td></tr>
+              <tr><th>Actually negative</th><td><strong>False positive (FP)</strong><br>False alarm</td><td><strong>True negative (TN)</strong><br>Correctly rejected a negative case</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout"><strong>Example:</strong> if “spam” is positive, a legitimate email wrongly sent to spam is a false positive. A spam email that reaches the inbox is a false negative.</div>
+        <h3>Four useful measures</h3>
+        <div class="grid">
+          <article class="card"><h3>Accuracy</h3><p><code>(TP + TN) / all examples</code></p><p>“What fraction of all predictions were correct?”</p></article>
+          <article class="card"><h3>Precision</h3><p><code>TP / (TP + FP)</code></p><p>“Of the items called positive, how many really were positive?” High precision means fewer false alarms.</p></article>
+          <article class="card"><h3>Recall (sensitivity)</h3><p><code>TP / (TP + FN)</code></p><p>“Of all actual positives, how many did we find?” High recall means fewer missed positives.</p></article>
+          <article class="card"><h3>Specificity</h3><p><code>TN / (TN + FP)</code></p><p>“Of all actual negatives, how many did we correctly leave negative?”</p></article>
+        </div>
+        <p>The <strong>F1 score</strong> combines precision and recall using their harmonic mean: <code>2 × precision × recall / (precision + recall)</code>. It is useful when both kinds of performance matter, but it does not replace understanding the application’s costs.</p>
+        <div class="callout memory"><strong>Memory cue:</strong> precision starts with the model’s positive <em>predictions</em>; recall starts with the actual positive <em>cases</em>.</div>
+
+        <h3>Why accuracy can fool you</h3>
+        <p>Suppose only 1 out of 100 transactions is fraudulent. A model that always predicts “legitimate” gets 99% accuracy—but it catches no fraud at all. Accuracy summarizes the count of correct answers; it does not tell you which mistakes happened or how costly they are.</p>
+        <p>In health screening, missing a real case (false negative) may be especially costly. In spam filtering, flagging an important legitimate message (false positive) may be especially costly. Choose measures with the real consequence in mind.</p>
+
+        <h3>ROC curve and AUC</h3>
+        <p>Many classifiers produce a score, then classify as positive only if the score passes a chosen <strong>threshold</strong>. Raising or lowering that threshold changes the balance between catching positive examples and generating false alarms.</p>
+        <ul>
+          <li><strong>True positive rate (TPR)</strong>, also recall: <code>TP / (TP + FN)</code>.</li>
+          <li><strong>False positive rate (FPR)</strong>: <code>FP / (FP + TN)</code>.</li>
+          <li>A <strong>ROC curve</strong> plots TPR against FPR as the threshold changes.</li>
+          <li><strong>AUC</strong> is the area under that curve; it summarizes ranking performance across thresholds.</li>
+        </ul>
+        <div class="callout caution"><strong>Do not stop at AUC.</strong> A single summary can hide poor performance in the region or at the operating threshold that matters to you. Inspect the confusion matrix and the relevant precision/recall or false-alarm behavior too.</div>
+      </section>
+
+      <section id="workflow">
+        <h2>5. Put the ideas together</h2>
+        <ol>
+          <li><strong>Collect labeled examples.</strong> For example, emails marked by people as spam or legitimate.</li>
+          <li><strong>Convert the text into features.</strong> Build a vocabulary and represent each email as word counts or another numeric representation.</li>
+          <li><strong>Fit the classifier on training examples.</strong> Naive Bayes estimates class priors and word likelihoods from the labeled data.</li>
+          <li><strong>Predict labels for new examples.</strong> Compare a score for each candidate category.</li>
+          <li><strong>Evaluate on held-out examples.</strong> Make a confusion matrix and choose metrics that reflect the cost of mistakes.</li>
+          <li><strong>Improve and re-check.</strong> Adjust the representation, model, or decision threshold, then evaluate again on appropriate data.</li>
+        </ol>
+        <div class="callout memory"><strong>One-line recap:</strong> turn words into features, learn label-specific word patterns, predict the most plausible label, and inspect what the model gets wrong.</div>
+      </section>
+
+      <section id="self-check">
+        <h2>6. Self-check: explain it in your own words</h2>
+        <details>
+          <summary>1. A model predicts whether a review is positive or negative. Is this classification or regression?</summary>
+          <p>Classification: the output is a category. Predicting a star rating such as 4.2 would instead be a numerical regression task if treated as a continuous value.</p>
+        </details>
+        <details>
+          <summary>2. In Naive Bayes, what is the prior and what is the likelihood?</summary>
+          <p>The prior is how common a label is before examining the particular document. The likelihood is how probable the observed words are if that label is true.</p>
+        </details>
+        <details>
+          <summary>3. What does the “naive” assumption say?</summary>
+          <p>It treats features (such as word counts) as conditionally independent given the class label, allowing the joint word probability to be approximated by multiplying individual probabilities.</p>
+        </details>
+        <details>
+          <summary>4. A spam filter misses spam and lets it into the inbox. What kind of error is this?</summary>
+          <p>If spam is the positive class, this is a false negative: the actual example is positive, but the prediction is negative.</p>
+        </details>
+        <details>
+          <summary>5. Which answers this question: “Of the actual positive cases, what fraction did we find?”</summary>
+          <p>Recall (also called sensitivity): <code>TP / (TP + FN)</code>.</p>
+        </details>
+        <details>
+          <summary>6. Why might 99% accuracy still be poor?</summary>
+          <p>If positives are rare, a model can get high accuracy by predicting the common negative class every time. It may still miss every positive case, so inspect class-specific metrics and the confusion matrix.</p>
+        </details>
+      </section>
+
+
+    </main>
+    <footer>
+      <p><strong>Quick recall:</strong> classification = choose a category; Naive Bayes = prior × word likelihoods; evaluation = inspect the errors, not just the accuracy.</p>
+    </footer>
+  </div>
+</body>
+</html>

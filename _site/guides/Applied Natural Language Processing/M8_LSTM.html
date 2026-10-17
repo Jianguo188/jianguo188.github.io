@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/assets/css/folder-nav.css">
+
+<title>LSTM & Attention — Beginner Study Guide</title>
+<style>
+  :root {
+    --bg: #f8f9fa;
+    --card: #ffffff;
+    --text: #1a1a2e;
+    --text-light: #555;
+    --accent: #4361ee;
+    --accent-light: #eef2ff;
+    --green: #2d9d6f;
+    --green-light: #e8f7f0;
+    --orange: #e8703a;
+    --orange-light: #fff3ed;
+    --purple: #7b2cbf;
+    --purple-light: #f5edff;
+    --border: #e0e0e0;
+    --shadow: 0 2px 12px rgba(0,0,0,0.06);
+    --shadow-lg: 0 8px 30px rgba(0,0,0,0.10);
+    --radius: 14px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  /* ===== HERO ===== */
+  .hero {
+    background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 50%, #7b2cbf 100%);
+    color: #fff;
+    padding: 60px 20px 50px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top:0; left:0; right:0; bottom:0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='1.5' fill='rgba(255,255,255,0.15)'/%3E%3C/svg%3E");
+  }
+  .hero-content { position: relative; z-index:1; max-width: 800px; margin: 0 auto; }
+  .hero h1 { font-size: 2.4rem; margin-bottom: 12px; letter-spacing: -0.5px; }
+  .hero p { font-size: 1.15rem; opacity: 0.9; max-width: 600px; margin: 0 auto; }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 6px 18px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    margin-top: 30px;
+    flex-wrap: wrap;
+  }
+  .hero-stat { text-align: center; }
+  .hero-stat .num { font-size: 1.8rem; font-weight: 800; }
+  .hero-stat .label { font-size: 0.8rem; opacity: 0.8; }
+
+  /* ===== NAV ===== */
+  .toc {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: var(--shadow);
+  }
+  .toc-inner {
+    max-width: 900px; margin: 0 auto;
+    display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+  }
+  .toc a {
+    text-decoration: none;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+  .toc a:hover { background: var(--accent-light); color: var(--accent); }
+
+  /* ===== LAYOUT ===== */
+  .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+
+  /* ===== SECTION ===== */
+  .section {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 30px;
+    overflow: hidden;
+  }
+  .section-header {
+    padding: 30px 30px 20px;
+    border-bottom: 2px solid var(--border);
+  }
+  .section-num {
+    display: inline-block;
+    width: 36px; height: 36px;
+    line-height: 36px;
+    text-align: center;
+    border-radius: 50%;
+    font-weight: 800;
+    font-size: 0.9rem;
+    margin-right: 12px;
+    vertical-align: middle;
+  }
+  .section-header h2 { font-size: 1.5rem; display: inline; vertical-align: middle; }
+  .section-header .subtitle { color: var(--text-light); font-size: 0.95rem; margin-top: 8px; margin-left: 48px; }
+  .section-body { padding: 30px; }
+
+  /* ===== CARDS ===== */
+  .concept-card {
+    background: var(--bg);
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--accent);
+  }
+  .concept-card h3 {
+    font-size: 1.15rem;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+  .concept-card p { color: var(--text-light); margin-bottom: 10px; }
+
+  /* analogy box */
+  .analogy {
+    background: var(--green-light);
+    border-left: 4px solid var(--green);
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin: 16px 0;
+  }
+  .analogy .label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--green);
+    margin-bottom: 6px;
+  }
+  .analogy p { color: var(--text); margin: 0; }
+
+  /* example box */
+  .example {
+    background: var(--orange-light);
+    border-left: 4px solid var(--orange);
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin: 16px 0;
+  }
+  .example .label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--orange);
+    margin-bottom: 6px;
+  }
+  .example p, .example ul { color: var(--text); margin: 0; }
+  .example ul { padding-left: 20px; margin-top: 6px; }
+
+  /* tip box */
+  .tip {
+    background: var(--purple-light);
+    border-left: 4px solid var(--purple);
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin: 16px 0;
+  }
+  .tip .label {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--purple);
+    margin-bottom: 6px;
+  }
+  .tip p { color: var(--text); margin: 0; }
+
+  /* ===== GATE CARDS ===== */
+  .gate-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .gate-card {
+    border-radius: 10px;
+    padding: 20px;
+    border: 2px solid;
+  }
+  .gate-card .gate-icon { font-size: 1.5rem; margin-bottom: 8px; }
+  .gate-card h4 { font-size: 1.05rem; margin-bottom: 8px; }
+  .gate-card p { font-size: 0.9rem; color: var(--text-light); margin: 0; }
+  .gate-forget { background: #fff5f5; border-color: #ff6b6b; }
+  .gate-input  { background: #f0fff4; border-color: #2d9d6f; }
+  .gate-cell   { background: #fffaf0; border-color: #f0a500; }
+  .gate-output { background: #f0f4ff; border-color: #4361ee; }
+
+  /* ===== MATH STEPS (replaces dark formula boxes) ===== */
+  .math-block {
+    margin: 20px 0;
+  }
+  .math-step {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 10px;
+    padding: 0;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .math-step-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    background: var(--accent-light);
+    border-bottom: 1px solid var(--border);
+  }
+  .math-step-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .math-step-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .math-eq {
+    padding: 14px 18px;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 1.05rem;
+    line-height: 2;
+    color: var(--text);
+    background: #fafafe;
+    overflow-x: auto;
+  }
+  .math-eq .var { color: var(--accent); font-weight: 600; }
+  .math-eq .fn { color: var(--orange); font-weight: 600; }
+  .math-eq .op { color: var(--purple); font-weight: 600; }
+  .math-note {
+    padding: 8px 18px 14px;
+    font-size: 0.88rem;
+    color: var(--text-light);
+    line-height: 1.6;
+  }
+  .math-note strong { color: var(--text); }
+  .math-legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 10px 18px;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    font-size: 0.82rem;
+    color: var(--text-light);
+  }
+  .math-legend span { white-space: nowrap; }
+  .math-legend .key {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 3px;
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
+  /* color variants for steps */
+  .math-step.step-forget  { border-left-color: #ff6b6b; }
+  .math-step.step-forget  .math-step-header { background: #fff5f5; }
+  .math-step.step-forget  .math-step-badge  { background: #ff6b6b; }
+  .math-step.step-forget  .math-eq .var     { color: #ff6b6b; }
+
+  .math-step.step-input   { border-left-color: #2d9d6f; }
+  .math-step.step-input   .math-step-header { background: #f0fff4; }
+  .math-step.step-input   .math-step-badge  { background: #2d9d6f; }
+  .math-step.step-input   .math-eq .var      { color: #2d9d6f; }
+
+  .math-step.step-cell    { border-left-color: #f0a500; }
+  .math-step.step-cell    .math-step-header { background: #fffaf0; }
+  .math-step.step-cell    .math-step-badge  { background: #f0a500; }
+  .math-step.step-cell    .math-eq .var     { color: #e8950a; }
+
+  .math-step.step-output  { border-left-color: #4361ee; }
+  .math-step.step-output  .math-step-header { background: #eef2ff; }
+  .math-step.step-output  .math-step-badge  { background: #4361ee; }
+
+  .math-step.step-score   { border-left-color: #7b2cbf; }
+  .math-step.step-score   .math-step-header { background: #f5edff; }
+  .math-step.step-score   .math-step-badge  { background: #7b2cbf; }
+
+  .math-step.step-softmax { border-left-color: #e8703a; }
+  .math-step.step-softmax .math-step-header { background: #fff3ed; }
+  .math-step.step-softmax .math-step-badge  { background: #e8703a; }
+
+  .math-step.step-context { border-left-color: #2d9d6f; }
+  .math-step.step-context .math-step-header { background: #e8f7f0; }
+  .math-step.step-context .math-step-badge  { background: #2d9d6f; }
+
+  .math-step.step-decode  { border-left-color: #4361ee; }
+  .math-step.step-decode  .math-step-header { background: #eef2ff; }
+  .math-step.step-decode  .math-step-badge  { background: #4361ee; }
+
+  /* ===== TIMELINE ===== */
+  .timeline {
+    position: relative;
+    padding-left: 30px;
+    margin: 20px 0;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px; top: 0; bottom: 0;
+    width: 2px;
+    background: var(--border);
+  }
+  .timeline-item {
+    position: relative;
+    padding-bottom: 20px;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -26px; top: 4px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    background: #fff;
+  }
+  .timeline-item h4 { font-size: 1rem; margin-bottom: 4px; }
+  .timeline-item p { font-size: 0.9rem; color: var(--text-light); margin: 0; }
+
+  /* ===== TABLE ===== */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.9rem;
+  }
+  .compare-table th {
+    background: var(--accent);
+    color: #fff;
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+  }
+  .compare-table th:first-child { border-radius: 8px 0 0 0; }
+  .compare-table th:last-child  { border-radius: 0 8px 0 0; }
+  .compare-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .compare-table tr:nth-child(even) td { background: var(--bg); }
+
+  /* ===== QUIZ ===== */
+  .quiz {
+    background: linear-gradient(135deg, #eef2ff, #f5edff);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 24px 0;
+  }
+  .quiz h3 { margin-bottom: 16px; }
+  .quiz-q {
+    background: #fff;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid var(--border);
+  }
+  .quiz-q:hover { box-shadow: var(--shadow); }
+  .quiz-q .q-text { font-weight: 600; font-size: 0.95rem; }
+  .quiz-q .q-answer {
+    display: none;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    color: var(--green);
+    font-size: 0.9rem;
+  }
+  .quiz-q.open .q-answer { display: block; }
+
+  /* ===== SVG DIAGRAM ===== */
+  .diagram-container {
+    text-align: center;
+    margin: 20px 0;
+    overflow-x: auto;
+  }
+  .diagram-container svg { max-width: 100%; height: auto; }
+  .diagram-caption {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    margin-top: 8px;
+    font-style: italic;
+  }
+
+  /* ===== SUMMARY BOX ===== */
+  .key-takeaways {
+    background: linear-gradient(135deg, #4361ee, #7b2cbf);
+    color: #fff;
+    border-radius: 12px;
+    padding: 28px;
+    margin: 24px 0;
+  }
+  .key-takeaways h3 { margin-bottom: 14px; font-size: 1.1rem; }
+  .key-takeaways ul { list-style: none; padding: 0; }
+  .key-takeaways li {
+    padding: 6px 0;
+    padding-left: 24px;
+    position: relative;
+    font-size: 0.95rem;
+  }
+  .key-takeaways li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    font-weight: 800;
+  }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-light);
+    font-size: 0.85rem;
+  }
+  .footer a { color: var(--accent); text-decoration: none; }
+
+  /* ===== Mnemonic ===== */
+  .mnemonic {
+    display: flex;
+    gap: 12px;
+    margin: 16px 0;
+    flex-wrap: wrap;
+  }
+  .mnemonic-item {
+    flex: 1;
+    min-width: 120px;
+    background: #fff;
+    border: 2px dashed var(--accent);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+  .mnemonic-item .letter {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--accent);
+  }
+  .mnemonic-item .word {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+  .mnemonic-item .desc {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    margin-top: 4px;
+  }
+
+  @media (max-width: 600px) {
+    .gate-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.6rem; }
+    .hero-stats { gap: 16px; }
+    .section-body, .section-header { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+  
+
+
+  <details class="folder-nav folder-nav--floating">
+    <summary>Browse topics</summary>
+    <div class="folder-nav-panel">
+      <a class="folder-nav-home" href="/">All guides</a>
+      <ul>
+        
+          
+          <li><a href="/#category-1">Applied Natural Language Processing</a></li>
+        
+          
+          <li><a href="/#category-2">Data Analytics Business 2</a></li>
+        
+          
+          <li><a href="/#category-3">Data Analytics Business</a></li>
+        
+      </ul>
+    </div>
+  </details>
+
+
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="hero-content">
+    <span class="hero-badge">DEEP LEARNING · BEGINNER GUIDE</span>
+    <h1>LSTM & Attention Mechanism</h1>
+    <p>A plain-English study guide built from your course materials — no PhD required.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="num">3</div><div class="label">Lessons</div></div>
+      <div class="hero-stat"><div class="num">4</div><div class="label">LSTM Gates</div></div>
+      <div class="hero-stat"><div class="num">1</div><div class="label">Attention Mechanism</div></div>
+      <div class="hero-stat"><div class="num">15+</div><div class="label">Examples & Analogies</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TABLE OF CONTENTS ===== -->
+<nav class="toc">
+  <div class="toc-inner">
+    <a href="#lesson1">1. Why LSTM?</a>
+    <a href="#lesson2">2. The Four Gates</a>
+    <a href="#lesson3">3. GRU</a>
+    <a href="#lesson4">4. Encoder-Decoder</a>
+    <a href="#lesson5">5. Attention</a>
+    <a href="#quiz">Quick Quiz</a>
+    <a href="#cheatsheet">Cheat Sheet</a>
+  </div>
+</nav>
+
+<div class="container">
+
+<!-- ===== LESSON 1: WHY LSTM ===== -->
+<div class="section" id="lesson1">
+  <div class="section-header">
+    <span class="section-num" style="background:var(--accent-light); color:var(--accent);">1</span>
+    <h2>Why Do We Need LSTM?</h2>
+    <div class="subtitle">The problem with regular neural networks when processing sequences</div>
+  </div>
+  <div class="section-body">
+
+    <div class="concept-card">
+      <h3>The Problem: RNN Has a "Goldfish Memory"</h3>
+      <p>Regular Recurrent Neural Networks (RNNs) process words one at a time, passing a <strong>hidden state</strong> from one step to the next — like a game of telephone. The problem? If the sentence is long, the early words get "forgotten" by the time the network reaches the end.</p>
+
+      <div class="example">
+        <div class="label">Real Example from Your Course</div>
+        <p>"I was born in <strong>Japan</strong> and lived there for 10 years and then moved to the US. My native language is ____."</p>
+        <ul>
+          <li>The answer is <strong>Japanese</strong> — but it depends on remembering "Japan" from the start of the sentence.</li>
+          <li>An RNN, by the time it reaches the blank, has processed so many words that the signal from "Japan" has faded to almost zero.</li>
+          <li>This is called the <strong>vanishing gradient problem</strong>: during training, the error signal shrinks as it travels backward through many time steps.</li>
+        </ul>
+      </div>
+
+      <div class="analogy">
+        <div class="label">Analogy</div>
+        <p>Imagine reading a 500-page book and being asked "What color was the car on page 3?" You'd struggle too! RNN is like a reader who can only remember the last few paragraphs clearly. LSTM is like a reader who takes <em>notes</em> and can flip back to page 3 anytime.</p>
+      </div>
+    </div>
+
+    <div class="concept-card">
+      <h3>The Solution: LSTM = RNN + "Gates"</h3>
+      <p>Long Short-Term Memory (LSTM) fixes the memory problem by adding <strong>gates</strong> — think of them as smart valves that control what information flows through and what gets discarded. Instead of one hidden state, LSTM adds a <strong>cell state</strong> — a dedicated "memory highway" that runs straight through the entire sequence.</p>
+
+      <div class="diagram-container">
+        <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg">
+          <!-- RNN flow -->
+          <text x="20" y="25" font-size="13" font-weight="bold" fill="#555">Regular RNN (short memory):</text>
+          <rect x="60" y="40" width="80" height="40" rx="8" fill="#e8703a" opacity="0.8"/>
+          <text x="100" y="65" text-anchor="middle" fill="#fff" font-size="13" font-weight="bold">RNN</text>
+          <line x1="140" y1="60" x2="180" y2="60" stroke="#555" stroke-width="2" marker-end="url(#arr)"/>
+          <rect x="180" y="40" width="80" height="40" rx="8" fill="#e8703a" opacity="0.8"/>
+          <text x="220" y="65" text-anchor="middle" fill="#fff" font-size="13" font-weight="bold">RNN</text>
+          <line x1="260" y1="60" x2="300" y2="60" stroke="#555" stroke-width="2" marker-end="url(#arr)"/>
+          <rect x="300" y="40" width="80" height="40" rx="8" fill="#e8703a" opacity="0.4"/>
+          <text x="340" y="65" text-anchor="middle" fill="#fff" font-size="13" font-weight="bold">RNN</text>
+          <text x="100" y="100" text-anchor="middle" font-size="11" fill="#e8703a">"Japan"</text>
+          <text x="340" y="100" text-anchor="middle" font-size="11" fill="#aaa">faded</text>
+
+          <!-- LSTM flow -->
+          <text x="20" y="135" font-size="13" font-weight="bold" fill="#555">LSTM (long memory via cell state):</text>
+          <rect x="60" y="150" width="80" height="40" rx="8" fill="#4361ee"/>
+          <text x="100" y="175" text-anchor="middle" fill="#fff" font-size="13" font-weight="bold">LSTM</text>
+          <line x1="140" y1="170" x2="180" y2="170" stroke="#4361ee" stroke-width="3" marker-end="url(#arr2)"/>
+          <rect x="180" y="150" width="80" height="40" rx="8" fill="#4361ee"/>
+          <text x="220" y="175" text-anchor="middle" fill="#fff" font-size="13" font-weight="bold">LSTM</text>
+          <line x1="260" y1="170" x2="300" y2="170" stroke="#4361ee" stroke-width="3" marker-end="url(#arr2)"/>
+          <rect x="300" y="150" width="80" height="40" rx="8" fill="#4361ee"/>
+          <text x="340" y="175" text-anchor="middle" fill="#fff" font-size="13" font-weight="bold">LSTM</text>
+          <text x="100" y="205" text-anchor="middle" font-size="11" fill="#4361ee">"Japan" still remembered!</text>
+
+          <defs>
+            <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="#555"/>
+            </marker>
+            <marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="#4361ee"/>
+            </marker>
+          </defs>
+        </svg>
+        <div class="diagram-caption">RNN loses early information; LSTM preserves it via the cell state highway</div>
+      </div>
+    </div>
+
+    <div class="concept-card">
+      <h3>The Cell State: Your Memory Highway</h3>
+      <p>The most important part of LSTM is the <strong>cell state</strong> (written as <em>C_t</em>). Think of it as a conveyor belt that runs straight through the entire sequence. Information flows along it unchanged unless a gate specifically adds or removes something.</p>
+
+      <div class="analogy">
+        <div class="label">Analogy</div>
+        <p>The cell state is like a <strong>conveyor belt in a sushi restaurant</strong>: the sushi (information) keeps moving forward. The chef (gates) can add new sushi or remove old sushi at each station, but the belt itself never stops.</p>
+      </div>
+
+      <div class="math-block">
+        <div class="math-step">
+          <div class="math-step-header">
+            <span class="math-step-badge">Key Tool</span>
+            <span class="math-step-title">The Sigmoid Function — the "volume knob" of every gate</span>
+          </div>
+          <div class="math-eq">
+            <span class="fn">sigmoid</span>(x) &nbsp;=&nbsp; <span style="font-size:1.1rem;">1 / (1 + e<sup>-x</sup>)</span>
+          </div>
+          <div class="math-note">
+            Sigmoid squashes any number into the range <strong>0 to 1</strong>. This output acts like a slider:
+          </div>
+          <div class="math-legend">
+            <span><span class="key" style="background:#ff6b6b;"></span><strong>0</strong> = block everything (forget this info)</span>
+            <span><span class="key" style="background:#f0a500;"></span><strong>0.5</strong> = partially keep (mix old &amp; new)</span>
+            <span><span class="key" style="background:#2d9d6f;"></span><strong>1</strong> = let everything through (keep this info)</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="label">Memory Aid</div>
+        <p><strong>Sigmoid = Slider</strong>: think of it as a volume knob from 0 (mute) to 1 (full volume). Every gate uses a sigmoid to decide "how much" of something to keep.</p>
+      </div>
+    </div>
+
+    <div class="key-takeaways">
+      <h3>Key Takeaways — Lesson 1</h3>
+      <ul>
+        <li>RNN forgets early words in long sequences (vanishing gradient)</li>
+        <li>LSTM adds a cell state — a memory highway that carries info across all time steps</li>
+        <li>Gates (using sigmoid) control what enters, stays, and leaves the cell state</li>
+        <li>LSTM is the go-to model for any task involving time or sequence (text, speech, etc.)</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== LESSON 2: THE FOUR GATES ===== -->
+<div class="section" id="lesson2">
+  <div class="section-header">
+    <span class="section-num" style="background:var(--green-light); color:var(--green);">2</span>
+    <h2>Inside the LSTM: The Four Gates</h2>
+    <div class="subtitle">Forget, Input, Cell Update, and Output — each with a specific job</div>
+  </div>
+  <div class="section-body">
+
+    <p style="margin-bottom:20px; color:var(--text-light);">
+      An LSTM unit receives two inputs at each time step: the <strong>current word</strong> (x_t) and the <strong>hidden state from the previous step</strong> (h_t-1). It uses these to update its internal memory (cell state) and produce a new hidden state (h_t). Four gates work together to make this happen.
+    </p>
+
+    <div class="gate-grid">
+      <div class="gate-card gate-forget">
+        <div class="gate-icon">🗑️</div>
+        <h4>1. Forget Gate (F_t)</h4>
+        <p><strong>"What should I throw away?"</strong><br>Looks at the current word + previous hidden state, outputs 0–1 for each piece of the old cell state. 0 = delete, 1 = keep.</p>
+      </div>
+      <div class="gate-card gate-input">
+        <div class="gate-icon">📝</div>
+        <h4>2. Input Gate (I_t)</h4>
+        <p><strong>"What new info should I write down?"</strong><br>Decides which values to update. Uses sigmoid to pick what's important, and tanh to create candidate new values.</p>
+      </div>
+      <div class="gate-card gate-cell">
+        <div class="gate-icon">🔄</div>
+        <h4>3. Cell State Update</h4>
+        <p><strong>"Combine old and new."</strong><br>Multiply old state by forget gate (drop some), then add the new candidate weighted by input gate.</p>
+      </div>
+      <div class="gate-card gate-output">
+        <div class="gate-icon">📤</div>
+        <h4>4. Output Gate (O_t)</h4>
+        <p><strong>"What should I tell the next step?"</strong><br>Decides what part of the cell state becomes the new hidden state, which is used for predictions and passed forward.</p>
+      </div>
+    </div>
+
+    <div class="analogy">
+      <div class="label">Analogy: The Notebook</div>
+      <p>Imagine maintaining a notebook while reading a story:</p>
+      <ul style="margin-top:8px; padding-left:20px;">
+        <li><strong>Forget Gate</strong> = Erasing outdated notes (crossing out "it's morning" when the story moves to evening)</li>
+        <li><strong>Input Gate</strong> = Writing down new important details (a character's name just revealed)</li>
+        <strong>Cell State</strong> = The notebook itself (continuously updated)
+        <li><strong>Output Gate</strong> = Deciding what to say aloud right now (summarizing the current situation)</li>
+      </ul>
+    </div>
+
+    <div class="concept-card">
+      <h3>The Math — Simplified</h3>
+      <p>Don't panic! Here's the step-by-step with plain labels. Each step is just multiply or add.</p>
+
+      <div class="math-block">
+        <p style="font-size:0.88rem; color:var(--text-light); margin-bottom:14px;">
+          Each step uses the same two inputs: <strong>current word (x_t)</strong> and <strong>previous hidden state (h_t-1)</strong>.
+          The "W" and "b" are learned weights and biases — the model's parameters it adjusts during training.
+        </p>
+
+        <!-- Step 1: Forget -->
+        <div class="math-step step-forget">
+          <div class="math-step-header">
+            <span class="math-step-badge">Step 1</span>
+            <span class="math-step-title">Forget Gate — "What should I erase?"</span>
+          </div>
+          <div class="math-eq">
+            <span class="var">f_t</span> &nbsp;=&nbsp; <span class="fn">sigmoid</span>( W_f &middot; [<span class="var">h_t-1</span>, &nbsp;<span class="var">x_t</span>] + b_f )
+          </div>
+          <div class="math-note">
+            Output is <strong>0 to 1</strong> for each cell. <strong>0</strong> = delete this info from memory. <strong>1</strong> = keep it as-is.
+          </div>
+        </div>
+
+        <!-- Step 2: Input -->
+        <div class="math-step step-input">
+          <div class="math-step-header">
+            <span class="math-step-badge">Step 2</span>
+            <span class="math-step-title">Input Gate — "What new info should I write?"</span>
+          </div>
+          <div class="math-eq">
+            <span class="var">i_t</span> &nbsp;=&nbsp; <span class="fn">sigmoid</span>( W_i &middot; [<span class="var">h_t-1</span>, &nbsp;<span class="var">x_t</span>] + b_i )<br>
+            <span class="var">c&tilde;_t</span> &nbsp;=&nbsp; <span class="fn">tanh</span>( W_c &middot; [<span class="var">h_t-1</span>, &nbsp;<span class="var">x_t</span>] + b_c )
+          </div>
+          <div class="math-note">
+            <strong>i_t</strong> decides <em>which</em> values to update (0 = skip, 1 = update).<br>
+            <strong>c&tilde;_t</strong> generates the <em>candidate</em> new values, scaled between <strong>-1 and +1</strong>.
+          </div>
+        </div>
+
+        <!-- Step 3: Cell State Update -->
+        <div class="math-step step-cell">
+          <div class="math-step-header">
+            <span class="math-step-badge">Step 3</span>
+            <span class="math-step-title">Update Cell State — "Combine old and new"</span>
+          </div>
+          <div class="math-eq">
+            <span class="var">C_t</span> &nbsp;=&nbsp; ( <span class="var">f_t</span> <span class="op">&times;</span> <span class="var">C_t-1</span> ) &nbsp;+&nbsp; ( <span class="var">i_t</span> <span class="op">&times;</span> <span class="var">c&tilde;_t</span> )
+          </div>
+          <div class="math-note">
+            <strong>Left side</strong> (f_t &times; C_t-1): erase some old memory using the forget gate.<br>
+            <strong>Right side</strong> (i_t &times; c&tilde;_t): write in some new memory using the input gate.<br>
+            Add them together &rarr; that's your updated notebook!
+          </div>
+        </div>
+
+        <!-- Step 4: Output -->
+        <div class="math-step step-output">
+          <div class="math-step-header">
+            <span class="math-step-badge">Step 4</span>
+            <span class="math-step-title">Output Gate — "What do I pass to the next step?"</span>
+          </div>
+          <div class="math-eq">
+            <span class="var">o_t</span> &nbsp;=&nbsp; <span class="fn">sigmoid</span>( W_o &middot; [<span class="var">h_t-1</span>, &nbsp;<span class="var">x_t</span>] + b_o )<br>
+            <span class="var">h_t</span> &nbsp;=&nbsp; <span class="var">o_t</span> <span class="op">&times;</span> <span class="fn">tanh</span>( <span class="var">C_t</span> )
+          </div>
+          <div class="math-note">
+            <strong>o_t</strong> decides which parts of the cell state to output.<br>
+            <strong>h_t</strong> is the new hidden state &mdash; passed to the next time step <em>and</em> used for predictions.
+          </div>
+        </div>
+
+        <div class="math-legend" style="border:1px solid var(--border); border-radius:8px; margin-top:10px;">
+          <span><span class="key" style="background:var(--accent);"></span><strong>Blue</strong> = variables</span>
+          <span><span class="key" style="background:var(--orange);"></span><strong>Orange</strong> = functions (sigmoid, tanh)</span>
+          <span><span class="key" style="background:var(--purple);"></span><strong>Purple</strong> = operations (&times;, +)</span>
+          <span>W = weight matrix &nbsp;|&nbsp; b = bias &nbsp;|&nbsp; &middot; = matrix multiply</span>
+        </div>
+      </div>
+
+      <div class="tip">
+        <div class="label">Memory Aid: FICO</div>
+        <p>Remember the gate order: <strong>F</strong>orget → <strong>I</strong>nput → <strong>C</strong>ell update → <strong>O</strong>utput. Like the credit score "FICO" — appropriate, because LSTM is all about scoring what's worth remembering!</p>
+      </div>
+    </div>
+
+    <div class="concept-card">
+      <h3>What Does Each Gate See?</h3>
+
+      <div class="example">
+        <div class="label">Worked Example</div>
+        <p>Sentence: <em>"I was born in Japan and moved to the US."</em></p>
+        <p style="margin-top:8px;">When the LSTM processes the word <strong>"US"</strong>:</p>
+        <ul>
+          <li><strong>Forget gate</strong> might partially forget "born" (less relevant now), but keep "Japan" (still important for the native language question)</li>
+          <li><strong>Input gate</strong> records "US" as a new location fact</li>
+          <li><strong>Cell state</strong> now holds: "person born in Japan, now in US"</li>
+          <li><strong>Output gate</strong> passes a hidden state that encodes the current context</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="key-takeaways">
+      <h3>Key Takeaways — Lesson 2</h3>
+      <ul>
+        <li>Four gates: Forget (erase), Input (write), Cell State (the notebook), Output (speak)</li>
+        <li>Every gate uses the same inputs: current word (x_t) + previous hidden state (h_t-1)</li>
+        <li>Sigmoid (0–1) controls "how much"; tanh (-1 to +1) generates "what values"</li>
+        <li>The cell state is updated by: old × forget + new × input</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== LESSON 3: GRU ===== -->
+<div class="section" id="lesson3">
+  <div class="section-header">
+    <span class="section-num" style="background:var(--orange-light); color:var(--orange);">3</span>
+    <h2>GRU — The Streamlined Cousin</h2>
+    <div class="subtitle">Gated Recurrent Unit: fewer gates, faster training, similar results</div>
+  </div>
+  <div class="section-body">
+
+    <div class="concept-card">
+      <h3>What is GRU?</h3>
+      <p>GRU (Gated Recurrent Unit) is a simplified version of LSTM. It merges some gates together to reduce complexity, making it <strong>faster to train</strong> while still solving the same memory problem.</p>
+
+      <div class="analogy">
+        <div class="label">Analogy</div>
+        <p>If LSTM is a Swiss Army knife with 4 tools, GRU is a pocket knife with 2 tools. For most everyday tasks, the pocket knife is enough — and it's lighter to carry.</p>
+      </div>
+    </div>
+
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>LSTM</th>
+          <th>GRU</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Number of gates</td>
+          <td>3 (Forget, Input, Output) + Cell State</td>
+          <td>2 (Update, Reset)</td>
+        </tr>
+        <tr>
+          <td>Separate cell state?</td>
+          <td>Yes (C_t)</td>
+          <td>No — uses hidden state only</td>
+        </tr>
+        <tr>
+          <td>Update gate</td>
+          <td>Forget + Input (separate)</td>
+          <td>Combined into one "update" gate</td>
+        </tr>
+        <tr>
+          <td>Reset gate</td>
+          <td>Output gate</td>
+          <td>"Reset" gate decides how much past to forget</td>
+        </tr>
+        <tr>
+          <td>Training speed</td>
+          <td>Slower (more parameters)</td>
+          <td>Faster (fewer tensor operations)</td>
+        </tr>
+        <tr>
+          <td>Best for</td>
+          <td>Very long sequences, complex patterns</td>
+          <td>Shorter sequences, when speed matters</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tip">
+      <div class="label">Rule of Thumb</div>
+      <p>Start with GRU for quick experiments (it trains faster). Switch to LSTM if your sequences are very long or the model isn't capturing long-range dependencies well.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== LESSON 4: ENCODER-DECODER ===== -->
+<div class="section" id="lesson4">
+  <div class="section-header">
+    <span class="section-num" style="background:var(--purple-light); color:var(--purple);">4</span>
+    <h2>Encoder-Decoder Architecture</h2>
+    <div class="subtitle">How LSTM is used for translation: read in one language, write in another</div>
+  </div>
+  <div class="section-body">
+
+    <div class="concept-card">
+      <h3>The Two-Part Design</h3>
+      <p>For tasks like translation, we need to <strong>read</strong> a sequence in one language and <strong>write</strong> it in another. This calls for a two-part architecture:</p>
+
+      <div class="diagram-container">
+        <svg viewBox="0 0 700 180" xmlns="http://www.w3.org/2000/svg">
+          <!-- Encoder -->
+          <text x="40" y="25" font-size="13" font-weight="bold" fill="#4361ee">ENCODER (reads input)</text>
+          <rect x="20" y="35" width="60" height="40" rx="8" fill="#4361ee" opacity="0.8"/>
+          <text x="50" y="60" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">LSTM</text>
+          <text x="50" y="90" text-anchor="middle" font-size="10" fill="#4361ee">"How"</text>
+          <rect x="90" y="35" width="60" height="40" rx="8" fill="#4361ee" opacity="0.8"/>
+          <text x="120" y="60" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">LSTM</text>
+          <text x="120" y="90" text-anchor="middle" font-size="10" fill="#4361ee">"are"</text>
+          <rect x="160" y="35" width="60" height="40" rx="8" fill="#4361ee" opacity="0.8"/>
+          <text x="190" y="60" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">LSTM</text>
+          <text x="190" y="90" text-anchor="middle" font-size="10" fill="#4361ee">"you"</text>
+          <line x1="50" y1="75" x2="50" y2="35" stroke="#4361ee" stroke-width="2"/>
+          <line x1="120" y1="75" x2="120" y2="35" stroke="#4361ee" stroke-width="2"/>
+          <line x1="190" y1="75" x2="190" y2="35" stroke="#4361ee" stroke-width="2"/>
+          <line x1="80" y1="55" x2="90" y2="55" stroke="#4361ee" stroke-width="2" marker-end="url(#e1)"/>
+          <line x1="150" y1="55" x2="160" y2="55" stroke="#4361ee" stroke-width="2" marker-end="url(#e1)"/>
+
+          <!-- Context vector C -->
+          <line x1="220" y1="55" x2="280" y2="55" stroke="#e8703a" stroke-width="3" stroke-dasharray="6,3" marker-end="url(#e2)"/>
+          <circle cx="250" cy="55" r="18" fill="#e8703a"/>
+          <text x="250" y="60" text-anchor="middle" fill="#fff" font-size="13" font-weight="bold">C</text>
+          <text x="250" y="90" text-anchor="middle" font-size="9" fill="#e8703a">context vector</text>
+
+          <!-- Decoder -->
+          <text x="330" y="25" font-size="13" font-weight="bold" fill="#7b2cbf">DECODER (writes output)</text>
+          <rect x="310" y="35" width="60" height="40" rx="8" fill="#7b2cbf" opacity="0.8"/>
+          <text x="340" y="60" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">LSTM</text>
+          <text x="340" y="90" text-anchor="middle" font-size="10" fill="#7b2cbf">"Jak"</text>
+          <rect x="380" y="35" width="60" height="40" rx="8" fill="#7b2cbf" opacity="0.8"/>
+          <text x="410" y="60" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">LSTM</text>
+          <text x="410" y="90" text-anchor="middle" font-size="10" fill="#7b2cbf">"sie"</text>
+          <rect x="450" y="35" width="60" height="40" rx="8" fill="#7b2cbf" opacity="0.8"/>
+          <text x="480" y="60" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">LSTM</text>
+          <text x="480" y="90" text-anchor="middle" font-size="10" fill="#7b2cbf">"masz?"</text>
+          <line x1="340" y1="75" x2="340" y2="35" stroke="#7b2cbf" stroke-width="2"/>
+          <line x1="410" y1="75" x2="410" y2="35" stroke="#7b2cbf" stroke-width="2"/>
+          <line x1="480" y1="75" x2="480" y2="35" stroke="#7b2cbf" stroke-width="2"/>
+          <line x1="370" y1="55" x2="380" y2="55" stroke="#7b2cbf" stroke-width="2" marker-end="url(#e3)"/>
+          <line x1="440" y1="55" x2="450" y2="55" stroke="#7b2cbf" stroke-width="2" marker-end="url(#e3)"/>
+
+          <defs>
+            <marker id="e1" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#4361ee"/></marker>
+            <marker id="e2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#e8703a"/></marker>
+            <marker id="e3" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#7b2cbf"/></marker>
+          </defs>
+        </svg>
+        <div class="diagram-caption">Encoder reads "How are you?" → context vector C → Decoder writes "Jak sie masz?"</div>
+      </div>
+
+      <div class="analogy">
+        <div class="label">Analogy</div>
+        <p>The encoder is like a <strong>stenographer</strong> at a meeting — listens to the full input and compresses it into a summary (context vector C). The decoder is like a <strong>translator</strong> who reads only that summary and writes the output language.</p>
+      </div>
+    </div>
+
+    <div class="concept-card">
+      <h3>The Problem: Information Bottleneck</h3>
+      <p>The encoder must compress the <em>entire</em> input sequence into a <strong>single vector C</strong>. If the input is long, this becomes a bottleneck — too much information squeezed into too small a space. The decoder then has to work from this lossy summary alone.</p>
+
+      <div class="example">
+        <div class="label">Example</div>
+        <p>Translating a 20-word sentence: the encoder must stuff all 20 words' meaning into one fixed-size vector. The decoder then unpacks it word by word. Early words in the decoder can't "look back" at specific input words — it only sees the compressed summary.</p>
+      </div>
+
+      <div class="tip">
+        <div class="label">The Fix → Attention (next section)</div>
+        <p>Instead of forcing everything through one vector, what if the decoder could "pay attention" to all the encoder's hidden states and pick the most relevant ones for each output word? That's exactly what Attention does.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== LESSON 5: ATTENTION ===== -->
+<div class="section" id="lesson5">
+  <div class="section-header">
+    <span class="section-num" style="background:var(--orange-light); color:var(--orange);">5</span>
+    <h2>Attention Mechanism</h2>
+    <div class="subtitle">Letting the decoder "look back" at every word — not just the summary</div>
+  </div>
+  <div class="section-body">
+
+    <div class="concept-card">
+      <h3>The Core Idea</h3>
+      <p>Without attention, the decoder only sees the <strong>final</strong> encoder output (one compressed vector). With attention, the decoder can look at <strong>every</strong> encoder hidden state and decide which ones are most relevant for the current word it's translating.</p>
+
+      <div class="analogy">
+        <div class="label">Analogy</div>
+        <p>Without attention: you read a whole book, then try to answer questions from memory alone. <br>With attention: you can flip back to <em>any page</em> and re-read the relevant paragraph before answering each question.</p>
+      </div>
+    </div>
+
+    <div class="concept-card">
+      <h3>How Attention Works — Step by Step</h3>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <h4>Step 1: Score every encoder hidden state</h4>
+          <p>For the current decoder word, calculate an <strong>alignment score (e)</strong> for each encoder hidden state. This measures "how relevant is this input word to the output I'm producing right now?" A small feedforward neural network computes this score from the encoder hidden state + the decoder's previous hidden state.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>Step 2: Convert scores to weights (softmax)</h4>
+          <p>Pass all the raw scores through a <strong>softmax</strong> function, which converts them into percentages (they sum to 1). These are the <strong>alpha (α)</strong> weights — "how much attention to pay to each input word."</p>
+        </div>
+        <div class="timeline-item">
+          <h4>Step 3: Build a weighted context vector</h4>
+          <p>Multiply each encoder hidden state by its alpha weight and sum them up. This produces the <strong>context vector (c_t)</strong> — a custom blend of all input information, tuned for the current output word.</p>
+        </div>
+        <div class="timeline-item">
+          <h4>Step 4: Decode using the context vector</h4>
+          <p>Feed the context vector into the decoder LSTM, which produces the output word. Repeat for every output word — each gets its own custom context vector.</p>
+        </div>
+      </div>
+
+      <div class="math-block">
+        <p style="font-size:0.88rem; color:var(--text-light); margin-bottom:14px;">
+          For each output word the decoder produces, attention runs this 4-step loop.
+          <strong>s_t-1</strong> = decoder's previous hidden state &nbsp;|&nbsp; <strong>h_i</strong> = each encoder hidden state
+        </p>
+
+        <!-- Step 1: Score -->
+        <div class="math-step step-score">
+          <div class="math-step-header">
+            <span class="math-step-badge">Step 1</span>
+            <span class="math-step-title">Score every encoder state — "How relevant is this input?"</span>
+          </div>
+          <div class="math-eq">
+            <span class="var">e_t,i</span> &nbsp;=&nbsp; <span class="fn">tanh</span>( W &middot; [<span class="var">s_t-1</span> ; &nbsp;<span class="var">h_i</span>] )
+          </div>
+          <div class="math-note">
+            A small feedforward neural network takes the decoder's previous state and one encoder state,
+            and produces a <strong>raw alignment score</strong>. Repeat for every encoder state <em>i</em>.
+          </div>
+        </div>
+
+        <!-- Step 2: Softmax -->
+        <div class="math-step step-softmax">
+          <div class="math-step-header">
+            <span class="math-step-badge">Step 2</span>
+            <span class="math-step-title">Softmax &rarr; attention weights — "Convert scores to percentages"</span>
+          </div>
+          <div class="math-eq">
+            <span class="var">&alpha;_t,i</span> &nbsp;=&nbsp; <span class="fn">softmax</span>( <span class="var">e_t,i</span> )
+          </div>
+          <div class="math-note">
+            Softmax turns the raw scores into <strong>weights that sum to 1</strong> (like percentages).
+            A high score becomes a high <strong>&alpha;</strong> (alpha) = "pay lots of attention to this word."
+          </div>
+        </div>
+
+        <!-- Step 3: Context vector -->
+        <div class="math-step step-context">
+          <div class="math-step-header">
+            <span class="math-step-badge">Step 3</span>
+            <span class="math-step-title">Weighted sum &rarr; context vector — "Blend the most relevant inputs"</span>
+          </div>
+          <div class="math-eq">
+            <span class="var">c_t</span> &nbsp;=&nbsp; &Sigma;<sub>i</sub> &nbsp; <span class="var">&alpha;_t,i</span> <span class="op">&times;</span> <span class="var">h_i</span>
+          </div>
+          <div class="math-note">
+            Multiply each encoder state by its alpha weight, then add them all up.
+            The result is a <strong>custom context vector</strong> tuned for the current output word &mdash;
+            words with high alpha dominate, words with low alpha barely contribute.
+          </div>
+        </div>
+
+        <!-- Step 4: Decode -->
+        <div class="math-step step-decode">
+          <div class="math-step-header">
+            <span class="math-step-badge">Step 4</span>
+            <span class="math-step-title">Decode &rarr; output word</span>
+          </div>
+          <div class="math-eq">
+            <span class="var">y_t</span> &nbsp;=&nbsp; <span class="fn">LSTM_decoder</span>( <span class="var">s_t-1</span>, &nbsp;<span class="var">y_t-1</span>, &nbsp;<span class="var">c_t</span> )
+          </div>
+          <div class="math-note">
+            The decoder LSTM uses the context vector <strong>c_t</strong> (plus its previous state and output)
+            to produce the current output word. <strong>Repeat</strong> for every output word &mdash;
+            each one gets its own freshly-computed context vector.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="concept-card">
+      <h3>Example: Translating "How are you?" → Polish</h3>
+
+      <div class="example">
+        <div class="label">Attention in Action</div>
+        <p>When the decoder is about to produce the Polish word <strong>"Jak"</strong> (meaning "How"), the attention weights might look like:</p>
+        <ul>
+          <li>"How" → α = <strong>0.80</strong> (high attention — this is the word being translated!)</li>
+          <li>"are" → α = 0.15</li>
+          <li>"you" → α = 0.05</li>
+        </ul>
+        <p style="margin-top:8px;">The context vector for "Jak" is mostly built from the hidden state of "How." When translating "sie" (≈ "are"), the weights shift to focus on "are." This dynamic focus is the essence of attention.</p>
+      </div>
+
+      <div class="diagram-container">
+        <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg">
+          <!-- Encoder hidden states -->
+          <text x="40" y="20" font-size="12" font-weight="bold" fill="#4361ee">Encoder states:</text>
+          <rect x="30" y="30" width="70" height="35" rx="6" fill="#4361ee" opacity="0.8"/>
+          <text x="65" y="52" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">h₁</text>
+          <text x="65" y="82" text-anchor="middle" font-size="10" fill="#4361ee">"How"</text>
+          <rect x="120" y="30" width="70" height="35" rx="6" fill="#4361ee" opacity="0.5"/>
+          <text x="155" y="52" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">h₂</text>
+          <text x="155" y="82" text-anchor="middle" font-size="10" fill="#4361ee">"are"</text>
+          <rect x="210" y="30" width="70" height="35" rx="6" fill="#4361ee" opacity="0.3"/>
+          <text x="245" y="52" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">h₃</text>
+          <text x="245" y="82" text-anchor="middle" font-size="10" fill="#4361ee">"you"</text>
+
+          <!-- Attention weights -->
+          <text x="340" y="20" font-size="12" font-weight="bold" fill="#e8703a">Attention weights (α):</text>
+          <line x1="100" y1="47" x2="330" y2="47" stroke="#e8703a" stroke-width="4" opacity="0.8"/>
+          <line x1="100" y1="47" x2="330" y2="100" stroke="#e8703a" stroke-width="1.5" opacity="0.3"/>
+          <line x1="190" y1="47" x2="330" y2="100" stroke="#e8703a" stroke-width="1" opacity="0.2"/>
+          <line x1="280" y1="47" x2="330" y2="100" stroke="#e8703a" stroke-width="0.5" opacity="0.1"/>
+          <text x="195" y="42" font-size="10" fill="#e8703a" font-weight="bold">α=0.80</text>
+
+          <!-- Context vector -->
+          <circle cx="350" cy="110" r="22" fill="#e8703a"/>
+          <text x="350" y="115" text-anchor="middle" fill="#fff" font-size="13" font-weight="bold">c_t</text>
+          <text x="350" y="150" text-anchor="middle" font-size="9" fill="#e8703a">context vector</text>
+
+          <!-- Decoder -->
+          <text x="430" y="90" font-size="12" font-weight="bold" fill="#7b2cbf">Decoder:</text>
+          <rect x="420" y="100" width="80" height="40" rx="8" fill="#7b2cbf"/>
+          <text x="460" y="125" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">LSTM</text>
+          <rect x="520" y="100" width="70" height="40" rx="8" fill="#2d9d6f"/>
+          <text x="555" y="125" text-anchor="middle" fill="#fff" font-size="12" font-weight="bold">"Jak"</text>
+          <line x1="500" y1="120" x2="520" y2="120" stroke="#555" stroke-width="2" marker-end="url(#a1)"/>
+          <line x1="372" y1="110" x2="420" y2="120" stroke="#e8703a" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#a2)"/>
+
+          <defs>
+            <marker id="a1" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#555"/></marker>
+            <marker id="a2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#e8703a"/></marker>
+          </defs>
+        </svg>
+        <div class="diagram-caption">Attention focuses mostly on "How" when translating to "Jak" — the line thickness = attention weight</div>
+      </div>
+    </div>
+
+    <div class="concept-card">
+      <h3>Types of Attention</h3>
+      <table class="compare-table">
+        <thead>
+          <tr><th>Type</th><th>Used In</th><th>How It Scores</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Additive Attention</strong></td>
+            <td>Seq2Seq with LSTM (this course)</td>
+            <td>Feedforward NN + tanh</td>
+          </tr>
+          <tr>
+            <td>Scaled Dot-Product</td>
+            <td>Transformers</td>
+            <td>Direct dot product, scaled</td>
+          </tr>
+          <tr>
+            <td>Self-Attention</td>
+            <td>Transformers (core mechanism)</td>
+            <td>Attends to its own input sequence</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="tip">
+        <div class="label">Why This Matters</div>
+        <p>Self-attention (where a sequence attends to itself, not to an encoder) is the foundation of <strong>Transformer models</strong> like GPT and BERT. The attention mechanism you learned here is the direct ancestor of modern AI!</p>
+      </div>
+    </div>
+
+    <div class="key-takeaways">
+      <h3>Key Takeaways — Lessons 4 & 5</h3>
+      <ul>
+        <li>Encoder-decoder: encoder reads input → context vector → decoder writes output</li>
+        <li>Problem: one vector can't hold all information from long inputs</li>
+        <li>Attention lets the decoder look at ALL encoder hidden states</li>
+        <li>Alpha weights (from softmax) determine how much each input word matters</li>
+        <li>Context vector = weighted sum of encoder states, custom-built per output word</li>
+        <li>Self-attention (a variant) is the core of Transformers</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== QUICK QUIZ ===== -->
+<div class="section" id="quiz">
+  <div class="section-header">
+    <span class="section-num" style="background:var(--accent-light); color:var(--accent);">Q</span>
+    <h2>Quick Self-Check Quiz</h2>
+    <div class="subtitle">Click each question to reveal the answer</div>
+  </div>
+  <div class="section-body">
+    <div class="quiz">
+      <h3>Test Your Understanding</h3>
+
+      <div class="quiz-q" onclick="this.classList.toggle('open')">
+        <div class="q-text">1. Why does RNN struggle with long sentences?</div>
+        <div class="q-answer">Because of the vanishing gradient problem — as the error signal travels backward through many time steps during training, it shrinks to near zero, making the network unable to learn from early words in a long sequence.</div>
+      </div>
+
+      <div class="quiz-q" onclick="this.classList.toggle('open')">
+        <div class="q-text">2. What does the cell state (C_t) do in LSTM?</div>
+        <div class="q-answer">It's the "memory highway" — a vector that carries information across all time steps. Gates can add or remove information, but the cell state itself flows mostly unchanged, preserving long-term memory.</div>
+      </div>
+
+      <div class="quiz-q" onclick="this.classList.toggle('open')">
+        <div class="q-text">3. What are the four components of an LSTM unit (in order)?</div>
+        <div class="q-answer">Forget Gate, Input Gate, Cell State Update, Output Gate. Remember: FICO!</div>
+      </div>
+
+      <div class="quiz-q" onclick="this.classList.toggle('open')">
+        <div class="q-text">4. What's the difference between sigmoid and tanh in LSTM?</div>
+        <div class="q-answer">Sigmoid outputs 0–1 (used in gates to decide "how much" to keep/forget). Tanh outputs -1 to +1 (used to generate candidate values and scale the cell state for output).</div>
+      </div>
+
+      <div class="quiz-q" onclick="this.classList.toggle('open')">
+        <div class="q-text">5. How is GRU different from LSTM?</div>
+        <div class="q-answer">GRU has only 2 gates (update + reset) instead of 3, and no separate cell state — it uses the hidden state for everything. This means fewer parameters and faster training, with similar performance on many tasks.</div>
+      </div>
+
+      <div class="quiz-q" onclick="this.classList.toggle('open')">
+        <div class="q-text">6. What problem does Attention solve in encoder-decoder?</div>
+        <div class="q-answer">The information bottleneck: without attention, the entire input must be compressed into one fixed-size vector. Attention lets the decoder access all encoder hidden states, weighting them by relevance for each output word.</div>
+      </div>
+
+      <div class="quiz-q" onclick="this.classList.toggle('open')">
+        <div class="q-text">7. What does the alpha (α) weight represent?</div>
+        <div class="q-answer">It's the attention weight (from softmax) that determines how much each encoder hidden state contributes to the context vector. Higher α = more attention to that input word.</div>
+      </div>
+
+      <div class="quiz-q" onclick="this.classList.toggle('open')">
+        <div class="q-text">8. What type of attention did you learn, and what's the other type used in Transformers?</div>
+        <div class="q-answer">This course covers additive attention (used in seq2seq LSTM models). Transformers use scaled dot-product attention and self-attention, which are more efficient variants.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CHEAT SHEET ===== -->
+<div class="section" id="cheatsheet">
+  <div class="section-header">
+    <span class="section-num" style="background:var(--green-light); color:var(--green);">★</span>
+    <h2>One-Page Cheat Sheet</h2>
+    <div class="subtitle">Everything you need on one page — print this!</div>
+  </div>
+  <div class="section-body">
+
+    <div class="mnemonic">
+      <div class="mnemonic-item">
+        <div class="letter">F</div>
+        <div class="word">Forget</div>
+        <div class="desc">Erase old info (sigmoid → 0 = drop)</div>
+      </div>
+      <div class="mnemonic-item">
+        <div class="letter">I</div>
+        <div class="word">Input</div>
+        <div class="desc">Write new info (sigmoid × tanh)</div>
+      </div>
+      <div class="mnemonic-item">
+        <div class="letter">C</div>
+        <div class="word">Cell</div>
+        <div class="desc">Update: old×forget + new×input</div>
+      </div>
+      <div class="mnemonic-item">
+        <div class="letter">O</div>
+        <div class="word">Output</div>
+        <div class="desc">New hidden state (sigmoid × tanh(C))</div>
+      </div>
+    </div>
+
+    <table class="compare-table">
+      <thead>
+        <tr><th>Concept</th><th>One-Sentence Summary</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>RNN</strong></td><td>Processes sequences but forgets early words (vanishing gradient)</td></tr>
+        <tr><td><strong>LSTM</strong></td><td>RNN + gates + cell state → remembers long-term dependencies</td></tr>
+        <tr><td><strong>Cell State (C_t)</strong></td><td>Memory highway: carries info across all time steps</td></tr>
+        <tr><td><strong>Forget Gate</strong></td><td>Sigmoid decides what to erase from cell state (0 = forget)</td></tr>
+        <tr><td><strong>Input Gate</strong></td><td>Sigmoid picks what to update + tanh creates new candidate values</td></tr>
+        <tr><td><strong>Output Gate</strong></td><td>Sigmoid picks what to output + tanh(C_t) scales → new hidden state</td></tr>
+        <tr><td><strong>GRU</strong></td><td>Simplified LSTM: 2 gates (update + reset), no cell state, faster</td></tr>
+        <tr><td><strong>Encoder</strong></td><td>LSTM that reads input sequence → produces context vector</td></tr>
+        <tr><td><strong>Decoder</strong></td><td>LSTM that takes context vector → generates output sequence</td></tr>
+        <tr><td><strong>Attention</strong></td><td>Decoder looks at ALL encoder states, weights by relevance (α)</td></tr>
+        <tr><td><strong>Alignment Score (e)</strong></td><td>Feedforward NN scores how relevant each input is to current output</td></tr>
+        <tr><td><strong>Softmax</strong></td><td>Converts raw scores → percentages (α weights sum to 1)</td></tr>
+        <tr><td><strong>Context Vector (c_t)</strong></td><td>Weighted sum of encoder states, custom-built per output word</td></tr>
+        <tr><td><strong>Self-Attention</strong></td><td>Sequence attends to itself — core of Transformers</td></tr>
+      </tbody>
+    </table>
+
+    <div class="math-block">
+
+      <!-- LSTM Core -->
+      <div class="math-step step-output" style="margin-bottom:8px;">
+        <div class="math-step-header">
+          <span class="math-step-badge">LSTM Core</span>
+          <span class="math-step-title">Per time step &mdash; all four gates</span>
+        </div>
+        <div class="math-eq" style="font-size:0.95rem; line-height:2.2;">
+          <span class="var">f_t</span> = <span class="fn">&sigma;</span>(W_f &middot; [h_{t-1}, x_t])<br>
+          <span class="var">i_t</span> = <span class="fn">&sigma;</span>(W_i &middot; [h_{t-1}, x_t])<br>
+          <span class="var">c&tilde;_t</span> = <span class="fn">tanh</span>(W_c &middot; [h_{t-1}, x_t])<br>
+          <span class="var">C_t</span> = f_t <span class="op">&#8857;</span> C_{t-1} + i_t <span class="op">&#8857;</span> c&tilde;_t<br>
+          <span class="var">o_t</span> = <span class="fn">&sigma;</span>(W_o &middot; [h_{t-1}, x_t])<br>
+          <span class="var">h_t</span> = o_t <span class="op">&#8857;</span> <span class="fn">tanh</span>(C_t)
+        </div>
+      </div>
+
+      <!-- Attention -->
+      <div class="math-step step-score" style="margin-bottom:0;">
+        <div class="math-step-header">
+          <span class="math-step-badge">Attention</span>
+          <span class="math-step-title">Per decoder step &mdash; custom context vector</span>
+        </div>
+        <div class="math-eq" style="font-size:0.95rem; line-height:2.2;">
+          <span class="var">e_t,i</span> = <span class="fn">score</span>(s_{t-1}, h_i)<br>
+          <span class="var">&alpha;_t,i</span> = <span class="fn">softmax</span>(e_t,i)<br>
+          <span class="var">c_t</span> = &Sigma;_i &nbsp;&alpha;_t,i <span class="op">&middot;</span> h_i<br>
+          <span class="var">y_t</span> = <span class="fn">LSTM_dec</span>(s_{t-1}, y_{t-1}, c_t)
+        </div>
+      </div>
+
+      <div class="math-legend" style="border:1px solid var(--border); border-radius:8px; margin-top:10px;">
+        <span><span class="key" style="background:var(--accent);"></span><strong>Blue</strong> = variables</span>
+        <span><span class="key" style="background:var(--orange);"></span><strong>Orange</strong> = functions</span>
+        <span><span class="key" style="background:var(--purple);"></span><strong>Purple</strong> = operations</span>
+        <span>&sigma; = sigmoid &nbsp;|&nbsp; &#8857; = element-wise multiply</span>
+      </div>
+    </div>
+
+    <div class="tip">
+      <div class="label">Final Memory Trick</div>
+      <p><strong>"FICO"</strong> = Forget, Input, Cell, Output (the 4 gates in order).<br>
+      <strong>"SASHA"</strong> = <strong>S</strong>core → <strong>A</strong>lpha → <strong>S</strong>oftmax → <strong>H</strong>idden-weighted sum → <strong>A</strong>ttention context vector.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<div class="footer">
+  <p>LSTM & Attention — Beginner Study Guide</p>
+  <p>Based on course materials: M8T1L1 (LSTM Part 1), M8T1L2 (LSTM Part 2), M8T2L1 (LSTM + Attention)</p>
+  <p>Generated from your WorkBuddy workspace</p>
+</div>
+
+</div>
+
+</body>
+</html>

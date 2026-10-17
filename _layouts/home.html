@@ -40,11 +40,10 @@
       content: "";
       pointer-events: none;
     }
-    .topbar, .hero-copy, .content { position: relative; z-index: 1; }
-    .topbar { max-width: 1160px; margin: 0 auto; }
-    .brand { color: #b8e9df; font-size: .86rem; font-weight: 750; letter-spacing: .13em; text-decoration: none; text-transform: uppercase; }
-    .hero-copy { max-width: 1160px; margin: 72px auto 0; }
-    .eyebrow { color: #8ee0cf; font-size: .78rem; font-weight: 750; letter-spacing: .16em; text-transform: uppercase; }
+    .hero-copy, .content { position: relative; z-index: 1; }
+    .hero-copy { max-width: 1160px; margin: 48px auto 0; }
+    .topics { display: flex; flex-wrap: wrap; gap: 9px; }
+    .topic { padding: 7px 12px; border: 1px solid rgb(191 229 226 / 25%); border-radius: 999px; background: rgb(255 255 255 / 7%); color: #c4eee5; font-size: .76rem; font-weight: 650; letter-spacing: .025em; }
     h1 { max-width: 760px; margin: 16px 0 14px; font-size: clamp(2.6rem, 7vw, 5.2rem); letter-spacing: -.055em; line-height: 1.02; }
     .tagline { max-width: 620px; margin: 0; color: #c5d0e0; font-size: clamp(1.05rem, 2.4vw, 1.25rem); line-height: 1.7; }
     .content { max-width: 1160px; margin: -36px auto 0; padding: 0 24px 80px; }
@@ -88,12 +87,17 @@
 </head>
 <body>
   <header class="hero">
-    <nav class="topbar" aria-label="Main navigation">
-      <a class="brand" href="{{ '/' | relative_url }}">{{ site.title | escape }}</a>
-    </nav>
     <div class="hero-copy">
-      <span class="eyebrow">Notes, guides &amp; things worth sharing</span>
-      <h1>A little space for learning.</h1>
+      <div class="topics" aria-label="Topics">
+        <span class="topic">GenAI</span>
+        <span class="topic">Agents</span>
+        <span class="topic">NLP</span>
+        <span class="topic">Personalization</span>
+        <span class="topic">Data Analytics</span>
+        <span class="topic">Cloud</span>
+        <span class="topic">Technology</span>
+      </div>
+      <h1>Making complex ideas easier to understand.</h1>
       <p class="tagline">{{ site.description | escape }}</p>
     </div>
   </header>
@@ -106,14 +110,14 @@
       <div class="library-layout">
         {% if article_count > 0 %}
           <aside class="sidebar" aria-label="Article categories">
-            <h2>Folders</h2>
+            <h2>Topics</h2>
             {% include folder-nav.html mode="sidebar" %}
           </aside>
         {% endif %}
         <div class="library-main">
           <div class="library-heading">
-            <h2>Browse the library</h2>
-            <p class="count">{{ article_count }} {% if article_count == 1 %}article{% else %}articles{% endif %}</p>
+            <h2>Explore the guides</h2>
+            <p class="count">{{ article_count }} {% if article_count == 1 %}guide{% else %}guides{% endif %}</p>
           </div>
           {% for directory in directories %}
             {% assign category_pages = articles | where: "dir", directory | sort_natural: "title" %}
@@ -126,19 +130,19 @@
                   <article class="card">
                     <h4>{{ page.title | default: fallback_title | escape }}</h4>
                     <p>{{ page.description | default: site.description | escape }}</p>
-                    <a class="read-link" href="{{ page.url | relative_url }}">Read article <span aria-hidden="true">&rarr;</span></a>
+                    <a class="read-link" href="{{ page.url | relative_url }}">Open guide <span aria-hidden="true">&rarr;</span></a>
                   </article>
                 {% endfor %}
               </div>
             </section>
           {% endfor %}
           {% if article_count == 0 %}
-            <p class="empty">No articles yet. Add an HTML page with Jekyll front matter inside a category folder to get started.</p>
+            <p class="empty">No guides published yet. Add an HTML page with Jekyll front matter inside a topic folder, and it will appear here automatically.</p>
           {% endif %}
         </div>
       </div>
     </div>
-    <footer>&copy; {{ site.time | date: "%Y" }} {{ site.author | escape }}</footer>
+    <footer>&copy; {{ site.time | date: "%Y" }} {{ site.author | escape }} · Built for curious minds.</footer>
   </main>
 </body>
 </html>
