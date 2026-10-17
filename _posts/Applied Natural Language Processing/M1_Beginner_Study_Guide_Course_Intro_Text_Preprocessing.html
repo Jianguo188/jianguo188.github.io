@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A beginner-friendly guide to the course introduction, NLP basics, and text preprocessing.">
+  <title>M1 Beginner Study Guide: NLP and Text Preprocessing</title>
+  <style>
+    :root {
+      --ink: #1f2937;
+      --muted: #536273;
+      --paper: #fff;
+      --canvas: #f2f6fa;
+      --blue: #155e8a;
+      --blue-pale: #e8f4fb;
+      --green-pale: #e9f7ef;
+      --gold-pale: #fff5d9;
+      --line: #d7e0e8;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font: 17px/1.65 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: #075985; }
+    a:focus-visible, summary:focus-visible { outline: 3px solid #f0a202; outline-offset: 3px; }
+    .page { max-width: 1020px; margin: 0 auto; padding: 28px 20px 64px; }
+    header, main, footer {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 8px 26px rgb(31 41 55 / 5%);
+    }
+    header { padding: clamp(24px, 5vw, 52px); border-top: 7px solid var(--blue); }
+    main { margin-top: 20px; padding: clamp(20px, 4vw, 42px); }
+    footer { margin-top: 20px; padding: 20px 26px; color: var(--muted); }
+    h1, h2, h3 { line-height: 1.2; }
+    h1 { max-width: 780px; margin: 0 0 14px; font-size: clamp(2rem, 5vw, 3.2rem); }
+    h2 { margin: 0 0 16px; font-size: clamp(1.45rem, 3vw, 2rem); }
+    h3 { margin: 24px 0 8px; font-size: 1.18rem; }
+    p { margin: 10px 0 16px; }
+    .eyebrow { color: var(--blue); font-weight: 750; letter-spacing: .07em; text-transform: uppercase; }
+    .lede { max-width: 780px; color: var(--muted); font-size: 1.15rem; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+    .chip { padding: 5px 11px; border-radius: 999px; background: var(--blue-pale); color: #123f5b; font-size: .9rem; font-weight: 650; }
+    nav { margin-top: 24px; padding: 18px 20px; border-radius: 12px; background: var(--canvas); }
+    nav strong { display: block; margin-bottom: 6px; }
+    nav ul { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0; padding-left: 20px; }
+    section { scroll-margin-top: 16px; padding-top: 30px; }
+    section + section { margin-top: 28px; border-top: 1px solid var(--line); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+    .card { padding: 17px 18px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+    .card h3 { margin-top: 0; }
+    .callout { margin: 18px 0; padding: 15px 18px; border-left: 5px solid var(--blue); border-radius: 8px; background: var(--blue-pale); }
+    .memory { border-left-color: #23804a; background: var(--green-pale); }
+    .caution { border-left-color: #b77900; background: var(--gold-pale); }
+    .example { overflow-x: auto; margin: 14px 0; padding: 15px 18px; border-radius: 10px; background: #f4f7fa; }
+    .example code { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    table { width: 100%; border-collapse: collapse; min-width: 520px; }
+    th, td { padding: 10px 12px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: var(--blue-pale); }
+    ol, ul { padding-left: 1.35em; }
+    li { margin: 5px 0; }
+    details { margin: 12px 0; padding: 13px 16px; border: 1px solid var(--line); border-radius: 10px; }
+    summary { cursor: pointer; color: #123f5b; font-weight: 700; }
+    .small { color: var(--muted); font-size: .93rem; }
+    .sources li { overflow-wrap: anywhere; margin-bottom: 9px; }
+    @media (max-width: 600px) {
+      body { font-size: 16px; }
+      .page { padding: 12px 10px 36px; }
+      header, main { border-radius: 12px; }
+      nav ul { display: block; }
+    }
+    @media print {
+      body { background: #fff; color: #000; font-size: 11pt; }
+      .page { max-width: none; padding: 0; }
+      header, main, footer { box-shadow: none; border-color: #aaa; }
+      nav { display: none; }
+      section { break-inside: avoid; }
+      a { color: #000; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <p class="eyebrow">Week 01 · Module 1</p>
+      <h1>Getting Text Ready for NLP</h1>
+      <p class="lede">A beginner’s guide to what Natural Language Processing is, why human language is tricky for computers, and how we prepare text before asking a computer to learn from it.</p>
+      <div class="chips" aria-label="Topics">
+        <span class="chip">Plain-language explanations</span>
+        <span class="chip">Real-world examples</span>
+        <span class="chip">Memory cues</span>
+        <span class="chip">Self-checks</span>
+      </div>
+      <nav aria-label="Guide contents">
+        <strong>Jump to a section</strong>
+        <ul>
+          <li><a href="#roadmap">Learning map</a></li>
+          <li><a href="#nlp">NLP and its challenges</a></li>
+          <li><a href="#vocabulary">Essential vocabulary</a></li>
+          <li><a href="#pipeline">Preprocessing pipeline</a></li>
+          <li><a href="#worked-example">Worked example</a></li>
+          <li><a href="#choices">Make careful choices</a></li>
+          <li><a href="#course">Course roadmap</a></li>
+          <li><a href="#self-check">Self-check</a></li>
+          <li><a href="#sources">Materials reviewed</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <section id="roadmap">
+        <h2>1. The learning map</h2>
+        <p>Computers are good at working with numbers, but a customer review or an email is made of words. Natural Language Processing (NLP) is the area of computing that helps computers work with human language. A typical text project follows this route:</p>
+        <div class="callout"><strong>Raw words → cleaned and organized words → a numerical representation → an NLP task.</strong> This module introduces the field and focuses on the early preparation steps.</div>
+        <div class="grid">
+          <article class="card"><h3>Understand the material</h3><p>Text is unstructured: documents vary in length, style, and meaning.</p></article>
+          <article class="card"><h3>Prepare the text</h3><p>Remove or standardize details that get in the way, then split text into tokens.</p></article>
+          <article class="card"><h3>Keep the purpose in view</h3><p>Preprocessing choices can help one task and harm another. There is no universal “clean text” recipe.</p></article>
+        </div>
+      </section>
+
+      <section id="nlp">
+        <h2>2. What is NLP, and why is it challenging?</h2>
+        <p><strong>Natural Language Processing</strong> combines ideas from language and computing to help machines analyze or produce human language. The course calls this an applied field because the aim is not only to understand methods, but also to build and assess useful models.</p>
+        <h3>Where text appears in real life</h3>
+        <p>Text is found in social-media posts, web pages, books, product reviews, captions, legal documents, medical records, police reports, and job descriptions. NLP can help with sentiment analysis, classifying documents, plagiarism detection, machine translation, and analyzing the structure of text or code.</p>
+        <h3>Language can be ambiguous</h3>
+        <p>People use context effortlessly; a computer must learn patterns that help resolve it. The same words can have different meanings, and a sentence can be understood in more than one way.</p>
+        <div class="grid">
+          <article class="card"><h3>Word-level (lexical) ambiguity</h3><p><em>“I went to the bank.”</em> Is it a financial institution or the land beside a river? Nearby words and the situation help us decide.</p></article>
+          <article class="card"><h3>Sentence-structure (syntactic) ambiguity</h3><p><em>“Wafa said on Monday she would give an exam.”</em> Did she speak on Monday, or is the exam on Monday? The sentence structure can allow more than one reading.</p></article>
+          <article class="card"><h3>Context and missing information</h3><p>Pronouns such as “it” or “they” depend on what was mentioned earlier. Without context, the intended reference may be unclear.</p></article>
+        </div>
+        <div class="callout memory"><strong>Memory cue:</strong> language ambiguity can live in a <em>word</em>, in the sentence’s <em>structure</em>, or in the surrounding <em>context</em>.</div>
+      </section>
+
+      <section id="vocabulary">
+        <h2>3. Essential NLP vocabulary</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Term</th><th>Plain-language meaning</th><th>Example</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Corpus</strong></td><td>A collection of text used for reading, analysis, or model building.</td><td>A folder of customer reviews.</td></tr>
+              <tr><td><strong>Token</strong></td><td>A unit produced when text is split up—often a word, but it could be a punctuation mark or another unit, depending on the tokenizer.</td><td>“I love tea!” might become <code>I</code>, <code>love</code>, <code>tea</code>, <code>!</code>.</td></tr>
+              <tr><td><strong>Tokenization</strong></td><td>Splitting text into tokens.</td><td>“This is a short sentence” becomes a sequence of words.</td></tr>
+              <tr><td><strong>Vocabulary</strong></td><td>The unique tokens recognized in a dataset or by a text representation.</td><td>If “tea” appears in many reviews, it is still one vocabulary entry.</td></tr>
+              <tr><td><strong>Syntax</strong></td><td>How words are arranged according to grammar.</td><td>Word order can change who did what to whom.</td></tr>
+              <tr><td><strong>Syntactic parsing</strong></td><td>Analyzing a sentence’s grammatical structure.</td><td>Identifying which words belong together in a sentence.</td></tr>
+              <tr><td><strong>Semantics</strong></td><td>The meaning conveyed by words or text.</td><td>Understanding that “That’s sick!” may express praise, not illness.</td></tr>
+              <tr><td><strong>Stop word</strong></td><td>A very common word that may contribute little for a particular task.</td><td>“the,” “a,” “is.” Whether to remove it depends on the goal.</td></tr>
+              <tr><td><strong>N-gram</strong></td><td>A sequence of <em>n</em> consecutive tokens.</td><td>In “a warm cup of tea,” <em>warm cup</em> is a bigram (2-gram).</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>A <strong>unigram</strong> contains one token, a <strong>bigram</strong> two consecutive tokens, and a <strong>trigram</strong> three. For “this is a simple sentence,” the bigrams include “this is,” “is a,” “a simple,” and “simple sentence.” N-grams can preserve some nearby word combinations that a one-word-at-a-time representation would miss.</p>
+      </section>
+
+      <section id="pipeline">
+        <h2>4. A practical text-preprocessing pipeline</h2>
+        <p>Text is called <strong>unstructured</strong> because it does not arrive as a neat, fixed set of numeric columns. Preprocessing prepares it for a task. The lecture introduces three common activities:</p>
+        <ol>
+          <li><strong>Noise removal:</strong> handle unwanted formatting such as HTML tags, stray symbols, repeated whitespace, or other irrelevant artifacts.</li>
+          <li><strong>Tokenization:</strong> split a document into the units the method will use.</li>
+          <li><strong>Normalization:</strong> reduce unimportant variation, for example by using consistent letter case or reducing related word forms.</li>
+        </ol>
+        <h3>Noise removal</h3>
+        <p>Noise may include HTML markup, accidental control characters, or messy spacing. Depending on the task, punctuation, digits, and accent marks might also be removed or transformed. A regular-expression library (such as Python’s <code>re</code>) can help define text patterns to find and change.</p>
+        <h3>Tokenization</h3>
+        <p>Choose how a document should be divided. Word tokenization is common, but applications may instead split into sentences, subword pieces, or n-grams. For example, a help-desk system might split a message into words first, then create bigrams to retain phrases such as “not working.”</p>
+        <h3>Normalization</h3>
+        <p>Normalization makes selected text forms more consistent. Common examples include lowercasing and reducing related word forms. It can also include removing stop words, rare terms, or task-specific terms—but those decisions should be made with care.</p>
+        <div class="callout"><strong>Helpful tools from the lecture:</strong> Python’s <code>re</code> module can perform pattern-based cleanup; NLTK (Natural Language Toolkit) includes tools for tokenization and word processing.</div>
+      </section>
+
+      <section id="worked-example">
+        <h2>5. Worked example: sorting customer support messages</h2>
+        <p>Imagine a company wants to find support messages about delivery delays. Here is an illustrative message:</p>
+        <div class="example"><code>“&lt;p&gt;My order #4821 ISN'T here!!!  I ordered two days ago.&lt;/p&gt;”</code></div>
+        <ol>
+          <li><strong>Inspect the goal.</strong> We want to find delivery-delay messages. That means “not here,” the order number, and possibly the number of days may all matter.</li>
+          <li><strong>Clean irrelevant formatting.</strong> Remove the HTML paragraph tags and normalize repeated spaces. Keep the message itself.</li>
+          <li><strong>Choose case handling.</strong> Lowercase words so “ISN'T” and “isn't” are treated alike. But preserve or correctly normalize the negation.</li>
+          <li><strong>Tokenize.</strong> One possible result is <code>my</code>, <code>order</code>, <code>4821</code>, <code>isn't</code>, <code>here</code>, <code>i</code>, <code>ordered</code>, <code>two</code>, <code>days</code>, <code>ago</code>.</li>
+          <li><strong>Consider normalization.</strong> A lemmatizer might map <code>ordered</code> to <code>order</code>; however, the original message may also refer to an order, so the surrounding phrase remains useful.</li>
+          <li><strong>Build useful features.</strong> A bigram such as <code>not here</code> (if tokenization separates the contraction in a suitable way) can capture a clue that separate words alone may obscure.</li>
+        </ol>
+        <div class="callout caution"><strong>Important:</strong> removing “not” as a stop word could turn “not delivered” into “delivered,” reversing the meaning. Removing all digits could also discard an order number that is useful for customer service. These examples are illustrative; the right preprocessing depends on what the system needs to do.</div>
+      </section>
+
+      <section id="choices">
+        <h2>6. Stemming, lemmatization, and careful choices</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Method</th><th>What it does</th><th>Simple illustration</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Stemming</strong></td><td>Uses rules that often chop prefixes or suffixes to produce a shorter stem. The result need not be a dictionary word.</td><td>“connected,” “connecting,” and “connection” may be reduced to a shared stem-like form by a particular stemmer; exact output depends on the rules.</td></tr>
+              <tr><td><strong>Lemmatization</strong></td><td>Uses lexical or linguistic knowledge to map a word to a recognized base form (lemma).</td><td>“was” may map to “be”; “better” may map to “good” when the tool has the needed context.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Both can reduce variation, but lemmatization aims for a linguistically valid base form instead of simply trimming word endings. A lemmatizer may need part-of-speech or context information to choose correctly.</p>
+        <h3>Preprocessing is a choice, not a checklist</h3>
+        <p>Removing punctuation, numbers, accents, or common words can be useful in some tasks and harmful in others. Punctuation can express excitement or distinguish a question. Numbers may be prices, dates, or order IDs. Stop words such as “not” can reverse meaning. Text models trained with embeddings may rely on word context, so aggressive cleanup can remove clues the model needs.</p>
+        <div class="grid">
+          <article class="card"><h3>Ask: what is noise here?</h3><p>For topic discovery, an order ID may be clutter. For customer support, it may be essential.</p></article>
+          <article class="card"><h3>Ask: what distinction matters?</h3><p>Lowercasing may help match “Tea” with “tea,” but case may matter for names or acronyms.</p></article>
+          <article class="card"><h3>Check the result</h3><p>Compare performance on examples the model did not learn from. Do not assume more cleaning always means a better model.</p></article>
+        </div>
+        <div class="callout memory"><strong>Memory cue:</strong> <em>clean</em> what is irrelevant, <em>split</em> into useful pieces, and <em>standardize</em> only the differences that do not matter to the task.</div>
+      </section>
+
+      <section id="course">
+        <h2>7. Where M1 fits in the course</h2>
+        <p>The course begins by preparing and representing text, then uses those representations in learning methods and evaluates how well the methods work. Later course topics listed in the introduction include classification, deep learning, topic modeling, and transformers.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Course deliverable from the introduction</th><th>What the lecture says</th></tr></thead>
+            <tbody>
+              <tr><td>Homework</td><td>Four homeworks: preprocessing and classification introduction; classification and dimensionality reduction; deep learning; transformers and unsupervised models.</td></tr>
+              <tr><td>Quizzes</td><td>Ten quizzes, mainly conceptual multiple-choice questions, intended to reinforce learning during the course.</td></tr>
+              <tr><td>Course goals</td><td>Preprocess text, compare text representations, explain NLP tasks, and develop and assess NLP models.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="small">This is a summary of the M1 introduction materials; consult the course syllabus for current policies and deadlines.</p>
+      </section>
+
+      <section id="self-check">
+        <h2>8. Self-check</h2>
+        <details>
+          <summary>1. What is a corpus?</summary>
+          <p>A collection of text. A set of customer reviews or a collection of news articles can each be a corpus.</p>
+        </details>
+        <details>
+          <summary>2. What is the difference between syntax and semantics?</summary>
+          <p>Syntax is the grammatical structure or arrangement of words. Semantics is the meaning conveyed by the text.</p>
+        </details>
+        <details>
+          <summary>3. What is a bigram?</summary>
+          <p>A sequence of two consecutive tokens, such as “very helpful” in the text “very helpful staff.”</p>
+        </details>
+        <details>
+          <summary>4. How do stemming and lemmatization differ?</summary>
+          <p>Stemming often chops word endings using rules and may produce a non-word stem. Lemmatization uses linguistic or lexical knowledge to seek a valid base form.</p>
+        </details>
+        <details>
+          <summary>5. Why should you not automatically remove every number or stop word?</summary>
+          <p>Some numbers carry useful information, such as a price or order ID, and some common words carry meaning, especially “not.” The task determines what is useful.</p>
+        </details>
+        <details>
+          <summary>6. A customer writes “I am not happy.” Why could deleting “not” be dangerous?</summary>
+          <p>It reverses the sentiment clue: “not happy” and “happy” do not mean the same thing.</p>
+        </details>
+      </section>
+
+      <section id="sources">
+        <h2>9. Materials reviewed</h2>
+        <ul class="sources">
+          <li><a href="M1%20Overview.docx">M1 Overview.docx</a> — module objectives and overview.</li>
+          <li><a href="M1%20-%20Course%20Introduction%20and%20Text%20Data%20Pre-processing/M1T1L1_Class_Introduction.txt">Class Introduction transcript</a> and <a href="M1%20-%20Course%20Introduction%20and%20Text%20Data%20Pre-processing/M1T1L1_Class_Introduction.pdf">slides</a>.</li>
+          <li><a href="M1%20-%20Course%20Introduction%20and%20Text%20Data%20Pre-processing/M1T2L1_Text_Preprocessing_Techniques.txt">Text Preprocessing transcript</a> and <a href="M1%20-%20Course%20Introduction%20and%20Text%20Data%20Pre-processing/M1T2L1-Text-Prerocessing.pdf">slides</a>.</li>
+          <li><a href="Quiz1.docx">Quiz 1</a> — its image-based questions were reviewed with local OCR for related NLP terminology and text-representation context. Some quiz topics belong to the neighboring text-representation module and are outside this guide’s main scope.</li>
+          <li><a href="M1%20-%20Course%20Introduction%20and%20Text%20Data%20Pre-processing/M1T1L1_Class_Introduction.mp4">Class Introduction recording</a> and <a href="M1%20-%20Course%20Introduction%20and%20Text%20Data%20Pre-processing/M1T2L1_Text_Preprocessing_Techniques.mp4">Text Preprocessing recording</a> — transcripts and slides were reviewed; recordings themselves were not watched.</li>
+          <li><a href="Quiz%200%20-%20Knowledge%20Base.docx">Quiz 0 - Knowledge Base</a> — its embedded questions were inspected; they concern broader programming/math topics such as matrix operations, entropy, overfitting, and dot products, so they are not summarized as M1 learning content.</li>
+        </ul>
+        <p class="small">Worked customer-support examples are illustrative teaching examples, not measured results from the course materials.</p>
+      </section>
+    </main>
+    <footer>
+      <p><strong>Quick recall:</strong> NLP works with human language; preprocessing cleans and organizes text for a task; always preserve the words and details that carry the meaning your task needs.</p>
+    </footer>
+  </div>
+</body>
+</html>
