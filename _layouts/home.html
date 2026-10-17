@@ -102,7 +102,7 @@
       {% for directory in directories %}
         {% if directory != "/" %}
           {% assign category_pages = articles | where: "dir", directory | sort_natural: "title" %}
-          {% assign category_name = directory | remove_first: "/" | remove_last: "/" | remove_first: "guides/" | replace: "/", " / " | replace: "-", " " | replace: "_", " " %}
+          {% assign category_name = directory | replace: "%20", " " | remove_first: "/" | remove_last: "/" | remove_first: "guides/" | replace: "/", " / " | replace: "-", " " | replace: "_", " " | strip %}
           {% assign has_categories = true %}
           <section class="category" aria-label="{{ category_name | escape }}">
             <h3 class="category-title">{{ category_name | escape }}</h3>
