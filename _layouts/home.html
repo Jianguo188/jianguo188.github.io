@@ -90,7 +90,7 @@
 
   <main class="content">
     <div class="library">
-      {% assign articles = site.html_pages | where_exp: "page", "page.path contains '/' and page.name != 'index.html'" %}
+      {% assign articles = site.html_pages | where_exp: "page", "page.dir != '/'" %}
       {% assign directories = articles | map: "dir" | uniq | sort %}
       {% assign article_count = articles.size %}
       <div class="library-heading">
