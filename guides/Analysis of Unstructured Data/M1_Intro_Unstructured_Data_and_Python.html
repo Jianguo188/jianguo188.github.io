@@ -1,0 +1,284 @@
+---
+title: "M1: Intro to Unstructured Data and Python"
+description: "Explore structured and unstructured data, practical ways to organize text such as customer reviews, and how Python supports that work."
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A beginner-friendly guide to unstructured data, metadata, and why Python is useful for analysis.">
+  <title>M1: Intro to Unstructured Data and Python</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1d2939;
+      --muted: #475467;
+      --paper: #ffffff;
+      --page: #f3f6fa;
+      --accent: #155eef;
+      --accent-dark: #123b83;
+      --line: #d0d5dd;
+      --note: #eff8ff;
+      --warm: #fff7e6;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font: 1rem/1.65 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: var(--accent-dark); text-underline-offset: 0.18em; }
+    a:focus-visible, summary:focus-visible {
+      outline: 3px solid #f79009;
+      outline-offset: 3px;
+      border-radius: 3px;
+    }
+    .shell { width: min(100% - 2rem, 960px); margin: 0 auto; }
+    header {
+      padding: 3rem 0 2rem;
+      background: #eaf2ff;
+      border-bottom: 1px solid #c7d7fe;
+    }
+    header p { max-width: 70ch; }
+    .eyebrow {
+      margin: 0 0 0.5rem;
+      color: var(--accent-dark);
+      font-size: 0.85rem;
+      font-weight: 750;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    h1 { max-width: 18ch; margin: 0; font-size: clamp(2rem, 6vw, 3.25rem); line-height: 1.12; }
+    h2 { margin-top: 0; font-size: clamp(1.45rem, 4vw, 2rem); line-height: 1.25; }
+    h3 { margin-bottom: 0.35rem; font-size: 1.15rem; }
+    main { padding: 1.5rem 0 3rem; }
+    section, nav.toc {
+      margin: 1.25rem 0;
+      padding: clamp(1.1rem, 3vw, 2rem);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 0.75rem;
+    }
+    nav.toc ul { display: flex; flex-wrap: wrap; gap: 0.55rem 1.25rem; margin-bottom: 0; padding-left: 1.2rem; }
+    .lead { font-size: 1.12rem; }
+    .callout {
+      margin: 1rem 0;
+      padding: 0.9rem 1rem;
+      background: var(--note);
+      border-left: 4px solid var(--accent);
+      border-radius: 0.25rem;
+    }
+    .caution { background: var(--warm); border-left-color: #b54708; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 1rem; }
+    .card { padding: 1rem; border: 1px solid var(--line); border-radius: 0.55rem; }
+    .card h3 { margin-top: 0; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    th, td { padding: 0.7rem; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: #f2f4f7; }
+    code { padding: 0.1em 0.3em; background: #f2f4f7; border-radius: 0.25rem; font-size: 0.95em; }
+    ol, ul { padding-left: 1.4rem; }
+    li + li { margin-top: 0.35rem; }
+    details { margin: 0.75rem 0; padding: 0.7rem 0.9rem; border: 1px solid var(--line); border-radius: 0.45rem; }
+    summary { cursor: pointer; font-weight: 700; }
+    details p { margin-bottom: 0.25rem; }
+    .small { color: var(--muted); font-size: 0.93rem; }
+    footer { padding: 0 0 2rem; color: var(--muted); }
+
+    @media (max-width: 600px) {
+      .shell { width: min(100% - 1rem, 960px); }
+      header { padding: 2rem 0 1.5rem; }
+      th, td { padding: 0.5rem; }
+    }
+    @media print {
+      body { background: #fff; color: #000; font-size: 11pt; }
+      header { padding: 1rem 0; background: #fff; border-bottom: 1px solid #777; }
+      .shell { width: 100%; }
+      section, nav.toc { break-inside: avoid; margin: 0.7rem 0; padding: 0.8rem; border-color: #999; }
+      a { color: #000; }
+      a::after { content: " (" attr(href) ")"; font-size: 0.85em; overflow-wrap: anywhere; }
+      details > *:not(summary) { display: block; }
+      footer { padding-bottom: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell">
+      <p class="eyebrow">Week 1 · Lesson 1</p>
+      <h1>M1: Intro to Unstructured Data and Python</h1>
+      <p class="lead">A beginner-friendly guide to turning messy real-world information into something useful for analysis—and understanding why Python is a practical tool for that work.</p>
+      <p><strong>By the end, you should be able to:</strong> distinguish structured from unstructured data; outline a process for structuring it; explain metadata and traceability; describe Python’s strengths and trade-offs; and recognize Python objects, attributes, methods, and functions.</p>
+    </div>
+  </header>
+
+  <main class="shell">
+    <nav class="toc" aria-label="Study guide contents">
+      <h2>On this page</h2>
+      <ul>
+        <li><a href="#roadmap">Roadmap</a></li>
+        <li><a href="#vocabulary">Key vocabulary</a></li>
+        <li><a href="#workflow">Structuring data</a></li>
+        <li><a href="#example">Everyday example</a></li>
+        <li><a href="#python">Why Python</a></li>
+        <li><a href="#objects">Python objects</a></li>
+        <li><a href="#pitfalls">Common mix-ups</a></li>
+        <li><a href="#check">Self-check</a></li>
+      </ul>
+    </nav>
+
+    <section id="roadmap">
+      <h2>1. The big picture</h2>
+      <p>Businesses have plenty of information that does not arrive as a tidy spreadsheet: messages, reports, photos, audio, video, and web pages, for example. To analyze it, first decide what you want to learn, then extract and record the relevant information in a consistent form. Metadata keeps each result connected to its original source.</p>
+      <p>Because every source and question can differ, this work often needs a small, task-specific program. Python is useful because it is readable, flexible, and has a large ecosystem of packages for collecting, processing, and analyzing many kinds of data.</p>
+      <div class="callout"><strong>Memory cue:</strong> Decide the question → design the output → keep its source identity → process the material → check the result.</div>
+    </section>
+
+    <section id="vocabulary">
+      <h2>2. Key vocabulary</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>Structured data</h3>
+          <p>Information already organized into predictable fields—often rows and columns—such as a customer table with one row per customer and columns for ID, region, and purchase date.</p>
+        </article>
+        <article class="card">
+          <h3>Unstructured data</h3>
+          <p>Information that is not ready to analyze as a regular table or relational database. Examples include free-form text, images, audio, video, emails, and reports. It may contain patterns, but the useful fields have not yet been consistently extracted.</p>
+        </article>
+        <article class="card">
+          <h3>Metadata</h3>
+          <p>“Data about data”: details that describe or identify a source record. For a report, this might include the organization, publication date, report type, and a unique source ID.</p>
+        </article>
+        <article class="card">
+          <h3>Schema</h3>
+          <p>The planned shape of the output: its columns or fields, what each means, and the kind of value each should contain.</p>
+        </article>
+      </div>
+      <p class="small">The lecture presents the estimate that 80% or more of business data is unstructured (with structured data around 20%). Treat this as an estimate used to motivate the topic—not a universal percentage that will hold for every organization, dataset, or date.</p>
+    </section>
+
+    <section id="workflow">
+      <h2>3. A practical workflow for structuring data</h2>
+      <ol>
+        <li><strong>Define the scope and question.</strong> What sources are included, and what do you want to find out? A vague question makes it hard to decide what to extract.</li>
+        <li><strong>Specify the desired output.</strong> Decide what one output row represents and what fields it needs. Choose the format before processing so your decisions are consistent.</li>
+        <li><strong>Plan metadata.</strong> Record enough source details to trace each output row back to the original item. A combination of fields should identify the source reliably; use a unique ID where possible.</li>
+        <li><strong>Plan collection and scale.</strong> Decide how to obtain the material. If there is a lot, consider processing it in batches so work can resume after stopping. Parallel processing—doing multiple items at once—may help, but adds complexity and is not always worthwhile.</li>
+        <li><strong>Write task-specific processing code.</strong> Collect and transform the source, then measure or classify what you need. Text sentiment or topic labels, for example, require choices suited to that task.</li>
+        <li><strong>Check the output and traceability.</strong> Confirm that the fields make sense and that each result can be associated with its source.</li>
+      </ol>
+      <div class="callout caution"><strong>Important:</strong> Structuring is not just “putting text in a spreadsheet.” The question determines what to extract, and different tasks can need different schemas and processing methods.</div>
+    </section>
+
+    <section id="example">
+      <h2>4. Everyday example: understanding café reviews</h2>
+      <p><em>Illustrative example—not a result measured in the course materials.</em> Imagine a café wants to understand what customers praise or complain about in online reviews. The original reviews are free-form text, so they are not directly comparable like numeric sales records.</p>
+      <div class="grid">
+        <article class="card">
+          <h3>Start with a question</h3>
+          <p>“What service themes appear in recent reviews, and are reviewers generally positive or negative?” Define which review sites and dates count as in scope.</p>
+        </article>
+        <article class="card">
+          <h3>Design a useful row</h3>
+          <p>One row per review might include <code>review_id</code>, <code>review_date</code>, <code>source</code>, <code>rating</code>, <code>text</code>, and a derived <code>sentiment_label</code>.</p>
+        </article>
+        <article class="card">
+          <h3>Preserve the link</h3>
+          <p>Keep the platform and its review ID (or another stable source reference). If a label seems wrong later, the analyst can find the original review and inspect it.</p>
+        </article>
+      </div>
+      <p>A review such as “The coffee was great, but I waited 20 minutes” contains more than one idea. A simple positive/negative label may hide that nuance. The business should decide whether it also needs fields for themes such as product quality and wait time, and should check automated labels rather than assuming they are always correct.</p>
+      <table>
+        <thead>
+          <tr><th>review_id</th><th>date</th><th>rating</th><th>text (shortened)</th><th>sentiment</th><th>theme</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>site-A-1042</td><td>2026-09-12</td><td>3</td><td>“Coffee was great, but I waited…”</td><td>Mixed</td><td>Quality; wait time</td></tr>
+        </tbody>
+      </table>
+      <p class="small">The sample row is invented for explanation. Its source ID and labels are examples, not extracted data or a benchmark.</p>
+    </section>
+
+    <section id="python">
+      <h2>5. Why use Python?</h2>
+      <p>Python is a <strong>high-level, general-purpose programming language</strong>. In plain language, it hides many low-level computer details and can be used for different kinds of work rather than being limited to one domain.</p>
+      <ul>
+        <li><strong>Readable syntax:</strong> the lecture emphasizes that Python code is designed to be comparatively easy to read and write.</li>
+        <li><strong>Broad uses:</strong> Python can help collect, organize, transform, analyze, and visualize data, and is also used in areas such as web and app development.</li>
+        <li><strong>Packages:</strong> reusable libraries add capabilities—from data analysis to natural-language processing (NLP) and machine learning—without requiring every tool to be built from scratch.</li>
+        <li><strong>Good fit for customized workflows:</strong> scripts can combine collection and processing steps for a particular data source and question.</li>
+        <li><strong>Interpreted workflow:</strong> the lecture contrasts running Python through an interpreter with compiling a program first. This is a useful introductory distinction; the exact execution details depend on the implementation and tools.</li>
+      </ul>
+      <div class="callout caution"><strong>Not “best at everything”:</strong> Python’s popularity, readability, and ecosystem are strong advantages, but it is not automatically the fastest or best tool for every task. The lecture notes that some languages can be faster and that R may be preferable for some traditional statistical work. Choose based on the task, tools, and constraints.</div>
+    </section>
+
+    <section id="objects">
+      <h2>6. Objects, attributes, methods, and functions</h2>
+      <p>Python is object-oriented: programs work with <strong>objects</strong>, which are values that can be stored and manipulated. A useful mental model is to imagine a review as an object that has information about itself and actions that can be performed on it.</p>
+      <ul>
+        <li><strong>Attribute:</strong> information stored on an object—like a review’s rating or date.</li>
+        <li><strong>Method:</strong> an operation associated with an object—like asking a text object to convert its letters to lowercase. In Python, methods are called with dot notation, such as <code>some_text.lower()</code>.</li>
+        <li><strong>Function:</strong> a reusable operation that can take inputs and return an output. Functions help divide a program into understandable steps. For example, a function could take a review and return a cleaned version.</li>
+      </ul>
+      <p>Objects often have attributes and methods, but need not have both. A method is function-like but is associated with an object. A function itself is also an object in Python, though at this stage it is most useful to think of a function as a named, reusable operation.</p>
+      <div class="callout"><strong>Memory cue:</strong> Attribute = what it has; method = what it can do; function = a reusable operation you call.</div>
+    </section>
+
+    <section id="pitfalls">
+      <h2>7. Common mix-ups and limitations</h2>
+      <ul>
+        <li><strong>“Unstructured” does not mean meaningless or totally pattern-free.</strong> It means the information is not already organized in the consistent tabular form needed for the planned analysis.</li>
+        <li><strong>Do not choose columns after the fact without a question.</strong> The research question should guide the output design and processing choices.</li>
+        <li><strong>Do not omit source identifiers.</strong> A derived label without enough metadata is difficult to audit, correct, or update.</li>
+        <li><strong>Do not confuse metadata with the content itself.</strong> A review’s text is the content; its review ID, date, and platform help describe and identify that content.</li>
+        <li><strong>More speed is not always better.</strong> Batching and parallelization are scale strategies; parallel work can bring extra coordination and troubleshooting.</li>
+        <li><strong>Python’s popularity is not proof it is optimal for every job.</strong> Consider performance, existing expertise, available packages, and the nature of the analysis.</li>
+      </ul>
+    </section>
+
+    <section id="recap">
+      <h2>8. Quick recap</h2>
+      <ol>
+        <li>Structured data is already organized in consistent fields; unstructured material needs task-specific processing before it is ready for the intended analysis.</li>
+        <li>Plan the question and output schema first, then retain metadata so results can be traced to their sources.</li>
+        <li>Python is a readable, flexible general-purpose language with a large package ecosystem, useful for customized data workflows.</li>
+        <li>Objects can hold attributes and methods; functions package reusable steps of a program.</li>
+      </ol>
+    </section>
+
+    <section id="check">
+      <h2>9. Self-check</h2>
+      <p>Try answering each question before opening its explanation. The expandable answers use built-in HTML controls and work with a keyboard.</p>
+      <details>
+        <summary>1. Why might a customer review need processing before it can be analyzed alongside many other reviews?</summary>
+        <p>It is free-form text rather than a set of consistent fields. The analyst first needs to decide what information to extract and how to represent it consistently for the chosen question.</p>
+      </details>
+      <details>
+        <summary>2. Name two useful pieces of metadata for a review dataset. What purpose do they serve?</summary>
+        <p>A stable review ID and the source platform are two examples. Along with fields such as a date, they help identify the original review so an output can be traced and checked.</p>
+      </details>
+      <details>
+        <summary>3. What should be decided before writing a script to structure a large collection of documents?</summary>
+        <p>The scope and question, the desired output format and fields, metadata requirements, and the collection plan—including whether batches or parallel processing are warranted.</p>
+      </details>
+      <details>
+        <summary>4. In the example <code>some_text.lower()</code>, what is <code>lower</code>?</summary>
+        <p>It is a method associated with the string object <code>some_text</code>; it returns a lowercase version of the text.</p>
+      </details>
+      <details>
+        <summary>5. Give one reason to choose Python and one reason not to assume it is always the best option.</summary>
+        <p>Its readable syntax and broad package ecosystem make it useful for many custom data tasks. However, another language may be faster or better suited to a particular statistical workflow or existing environment.</p>
+      </details>
+    </section>
+
+
+  </main>
+
+  <footer class="shell">
+    <p>Prepared as a beginner study aid for Week 1, Lesson 1. Practical examples and sample records are illustrative unless explicitly identified as course content.</p>
+  </footer>
+</body>
+</html>

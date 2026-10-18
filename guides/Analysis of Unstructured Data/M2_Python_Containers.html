@@ -1,0 +1,365 @@
+---
+title: "M2: Python Containers"
+description: "Compare Python lists, sets, tuples, and dictionaries, understand their behavior, and choose the right container for common tasks."
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A beginner-friendly guide to Python lists, sets, tuples, and dictionaries, with practical examples.">
+  <title>M2: Python Containers</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1d2939;
+      --muted: #475467;
+      --paper: #ffffff;
+      --page: #f3f6fa;
+      --accent: #155eef;
+      --accent-dark: #123b83;
+      --line: #d0d5dd;
+      --note: #eff8ff;
+      --warm: #fff7e6;
+      --code: #101828;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font: 1rem/1.65 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: var(--accent-dark); text-underline-offset: 0.18em; }
+    a:focus-visible, summary:focus-visible {
+      outline: 3px solid #f79009;
+      outline-offset: 3px;
+      border-radius: 3px;
+    }
+    .shell { width: min(100% - 2rem, 960px); margin: 0 auto; }
+    header {
+      padding: 3rem 0 2rem;
+      background: #eaf2ff;
+      border-bottom: 1px solid #c7d7fe;
+    }
+    header p { max-width: 72ch; }
+    .eyebrow {
+      margin: 0 0 0.5rem;
+      color: var(--accent-dark);
+      font-size: 0.85rem;
+      font-weight: 750;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    h1 { max-width: 18ch; margin: 0; font-size: clamp(2rem, 6vw, 3.25rem); line-height: 1.12; }
+    h2 { margin-top: 0; font-size: clamp(1.45rem, 4vw, 2rem); line-height: 1.25; }
+    h3 { margin-bottom: 0.35rem; font-size: 1.15rem; }
+    main { padding: 1.5rem 0 3rem; }
+    section, nav.toc {
+      margin: 1.25rem 0;
+      padding: clamp(1.1rem, 3vw, 2rem);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 0.75rem;
+    }
+    nav.toc ul { display: flex; flex-wrap: wrap; gap: 0.55rem 1.25rem; margin-bottom: 0; padding-left: 1.2rem; }
+    .lead { font-size: 1.12rem; }
+    .callout {
+      margin: 1rem 0;
+      padding: 0.9rem 1rem;
+      background: var(--note);
+      border-left: 4px solid var(--accent);
+      border-radius: 0.25rem;
+    }
+    .caution { background: var(--warm); border-left-color: #b54708; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 1rem; }
+    .card { padding: 1rem; border: 1px solid var(--line); border-radius: 0.55rem; }
+    .card h3 { margin-top: 0; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    th, td { padding: 0.7rem; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: #f2f4f7; }
+    code { padding: 0.1em 0.3em; background: #f2f4f7; border-radius: 0.25rem; font-size: 0.95em; }
+    pre {
+      overflow-x: auto;
+      padding: 1rem;
+      background: var(--code);
+      color: #f9fafb;
+      border-radius: 0.5rem;
+      font: 0.93rem/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    pre code { padding: 0; background: transparent; color: inherit; }
+    ol, ul { padding-left: 1.4rem; }
+    li + li { margin-top: 0.35rem; }
+    details { margin: 0.75rem 0; padding: 0.7rem 0.9rem; border: 1px solid var(--line); border-radius: 0.45rem; }
+    summary { cursor: pointer; font-weight: 700; }
+    details p { margin-bottom: 0.25rem; }
+    .small { color: var(--muted); font-size: 0.93rem; }
+    footer { padding: 0 0 2rem; color: var(--muted); }
+
+    @media (max-width: 600px) {
+      .shell { width: min(100% - 1rem, 960px); }
+      header { padding: 2rem 0 1.5rem; }
+      th, td { padding: 0.5rem; }
+    }
+    @media print {
+      body { background: #fff; color: #000; font-size: 11pt; }
+      header { padding: 1rem 0; background: #fff; border-bottom: 1px solid #777; }
+      .shell { width: 100%; }
+      section, nav.toc { break-inside: avoid; margin: 0.7rem 0; padding: 0.8rem; border-color: #999; }
+      a { color: #000; }
+      a::after { content: " (" attr(href) ")"; font-size: 0.85em; overflow-wrap: anywhere; }
+      details > *:not(summary) { display: block; }
+      pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #f2f4f7; color: #000; }
+      footer { padding-bottom: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell">
+      <p class="eyebrow">Week 1 · Lesson 2</p>
+      <h1>M2: Python Containers</h1>
+      <p class="lead">Lists, sets, tuples, and dictionaries all hold other objects—but each is suited to a different job. This guide explains how to choose among them and how their behavior connects to real tasks.</p>
+      <p><strong>By the end, you should be able to:</strong> describe the four built-in container types; compare mutability, ordering, indexing, and hashability; choose an appropriate container for a task; and recognize how <code>collections</code>, NumPy, and pandas extend Python’s tools.</p>
+    </div>
+  </header>
+
+  <main class="shell">
+    <nav class="toc" aria-label="Study guide contents">
+      <h2>On this page</h2>
+      <ul>
+        <li><a href="#roadmap">Roadmap</a></li>
+        <li><a href="#terms">Key terms</a></li>
+        <li><a href="#comparison">Container comparison</a></li>
+        <li><a href="#example">Real-world example</a></li>
+        <li><a href="#syntax">Python syntax</a></li>
+        <li><a href="#choosing">Choosing a container</a></li>
+        <li><a href="#modules">Beyond built-ins</a></li>
+        <li><a href="#pitfalls">Common mix-ups</a></li>
+        <li><a href="#check">Self-check</a></li>
+      </ul>
+    </nav>
+
+    <section id="roadmap">
+      <h2>1. The big picture</h2>
+      <p>A <strong>container</strong> is an object that holds other objects. Think of containers as different organizers: a numbered list, a unique-item basket, a fixed record, or a labeled filing cabinet. The best choice depends on what you need to do with the information.</p>
+      <p>Four basic questions help you choose:</p>
+      <ol>
+        <li>Can the collection change after it is created?</li>
+        <li>Does the order matter?</li>
+        <li>Do you need to retrieve an item by its position, by a key, or just check whether it is present?</li>
+        <li>Will the container itself (or one of its items) need to serve as a dictionary key or set member?</li>
+      </ol>
+      <div class="callout"><strong>Memory cue:</strong> list = sequence, set = unique membership, tuple = fixed record, dictionary = key-to-value lookup.</div>
+    </section>
+
+    <section id="terms">
+      <h2>2. Key terms in plain language</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>Mutable</h3>
+          <p>The object can be changed in place after it is created. Lists, sets, and dictionaries are mutable. Immutable does not mean a variable can never be assigned a new value—it means the existing object cannot be edited in place.</p>
+        </article>
+        <article class="card">
+          <h3>Ordered</h3>
+          <p>The container preserves a defined iteration order. Lists and tuples follow their sequence order. Modern Python dictionaries preserve insertion order (a language guarantee since Python 3.7). Sets are unordered, so do not rely on their iteration order.</p>
+        </article>
+        <article class="card">
+          <h3>Indexing</h3>
+          <p>Accessing an item by its position, often with square brackets such as <code>items[0]</code>. Lists and tuples use integer positions starting at 0. A dictionary uses keys for lookup; a set has no positional indexing.</p>
+        </article>
+        <article class="card">
+          <h3>Hashable</h3>
+          <p>An object is hashable when it has a hash value that stays consistent during its lifetime and can be compared for equality. Hashable values can be dictionary keys and set elements. Common examples include strings, integers, and tuples whose contents are all hashable.</p>
+        </article>
+      </div>
+      <div class="callout caution"><strong>Hashability clarification:</strong> the slide describes hashability as having a “static address.” That is a simplified and potentially misleading metaphor: hashability is about a stable hash value, not a fixed memory address. Mutability is a useful clue, but the key test is whether the object’s hash and equality behavior remain suitable for lookup. A tuple is hashable only if all of its elements are hashable.</div>
+    </section>
+
+    <section id="comparison">
+      <h2>3. Compare the four built-in containers</h2>
+      <table>
+        <thead>
+          <tr><th>Type</th><th>Typical syntax</th><th>Mutable?</th><th>Order / access</th><th>Good for</th><th>Hashable?</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">List</th>
+            <td><code>[a, b, c]</code></td>
+            <td>Yes</td>
+            <td>Ordered; integer-indexed</td>
+            <td>A sequence that may change or contain duplicates</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <th scope="row">Set</th>
+            <td><code>{a, b, c}</code></td>
+            <td>Yes</td>
+            <td>Unordered; no positional indexing</td>
+            <td>Unique values and membership checks</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <th scope="row">Tuple</th>
+            <td><code>(a, b, c)</code></td>
+            <td>No</td>
+            <td>Ordered; integer-indexed</td>
+            <td>A fixed sequence or multi-part key</td>
+            <td>Yes, if every item is hashable</td>
+          </tr>
+          <tr>
+            <th scope="row">Dictionary</th>
+            <td><code>{key: value}</code></td>
+            <td>Yes</td>
+            <td>Insertion-ordered; access by key</td>
+            <td>Associating labels/keys with values</td>
+            <td>No</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>A dictionary is ordered in the sense that iteration follows insertion order, but it is not a positional sequence: use a key such as <code>"name"</code> rather than assuming an integer position. Dictionary keys must be unique and hashable; values can be objects of many types, including mutable ones.</p>
+      <p>Set elements and dictionary keys need to be hashable. Lists and dictionaries cannot be used as set elements or dictionary keys. A tuple can be used when all of its contents are hashable.</p>
+    </section>
+
+    <section id="example">
+      <h2>4. Real-world example: packing for a weekend trip</h2>
+      <p><em>Illustrative example, not a measured result from the course.</em> Suppose you are organizing a travel checklist, tracking unique destinations, representing a booking identifier, and looking up booking details.</p>
+      <div class="grid">
+        <article class="card">
+          <h3>List: checklist in sequence</h3>
+          <p>Keep tasks in the order you plan to do them, and add or remove items as plans change.</p>
+          <pre><code>packing = ["passport", "charger", "jacket"]
+packing.append("toothbrush")
+first_item = packing[0]</code></pre>
+        </article>
+        <article class="card">
+          <h3>Set: unique destinations</h3>
+          <p>Store each destination once, even if it appears repeatedly in the itinerary. Ask quickly whether a place is already included.</p>
+          <pre><code>cities = {"Oslo", "Bergen", "Oslo"}
+# cities contains each value once
+already_planned = "Bergen" in cities</code></pre>
+        </article>
+        <article class="card">
+          <h3>Tuple: multi-part identifier</h3>
+          <p>Pair a confirmation code with a year to form one fixed, hashable key, assuming both parts are hashable.</p>
+          <pre><code>booking_key = ("AB123", 2026)</code></pre>
+        </article>
+        <article class="card">
+          <h3>Dictionary: details by key</h3>
+          <p>Look up booking details using a meaningful label or identifier. Each key maps to a value.</p>
+          <pre><code>booking = {
+    "traveler": "Mina",
+    "city": "Oslo",
+    "nights": 2
+}
+city = booking["city"]</code></pre>
+        </article>
+      </div>
+      <p class="small">The examples show typical uses. In real programs, choose keys and data fields that make the information clear and avoid storing unnecessary personal details.</p>
+    </section>
+
+    <section id="syntax">
+      <h2>5. Useful syntax details</h2>
+      <ul>
+        <li><strong>List:</strong> square brackets. Positions start at zero: the first item is <code>items[0]</code>.</li>
+        <li><strong>Set:</strong> braces with comma-separated values. To create an empty set, use <code>set()</code>; <code>{}</code> creates an empty dictionary. Sets keep distinct elements, not duplicates.</li>
+        <li><strong>Tuple:</strong> often written with parentheses, but the commas make it a tuple. A one-item tuple needs a trailing comma: <code>("Oslo",)</code>. <code>("Oslo")</code> is just a string in parentheses.</li>
+        <li><strong>Dictionary:</strong> braces with <code>key: value</code> pairs. If the same key is assigned again, its value is replaced; keys do not appear twice as separate entries.</li>
+        <li><strong>Nested containers:</strong> lists, tuples, sets, and dictionaries can hold other objects, subject to the hashability requirement for set elements and dictionary keys.</li>
+      </ul>
+      <div class="callout"><strong>Example of immutable reassignment:</strong> if <code>place = ("Oslo", 2026)</code>, you cannot change one element of that tuple in place. You can assign a different tuple to the variable <code>place</code>; that replaces the variable’s reference rather than editing the original tuple.</div>
+    </section>
+
+    <section id="choosing">
+      <h2>6. Which container should you choose?</h2>
+      <table>
+        <thead><tr><th>If you need to…</th><th>Consider…</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>Keep an ordered, editable sequence, possibly with repeated items</td><td>List</td><td>It is ordered, indexable, and mutable.</td></tr>
+          <tr><td>Remove duplicates or test whether a value is present</td><td>Set</td><td>Values are unique; membership checks are a core use. Average membership performance is typically efficient, but exact speed depends on details.</td></tr>
+          <tr><td>Keep a small, fixed sequence, or use multiple values as one key</td><td>Tuple</td><td>It is ordered and immutable; it is hashable when its contents are hashable.</td></tr>
+          <tr><td>Look up a value from a meaningful key</td><td>Dictionary</td><td>It maps unique hashable keys to values.</td></tr>
+        </tbody>
+      </table>
+      <p>For example, the lecture describes using a tuple like <code>("Microsoft", 2010)</code> to identify one company-year record. That tuple can serve as a dictionary key if both parts are hashable:</p>
+      <pre><code>annual_data = {
+    ("Microsoft", 2010): {"revenue": 62.5},
+    ("Microsoft", 2011): {"revenue": 69.9}
+}
+record = annual_data[("Microsoft", 2010)]</code></pre>
+      <p class="small">The revenue figures above are fabricated solely to illustrate the data structure; they are not course results or verified financial figures.</p>
+    </section>
+
+    <section id="modules">
+      <h2>7. Containers beyond Python’s built-ins</h2>
+      <ul>
+        <li><strong><code>collections</code>:</strong> provides specialized container tools. For example, <code>Counter</code> is useful for counting occurrences, and <code>defaultdict</code> can provide a default value for a missing key.</li>
+        <li><strong>NumPy:</strong> provides arrays and tools for numerical and scientific computing, including vectorized operations and linear algebra.</li>
+        <li><strong>pandas:</strong> provides tools for working with structured, tabular data. A pandas <code>DataFrame</code> is a common target when converting unstructured material into rows and columns.</li>
+      </ul>
+      <p>These tools build on ideas from basic containers, but they have specialized behavior and operations. Learn the four built-in types first, then use additional packages when their features fit the task.</p>
+    </section>
+
+    <section id="pitfalls">
+      <h2>8. Common mix-ups and limitations</h2>
+      <ul>
+        <li><strong>Parentheses do not automatically make a tuple.</strong> It is the comma that forms a tuple; remember the comma in a one-item tuple.</li>
+        <li><strong>Curly braces are shared syntax.</strong> Non-empty <code>{1, 2}</code> is a set; <code>{"a": 1}</code> is a dictionary; empty <code>{}</code> is a dictionary.</li>
+        <li><strong>Ordered is not the same as integer-indexed.</strong> A dictionary preserves insertion order, but its normal lookup is by key. A set has no guaranteed order.</li>
+        <li><strong>Immutable does not always mean hashable.</strong> A tuple containing a list cannot be hashed, because the list is unhashable. Tuple hashability depends on its contents.</li>
+        <li><strong>A hashable tuple can still contain mutable-looking data? Check every item.</strong> For example, a tuple containing only strings and numbers is hashable; a tuple containing a list is not.</li>
+        <li><strong>Sets discard duplicates and do not preserve a usable position.</strong> If order or repeated values matter, use a list instead.</li>
+        <li><strong>Container choice is task-dependent.</strong> A list is flexible, but a dictionary or set may describe the relationship or membership question more directly.</li>
+      </ul>
+    </section>
+
+    <section id="recap">
+      <h2>9. Quick recap</h2>
+      <ul>
+        <li><strong>List:</strong> mutable, ordered, indexable sequence; duplicates allowed.</li>
+        <li><strong>Set:</strong> mutable collection of unique hashable elements; unordered and not indexable.</li>
+        <li><strong>Tuple:</strong> immutable, ordered, indexable sequence; hashable only if every element is hashable.</li>
+        <li><strong>Dictionary:</strong> mutable mapping of unique hashable keys to values; preserves insertion order in modern Python.</li>
+      </ul>
+      <p>Choosing a container thoughtfully makes code clearer and helps prevent errors when you update data, test membership, or use keys.</p>
+    </section>
+
+    <section id="check">
+      <h2>10. Self-check</h2>
+      <p>Try each question before opening its explanation. The answers use keyboard-accessible expandable sections.</p>
+      <details>
+        <summary>1. You need an editable checklist where order matters and the same item may appear twice. Which container fits?</summary>
+        <p>A list: it is mutable, ordered, indexable, and permits repeated values.</p>
+      </details>
+      <details>
+        <summary>2. What is the result of writing <code>{}</code> when you intend to make an empty set?</summary>
+        <p><code>{}</code> creates an empty dictionary. Use <code>set()</code> for an empty set.</p>
+      </details>
+      <details>
+        <summary>3. Can <code>("trip", [2026])</code> be used as a dictionary key?</summary>
+        <p>No. The outer object is a tuple, but one of its elements is a list, which is unhashable. A tuple is hashable only when all of its contents are hashable.</p>
+      </details>
+      <details>
+        <summary>4. A dictionary remembers the order keys were inserted. Can you use <code>my_dict[0]</code> to get its first inserted value?</summary>
+        <p>Not reliably as “the first item.” Square-bracket dictionary access looks up a key. Use the actual key, or explicitly iterate over items if you need to work with insertion order.</p>
+      </details>
+      <details>
+        <summary>5. Which container is a natural fit for counting how many times each word appears?</summary>
+        <p>A dictionary can map each word to its count; <code>collections.Counter</code> is a specialized tool for this pattern.</p>
+      </details>
+      <details>
+        <summary>6. What does hashable mean, and why does it matter for dictionary keys?</summary>
+        <p>A hashable object has a stable hash value during its lifetime and equality behavior suitable for lookup. Dictionaries use hashes to find keys efficiently, so a key must not change in a way that invalidates its lookup.</p>
+      </details>
+    </section>
+
+
+  </main>
+
+  <footer class="shell">
+    <p>Prepared as a beginner study aid for Week 1, Lesson 2. Practical examples are illustrative unless explicitly identified as course content.</p>
+  </footer>
+</body>
+</html>

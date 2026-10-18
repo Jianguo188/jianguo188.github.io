@@ -1,0 +1,381 @@
+---
+title: "M3: Python Logic and Programming"
+description: "Build Python fundamentals with values, strings, functions, conditions, loops, and simple simulations for reasoning about data."
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A beginner-friendly guide to Python variables, classes, functions, conditionals, loops, and simulations, based on Week 1 Lesson 3 and Demo A.">
+  <title>M3: Python Logic and Programming</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1d2939;
+      --muted: #475467;
+      --paper: #ffffff;
+      --page: #f3f6fa;
+      --accent: #155eef;
+      --accent-dark: #123b83;
+      --line: #d0d5dd;
+      --note: #eff8ff;
+      --warm: #fff7e6;
+      --code: #101828;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font: 1rem/1.65 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: var(--accent-dark); text-underline-offset: 0.18em; }
+    a:focus-visible, summary:focus-visible {
+      outline: 3px solid #f79009;
+      outline-offset: 3px;
+      border-radius: 3px;
+    }
+    .shell { width: min(100% - 2rem, 980px); margin: 0 auto; }
+    header {
+      padding: 3rem 0 2rem;
+      background: #eaf2ff;
+      border-bottom: 1px solid #c7d7fe;
+    }
+    header p { max-width: 72ch; }
+    .eyebrow {
+      margin: 0 0 0.5rem;
+      color: var(--accent-dark);
+      font-size: 0.85rem;
+      font-weight: 750;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    h1 { max-width: 22ch; margin: 0; font-size: clamp(2rem, 6vw, 3.25rem); line-height: 1.12; }
+    h2 { margin-top: 0; font-size: clamp(1.45rem, 4vw, 2rem); line-height: 1.25; }
+    h3 { margin-bottom: 0.35rem; font-size: 1.15rem; }
+    main { padding: 1.5rem 0 3rem; }
+    section, nav.toc {
+      margin: 1.25rem 0;
+      padding: clamp(1.1rem, 3vw, 2rem);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 0.75rem;
+    }
+    nav.toc ul { display: flex; flex-wrap: wrap; gap: 0.55rem 1.25rem; margin-bottom: 0; padding-left: 1.2rem; }
+    .lead { font-size: 1.12rem; }
+    .callout {
+      margin: 1rem 0;
+      padding: 0.9rem 1rem;
+      background: var(--note);
+      border-left: 4px solid var(--accent);
+      border-radius: 0.25rem;
+    }
+    .caution { background: var(--warm); border-left-color: #b54708; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 1rem; }
+    .card { padding: 1rem; border: 1px solid var(--line); border-radius: 0.55rem; }
+    .card h3 { margin-top: 0; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    th, td { padding: 0.7rem; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: #f2f4f7; }
+    code { padding: 0.1em 0.3em; background: #f2f4f7; border-radius: 0.25rem; font-size: 0.95em; }
+    pre {
+      overflow-x: auto;
+      padding: 1rem;
+      background: var(--code);
+      color: #f9fafb;
+      border-radius: 0.5rem;
+      font: 0.93rem/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    pre code { padding: 0; background: transparent; color: inherit; }
+    ol, ul { padding-left: 1.4rem; }
+    li + li { margin-top: 0.35rem; }
+    details { margin: 0.75rem 0; padding: 0.7rem 0.9rem; border: 1px solid var(--line); border-radius: 0.45rem; }
+    summary { cursor: pointer; font-weight: 700; }
+    details p { margin-bottom: 0.25rem; }
+    .small { color: var(--muted); font-size: 0.93rem; }
+    footer { padding: 0 0 2rem; color: var(--muted); }
+
+    @media (max-width: 600px) {
+      .shell { width: min(100% - 1rem, 980px); }
+      header { padding: 2rem 0 1.5rem; }
+      th, td { padding: 0.5rem; }
+    }
+    @media print {
+      body { background: #fff; color: #000; font-size: 11pt; }
+      header { padding: 1rem 0; background: #fff; border-bottom: 1px solid #777; }
+      .shell { width: 100%; }
+      section, nav.toc { break-inside: avoid; margin: 0.7rem 0; padding: 0.8rem; border-color: #999; }
+      a { color: #000; }
+      a::after { content: " (" attr(href) ")"; font-size: 0.85em; overflow-wrap: anywhere; }
+      details > *:not(summary) { display: block; }
+      pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #f2f4f7; color: #000; }
+      footer { padding-bottom: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell">
+      <p class="eyebrow">Week 1 · Lesson 3 + Demo A</p>
+      <h1>M3: Python Logic and Programming</h1>
+      <p class="lead">A practical introduction to using Python to inspect, classify, and repeatedly process information—building from simple values and string operations to reusable functions, branching logic, and simulations.</p>
+      <p><strong>Learning goals:</strong> use simple Python built-ins; recognize values, collections, classes, methods, and functions; write basic <code>if</code> logic and loops; and combine these ideas to process records or run a simple simulation.</p>
+      <p class="small">This guide combines W1 L3, “Basic Programming Strategies &amp; Logic Control,” with W1 Demo A, “Basics of Python.”</p>
+    </div>
+  </header>
+
+  <main class="shell">
+    <nav class="toc" aria-label="Study guide contents">
+      <h2>On this page</h2>
+      <ul>
+        <li><a href="#roadmap">Roadmap</a></li>
+        <li><a href="#basics">Python building blocks</a></li>
+        <li><a href="#strings">Working with text</a></li>
+        <li><a href="#functions">Functions</a></li>
+        <li><a href="#conditions">Conditions and branches</a></li>
+        <li><a href="#loops">Loops and loop controls</a></li>
+        <li><a href="#example">Everyday example</a></li>
+        <li><a href="#simulation">Simulation and chance</a></li>
+        <li><a href="#pitfalls">Common mistakes</a></li>
+        <li><a href="#check">Self-check</a></li>
+      </ul>
+    </nav>
+
+    <section id="roadmap">
+      <h2>1. The big picture</h2>
+      <p>A small data-processing program often follows this pattern:</p>
+      <ol>
+        <li><strong>Represent information</strong> with values such as text, numbers, and collections.</li>
+        <li><strong>Inspect or transform it</strong> with built-in functions and object methods.</li>
+        <li><strong>Choose what to do</strong> using conditions such as “is this value missing?” or “is this rating below the threshold?”</li>
+        <li><strong>Repeat the steps</strong> over records with a loop.</li>
+        <li><strong>Package reusable work</strong> in a function so the same rule can be applied consistently.</li>
+      </ol>
+      <div class="callout"><strong>Memory cue:</strong> values hold the data; functions do a task; conditions choose a path; loops repeat a path over items.</div>
+    </section>
+
+    <section id="basics">
+      <h2>2. Python building blocks</h2>
+      <h3>Values and variables</h3>
+      <p>A variable is a name that refers to a value. The demo introduces common types: <code>str</code> for text, <code>int</code> for whole numbers, <code>float</code> for decimal numbers, and <code>bool</code> for <code>True</code> or <code>False</code>.</p>
+      <pre><code>name = "Mina"         # str
+orders = 4            # int
+wait_minutes = 18.5   # float
+is_open = True        # bool
+
+print(type(wait_minutes))  # &lt;class 'float'&gt;</code></pre>
+      <p><code>print()</code> displays a value. <code>type()</code> helps check what kind of value you have. Formatted strings (f-strings) put variable values into readable text:</p>
+      <pre><code>print(f"{name} has {orders} orders to review.")</code></pre>
+      <h3>Collections and objects</h3>
+      <p>Python objects include individual values and containers such as lists, sets, tuples, and dictionaries. A list like <code>["A12", "B03"]</code> stores an ordered sequence; a dictionary like <code>{"A12": 18}</code> maps a key to a value. The earlier W1 L2 guide covers those containers in more detail.</p>
+      <p>In a Jupyter notebook, the demo runs a cell with <kbd>Shift</kbd>+<kbd>Enter</kbd>. The result appears below the cell; a later cell can use variables defined in earlier cells that have already run.</p>
+    </section>
+
+    <section id="strings">
+      <h2>3. Working with text: classes and methods</h2>
+      <p>A <strong>class</strong> defines a kind of object and the behavior available to it; a particular value created from that class is an <strong>instance</strong>. You will use many existing Python classes even if you rarely write your own. An <strong>attribute</strong> is information attached to an object; a <strong>method</strong> is an operation associated with an object and called with dot notation.</p>
+      <p>For example, a string is a Python object, and string methods help inspect or transform text:</p>
+      <pre><code>raw_name = "  Mina Patel  "
+clean_name = raw_name.strip()
+lower_name = clean_name.lower()
+words = clean_name.split()
+
+print(clean_name)  # Mina Patel
+print(lower_name)  # mina patel
+print(words)       # ['Mina', 'Patel']</code></pre>
+      <ul>
+        <li><code>isalpha()</code> checks whether characters are letters (and requires at least one letter).</li>
+        <li><code>isdigit()</code> checks whether characters are digits.</li>
+        <li><code>isupper()</code> and <code>islower()</code> check letter case; non-letter characters are ignored, but there must be at least one letter.</li>
+        <li><code>upper()</code>, <code>lower()</code>, and <code>capitalize()</code> return text with changed capitalization.</li>
+        <li><code>split()</code> separates a string into a list, by default at whitespace; <code>replace(old, new)</code> substitutes text; <code>strip()</code> removes leading and trailing whitespace.</li>
+      </ul>
+      <p>Strings are immutable: these methods return results rather than changing the original string in place. Save the returned result if you want to use it later. The demo also introduces encoding: <code>encode("utf-8")</code> converts text to bytes, and <code>decode("utf-8")</code> converts those bytes back to text.</p>
+      <div class="callout caution"><strong>Class detail:</strong> attributes can belong to a class or to an individual instance; they are not necessarily shared among all instances. For this lesson, focus on recognizing that objects have data and behavior, and that methods are called like <code>text.strip()</code>.</div>
+    </section>
+
+    <section id="functions">
+      <h2>4. Functions: name a reusable task</h2>
+      <p>Python has built-in functions such as <code>print()</code>, <code>int()</code>, and <code>round()</code>. You can also define a custom function with <code>def</code>. Inputs are called parameters; <code>return</code> sends a result back to the code that called the function.</p>
+      <pre><code>def classify_wait(minutes):
+    if minutes is None:
+        return "missing"
+    elif minutes &lt;= 20:
+        return "on time"
+    else:
+        return "delayed"
+
+status = classify_wait(18)
+print(status)  # on time</code></pre>
+      <p>The parameter <code>minutes</code> is local to the function call. The indented lines form the function body. In Python, indentation is required to show which statements belong to the function or branch; use consistent indentation (commonly four spaces)—a tab character is not required.</p>
+      <div class="callout"><strong>Print vs. return:</strong> <code>print()</code> displays something for a person to see; <code>return</code> gives a value back so other code can store or use it. A function that reaches its end without a <code>return</code> statement returns <code>None</code>.</div>
+    </section>
+
+    <section id="conditions">
+      <h2>5. Conditions: choose what happens next</h2>
+      <p>An <code>if</code>/<code>elif</code>/<code>else</code> block checks conditions from top to bottom. The first true branch runs; <code>else</code>, if present, is the fallback if none of the earlier tests matched. <code>elif</code> and <code>else</code> are optional, but neither can replace the initial <code>if</code>.</p>
+      <pre><code>rating = 3
+
+if rating &gt;= 4:
+    label = "positive"
+elif rating == 3:
+    label = "mixed"
+else:
+    label = "negative"</code></pre>
+      <p>Conditions evaluate to truth values. Useful operators include:</p>
+      <table>
+        <thead><tr><th>Operator</th><th>Meaning</th><th>Example</th></tr></thead>
+        <tbody>
+          <tr><td><code>==</code>, <code>!=</code></td><td>equal to, not equal to</td><td><code>rating == 3</code></td></tr>
+          <tr><td><code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code></td><td>numeric comparisons</td><td><code>minutes &lt;= 20</code></td></tr>
+          <tr><td><code>in</code></td><td>membership test</td><td><code>"A12" in order_ids</code></td></tr>
+          <tr><td><code>%</code></td><td>remainder (modulo)</td><td><code>7 % 2 == 1</code></td></tr>
+          <tr><td><code>is None</code></td><td>check for the absence of a value</td><td><code>minutes is None</code></td></tr>
+        </tbody>
+      </table>
+      <p>For example, <code>number % 2 == 0</code> tests whether an integer is even. A remainder of 0 means it divides evenly by 2.</p>
+      <div class="callout caution"><strong>Assignment vs. comparison:</strong> a single <code>=</code> assigns a value, as in <code>rating = 3</code>. A double <code>==</code> asks whether two values are equal. Also, <code>None</code> is not the same value as <code>False</code>, even though both are treated as false in a conditional.</div>
+      <p>Python also treats some values as false in a condition: <code>False</code>, <code>None</code>, numeric zero, and empty collections or strings. Most other values are true. When learning, writing an explicit comparison often makes the intention clearer.</p>
+    </section>
+
+    <section id="loops">
+      <h2>6. Loops: repeat work over items</h2>
+      <p>A <strong>loop</strong> repeats a block of code. A <code>for</code> loop visits each item in an iterable—such as a list, string, dictionary, or a sequence made by <code>range()</code>. The loop variable is a temporary name for the current item.</p>
+      <pre><code>order_ids = ["A12", "B03", "C19"]
+
+for order_id in order_ids:
+    print(f"Checking order {order_id}")</code></pre>
+      <p><code>range(start, stop)</code> provides integers from <code>start</code> up to, but not including, <code>stop</code>. For example, <code>range(3)</code> produces 0, 1, and 2, so the loop runs three times.</p>
+      <h3>Use conditions inside a loop</h3>
+      <p>Combining a loop with a branch allows a script to handle records differently. For a dictionary, test whether a key exists before trying to retrieve it, or use a deliberate missing-value strategy.</p>
+      <h3>Loop-control statements</h3>
+      <table>
+        <thead><tr><th>Statement</th><th>Effect</th><th>When it helps</th></tr></thead>
+        <tbody>
+          <tr><th scope="row"><code>pass</code></th><td>Does nothing at that point; execution continues with the next statement in the same block.</td><td>A temporary placeholder where Python syntax requires a statement.</td></tr>
+          <tr><th scope="row"><code>continue</code></th><td>Skips the remainder of the current iteration and moves to the next item.</td><td>Skip an unusable record while continuing the batch.</td></tr>
+          <tr><th scope="row"><code>break</code></th><td>Exits the nearest enclosing loop immediately.</td><td>Stop searching once the needed item is found, or end a bounded test early.</td></tr>
+        </tbody>
+      </table>
+      <p>A <code>while</code> loop repeats while its condition remains true. Use it when the stopping point depends on a changing condition rather than a fixed collection. Ensure that the loop can eventually stop. <code>try</code>/<code>except</code> is a separate error-handling structure, not a kind of loop control; use it to respond to expected errors. <code>exit()</code> ends a program or interactive session, rather than merely skipping or breaking a loop.</p>
+    </section>
+
+    <section id="example">
+      <h2>7. Everyday example: checking delivery wait times</h2>
+      <p><em>Illustrative example—not a course measurement.</em> A café manager wants to label a small batch of delivery records. For this simple example, assume 20 minutes is the manager’s chosen on-time cutoff; it is not a universal service standard.</p>
+      <pre><code>deliveries = [
+    {"order": "A12", "minutes": 18},
+    {"order": "B03", "minutes": 27},
+    {"order": "C19", "minutes": None},
+    {"order": "D08", "minutes": 22},
+]
+
+def classify_wait(minutes):
+    if minutes is None:
+        return "missing"
+    elif minutes &lt;= 20:
+        return "on time"
+    else:
+        return "delayed"
+
+for delivery in deliveries:
+    minutes = delivery["minutes"]
+    if minutes is None:
+        print(f'{delivery["order"]}: no wait time recorded')
+        continue
+    status = classify_wait(minutes)
+    print(f'{delivery["order"]}: {status} ({minutes} minutes)')</code></pre>
+      <p>What is happening: the list holds the records; the function applies one consistent rule; the <code>if</code> checks for missing data; <code>continue</code> skips the rest of that iteration for the missing record; and the <code>for</code> loop repeats the process for each delivery.</p>
+      <p class="small">Expected output for the invented example: A12 is on time; B03 is delayed; C19 has no wait time recorded; D08 is delayed. Changing the cutoff changes the labels.</p>
+    </section>
+
+    <section id="simulation">
+      <h2>8. Simulation: use a loop to explore uncertainty</h2>
+      <p>A simulation repeats a simple random experiment to create synthetic observations. In the course demo, a random number is used to represent a fair coin flip, with heads coded as 1 and tails as 0. The mean of a list of 1s and 0s is the fraction of flips that were heads.</p>
+      <pre><code>import random
+
+flips = []
+for _ in range(1000):
+    flips.append(1 if random.random() &lt; 0.5 else 0)
+
+heads_fraction = sum(flips) / len(flips)
+print(f"Heads: {heads_fraction:.1%}")</code></pre>
+      <p>This uses Python’s standard <code>random</code> module as an illustrative equivalent to the course notebook’s NumPy random-number example. Each run can give a different percentage; the code does not promise exactly 50%. A fixed random seed can make a pseudo-random run repeatable for debugging.</p>
+      <h3>Independent events and the gambler’s fallacy</h3>
+      <p>For a fair coin, each toss is independent: the chance of heads on the next toss is still 50%, even after several heads in a row. The expectation of about half heads over a large number of tosses does not mean the next toss must “make up” for an earlier imbalance.</p>
+      <p>Runs of repeated outcomes do occur by chance. Seeing a streak is not, by itself, evidence that a coin is unfair. The demo explores comparing each toss with the one before it; in a more careful simulation, group observations by the previous outcome and compare the next-outcome proportions over many trials.</p>
+      <div class="callout caution"><strong>Probability caveat:</strong> the chance of one specific sequence of five tosses (for example, H-H-H-H-H) is 1/32 for a fair coin. The chance of either all heads or all tails in five tosses is 2/32 = 1/16. Those are probabilities for a particular five-toss window—not the probability of observing at least one five-in-a-row streak somewhere across 1,000 tosses, which is much larger. A streak threshold is not a sound fairness test by itself.</div>
+      <p class="small">The course’s loop uses a counter of repeated matches after the first toss and checks when that counter reaches five; that corresponds to six identical tosses in a row, not five. Define whether a counter means “items in a streak” or “matches after the first item” before choosing a threshold.</p>
+    </section>
+
+    <section id="pitfalls">
+      <h2>9. Common mistakes and good habits</h2>
+      <ul>
+        <li><strong>Forgetting indentation:</strong> indentation determines which statements belong to a function, condition, or loop. Keep it consistent.</li>
+        <li><strong>Confusing <code>=</code> and <code>==</code>:</strong> one assigns, two compare.</li>
+        <li><strong>Assuming indexing starts at 1:</strong> Python sequence positions start at 0. In a slice such as <code>items[0:2]</code>, the start is included and the stop is excluded.</li>
+        <li><strong>Expecting a method to modify immutable text:</strong> save the result of <code>strip()</code>, <code>lower()</code>, or <code>replace()</code> if you want to keep it.</li>
+        <li><strong>Using a missing dictionary key without checking:</strong> direct lookup raises <code>KeyError</code> when the key is absent. Check first or use a suitable lookup method.</li>
+        <li><strong>Mixing up <code>pass</code>, <code>continue</code>, and <code>break</code>:</strong> no-op, skip this iteration, and leave the loop are different actions.</li>
+        <li><strong>Writing a loop that never stops:</strong> a <code>while</code> loop needs a condition that can eventually become false, or an intentional stop mechanism.</li>
+        <li><strong>Trusting a single random run too much:</strong> random variation is expected, and a sample outcome does not prove a process is fair or biased.</li>
+        <li><strong>Confusing demonstration output with a guaranteed result:</strong> random outputs vary between runs unless a seed and implementation are fixed.</li>
+      </ul>
+    </section>
+
+    <section id="recap">
+      <h2>10. Quick recap</h2>
+      <ul>
+        <li>Use built-in functions and object methods to inspect, format, or transform values.</li>
+        <li>Use a custom function to give a repeatable task a name, accept inputs, and return a useful result.</li>
+        <li>Use <code>if</code>/<code>elif</code>/<code>else</code> to choose a path based on conditions.</li>
+        <li>Use <code>for</code> to process items in an iterable; use <code>while</code> when repetition depends on a condition.</li>
+        <li>Use <code>continue</code> to skip one iteration, <code>break</code> to exit a loop, and <code>pass</code> as a no-op placeholder.</li>
+        <li>Use simulations to explore uncertain scenarios, but interpret random outcomes with probability in mind.</li>
+      </ul>
+    </section>
+
+    <section id="check">
+      <h2>11. Self-check</h2>
+      <p>Try to answer each question before expanding the explanation.</p>
+      <details>
+        <summary>1. What is the difference between <code>print()</code> and <code>return</code> in a function?</summary>
+        <p><code>print()</code> displays text or a value. <code>return</code> gives a value back to the caller so the program can store or use it.</p>
+      </details>
+      <details>
+        <summary>2. In <code>if number % 2 == 0:</code>, what is being tested?</summary>
+        <p>The remainder after dividing <code>number</code> by 2 is tested for equality with zero. That is a common way to test whether an integer is even.</p>
+      </details>
+      <details>
+        <summary>3. What does <code>continue</code> do inside a <code>for</code> loop?</summary>
+        <p>It skips the remaining statements in the current iteration and advances to the next item.</p>
+      </details>
+      <details>
+        <summary>4. If a loop is written as <code>for i in range(4):</code>, how many times does it run?</summary>
+        <p>Four times, with <code>i</code> taking the values 0, 1, 2, and 3. The stop value 4 is excluded.</p>
+      </details>
+      <details>
+        <summary>5. Does a streak of heads make tails more likely on the next toss of a fair coin?</summary>
+        <p>No. Under the fair, independent-coin assumption, the next toss remains 50% heads and 50% tails.</p>
+      </details>
+      <details>
+        <summary>6. Why check whether a value is <code>None</code> before comparing it with a number?</summary>
+        <p><code>None</code> means no value is available. A numeric comparison with it is not the same as testing a number and can raise a type error. Handle missing data explicitly.</p>
+      </details>
+      <details>
+        <summary>7. In the delivery example, what happens to the record whose minutes value is <code>None</code>?</summary>
+        <p>The loop prints that the time is missing, then <code>continue</code> skips the classification and output steps for that record and proceeds to the next delivery.</p>
+      </details>
+    </section>
+
+
+  </main>
+
+  <footer class="shell">
+    <p>Prepared as a beginner study aid. Practical thresholds and data in the worked examples are illustrative, not course measurements.</p>
+  </footer>
+</body>
+</html>

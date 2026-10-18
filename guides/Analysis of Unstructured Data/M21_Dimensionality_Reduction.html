@@ -1,0 +1,344 @@
+---
+title: "M21: Dimensionality Reduction"
+description: "Understand why dimensionality reduction is useful and compare PCA, t-SNE, and UMAP, including their trade-offs and common pitfalls."
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A beginner-friendly guide to dimensionality reduction for text and unstructured data.">
+  <title>M21: Dimensionality Reduction</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #182535;
+      --muted: #506174;
+      --paper: #f4f7fb;
+      --surface: #fff;
+      --line: #d5deea;
+      --blue: #124b78;
+      --teal: #087e78;
+      --soft-blue: #e8f2fb;
+      --soft-teal: #e7f5f3;
+      --gold: #775000;
+      --soft-gold: #fff5d9;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font: 16px/1.65 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: var(--blue); text-underline-offset: .18em; }
+    a:hover { color: #073356; }
+    a:focus-visible, summary:focus-visible {
+      outline: 3px solid #d29100;
+      outline-offset: 3px;
+      border-radius: 3px;
+    }
+    .wrap { width: min(100% - 2rem, 960px); margin-inline: auto; }
+    header {
+      padding: 3.5rem 0 2.5rem;
+      color: white;
+      background: linear-gradient(125deg, #123d64, #087e78);
+    }
+    header p { max-width: 720px; color: #e6f3fa; margin-bottom: 0; }
+    .eyebrow { font-size: .85rem; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; }
+    h1 { max-width: 780px; margin: .4rem 0 .8rem; font-size: clamp(2rem, 5vw, 3.4rem); line-height: 1.1; }
+    main { padding: 1.5rem 0 3.5rem; }
+    section, nav.toc, .callout {
+      margin: 1.2rem 0;
+      padding: clamp(1.1rem, 3vw, 1.8rem);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface);
+      box-shadow: 0 5px 18px rgb(25 48 72 / 5%);
+    }
+    h2 { margin: 0 0 .7rem; color: #153d60; font-size: clamp(1.45rem, 3vw, 1.9rem); line-height: 1.25; }
+    h3 { margin: 1.35rem 0 .35rem; color: #174f6c; font-size: 1.15rem; }
+    p { margin: .55rem 0; }
+    ul, ol { padding-left: 1.35rem; }
+    li + li { margin-top: .35rem; }
+    .toc ul { display: flex; flex-wrap: wrap; gap: .45rem 1.2rem; margin: .7rem 0 0; padding: 0; list-style: none; }
+    .toc li { margin: 0; }
+    .lead { font-size: 1.1rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 1rem; }
+    .card { padding: 1rem; border: 1px solid var(--line); border-radius: 10px; background: #fbfdff; }
+    .card h3 { margin-top: 0; }
+    .callout { border-left: 5px solid var(--teal); background: var(--soft-teal); }
+    .caution { border-left-color: #b57900; background: var(--soft-gold); }
+    .definition { color: var(--muted); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 650px; }
+    caption { padding: .5rem; text-align: left; font-weight: 700; color: #153d60; }
+    th, td { padding: .75rem; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: var(--soft-blue); }
+    code { padding: .08rem .28rem; border-radius: 4px; background: #eef2f6; font: .94em ui-monospace, SFMono-Regular, Consolas, monospace; }
+    details { margin: .8rem 0; padding: .75rem 1rem; border: 1px solid var(--line); border-radius: 9px; background: #fbfdff; }
+    summary { color: #153d60; font-weight: 700; cursor: pointer; }
+    footer { padding: 1rem 0 2.5rem; color: var(--muted); font-size: .92rem; }
+    @media (max-width: 540px) {
+      header { padding: 2.5rem 0 2rem; }
+      .wrap { width: min(100% - 1.2rem, 960px); }
+      section, nav.toc, .callout { border-radius: 10px; }
+    }
+    @media print {
+      body { background: white; color: #111; font-size: 11pt; }
+      header { padding: 1rem 0; background: white; color: #111; }
+      header p { color: #333; }
+      section, nav.toc, .callout { box-shadow: none; break-inside: avoid; }
+      a { color: #111; }
+      .toc ul { display: block; }
+      details > *:not(summary) { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="eyebrow">Week 5 · Lesson 4</div>
+      <h1>M21: Dimensionality Reduction</h1>
+      <p>How to simplify complex data—especially text—without forgetting that a smaller representation can hide useful details.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <nav class="toc" aria-label="On this page">
+      <strong>On this page</strong>
+      <ul>
+        <li><a href="#overview">Big idea</a></li>
+        <li><a href="#terms">Key terms</a></li>
+        <li><a href="#methods">Method guide</a></li>
+        <li><a href="#pca">PCA</a></li>
+        <li><a href="#nonlinear">t-SNE and UMAP</a></li>
+        <li><a href="#example">Worked example</a></li>
+        <li><a href="#workflow">Choosing a method</a></li>
+        <li><a href="#pitfalls">Pitfalls</a></li>
+        <li><a href="#check">Self-check</a></li>
+      </ul>
+    </nav>
+
+    <section id="overview">
+      <h2>1. The big idea</h2>
+      <p class="lead"><strong>Dimensionality reduction</strong> means describing the same observations with fewer dimensions—often fewer columns or a shorter feature vector.</p>
+      <p>Text can begin in a very large space. A bag-of-words representation might have one column for every vocabulary word, while an embedding represents a document as a dense vector. Reducing dimensions can make data easier to visualize, simplify a later analysis, or compress overlapping information.</p>
+      <p>There is no single best technique. Choose according to the data and the purpose: preserving broad variation, representing themes, or making a useful map of which examples are near each other.</p>
+      <div class="callout">
+        <strong>Keep this distinction in mind:</strong> a 2D map is useful for looking at data, but it is not automatically a faithful replacement for the original data in every downstream model.
+      </div>
+    </section>
+
+    <section id="terms">
+      <h2>2. A few terms in plain language</h2>
+      <dl>
+        <dt><strong>Feature / dimension</strong></dt>
+        <dd class="definition">A measured or computed attribute, such as a word count, a survey answer, or one coordinate in an embedding.</dd>
+        <dt><strong>Variance</strong></dt>
+        <dd class="definition">A measure of how much a feature varies across observations. PCA uses directions with high variance to summarize data.</dd>
+        <dt><strong>Component</strong></dt>
+        <dd class="definition">A new feature made by combining original features. A principal component is a weighted direction through the data.</dd>
+        <dt><strong>Local and global structure</strong></dt>
+        <dd class="definition">Local structure concerns nearby examples and their neighbors; global structure concerns broader relationships across the whole dataset.</dd>
+        <dt><strong>Nonlinear method</strong></dt>
+        <dd class="definition">A method that can represent more complex relationships than a single straight-line transformation.</dd>
+      </dl>
+    </section>
+
+    <section id="methods">
+      <h2>3. The main options and what they are for</h2>
+      <div class="table-wrap">
+        <table>
+          <caption>A practical map of dimensionality-reduction approaches covered in the lesson</caption>
+          <thead>
+            <tr><th>Approach</th><th>Plain-language idea</th><th>Good reason to consider it</th><th>Watch out for</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Embeddings</th>
+              <td>Represent words, sentences, or documents as dense numeric vectors that encode learned relationships.</td>
+              <td>A compact starting representation for semantic text comparisons.</td>
+              <td>Embedding dimensions are not usually simple human-readable concepts; quality depends on the model and task.</td>
+            </tr>
+            <tr>
+              <th scope="row">PCA</th>
+              <td>Find a smaller set of uncorrelated directions that captures as much variance as possible.</td>
+              <td>Fast, deterministic compression or a linear baseline before another analysis.</td>
+              <td>Linear assumptions, scale and outlier sensitivity, and components that can be difficult to interpret.</td>
+            </tr>
+            <tr>
+              <th scope="row">Topic models (LDA, NMF)</th>
+              <td>Replace many word features with fewer topic-related features.</td>
+              <td>Summarizing documents by interpretable themes and topic proportions.</td>
+              <td>Topics need human interpretation and can be incoherent or overlapping; this is not the same as PCA.</td>
+            </tr>
+            <tr>
+              <th scope="row">LSA</th>
+              <td>Use singular value decomposition to uncover a lower-dimensional latent representation.</td>
+              <td>Finding compressed structure in a text-feature matrix.</td>
+              <td>Despite its name, LSA is not the same method as probabilistic topic modeling such as LDA.</td>
+            </tr>
+            <tr>
+              <th scope="row">t-SNE</th>
+              <td>Arrange points in a low-dimensional map to make neighborhood relationships visible.</td>
+              <td>Exploring or visualizing relationships among particular points.</td>
+              <td>Can be computationally costly and run-to-run results can differ; the lesson cautions against using it as general preprocessing.</td>
+            </tr>
+            <tr>
+              <th scope="row">UMAP</th>
+              <td>Build a neighborhood graph, then find a lower-dimensional representation that aims to preserve local and global relationships.</td>
+              <td>Visualization; sometimes a tuned intermediate representation before methods such as HDBSCAN.</td>
+              <td>Less interpretable than PCA, requires tuning, and may behave poorly when fed into other distance-based methods.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>The methods can also be combined in a pipeline. The lecture gives sentence embeddings followed by UMAP and then HDBSCAN as one example of a modern text-analysis chain.</p>
+    </section>
+
+    <section id="pca">
+      <h2>4. PCA: summarize shared variation</h2>
+      <p><strong>Principal Component Analysis (PCA)</strong> looks for directions that capture patterns of variation shared across features. If several original features move together, a smaller number of combined components may summarize much of that shared information.</p>
+      <ol>
+        <li><strong>Prepare the features.</strong> The lecture describes standardizing the data before PCA because different scales can distort the result.</li>
+        <li><strong>Find directions in the data.</strong> PCA uses the covariance structure. Eigenvectors give directions (the components); their eigenvalues indicate how much variance those directions explain.</li>
+        <li><strong>Keep a smaller set.</strong> Project observations onto the leading components, keeping fewer dimensions than the original representation.</li>
+      </ol>
+      <div class="grid">
+        <div class="card">
+          <h3>Why PCA can help</h3>
+          <ul>
+            <li>It is relatively simple, fast, and deterministic.</li>
+            <li>Its components are orthogonal (at right angles), so the new component coordinates are uncorrelated.</li>
+            <li>It can suppress some small-scale variation that behaves like noise.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>What PCA can miss</h3>
+          <ul>
+            <li>It assumes that linear directions are useful summaries.</li>
+            <li>A high-variance direction is not necessarily the most meaningful for a business question.</li>
+            <li>Low-variance edge cases may be important, even if PCA drops them.</li>
+            <li>Components combine input features, so their meaning may be difficult to explain.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout caution">
+        <strong>Interpretation caution:</strong> “explains more variance” does not mean “preserves every important detail.” Inspect what is lost and whether the retained representation still serves the task.
+      </div>
+    </section>
+
+    <section id="nonlinear">
+      <h2>5. t-SNE and UMAP: map neighborhood relationships</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>t-SNE</h3>
+          <p>t-distributed Stochastic Neighbor Embedding is a nonlinear method especially suited to visualization of high-dimensional data. It can help show which points are near one another, for example when exploring groups or known labels.</p>
+          <p><strong>Trade-offs:</strong> it can be computationally expensive and non-deterministic. The lecture says it is generally not appropriate as a preprocessing step for other analyses.</p>
+        </article>
+        <article class="card">
+          <h3>UMAP</h3>
+          <p>Uniform Manifold Approximation and Projection also reduces high-dimensional data nonlinearly. In the lecture’s description, it builds a nearest-neighbor graph and tries to keep nearby observations connected in the smaller representation while also arranging neighborhoods relative to one another.</p>
+          <p><strong>Trade-offs:</strong> it can be faster and more scalable than t-SNE, but it is hard to interpret, has parameters that need careful tuning, and is primarily designed for visualization. Its use as preprocessing depends on the downstream method.</p>
+        </article>
+      </div>
+      <div class="callout">
+        <strong>Why the course pairs UMAP with HDBSCAN:</strong> the lecture describes reducing sentence embeddings to a smaller intermediate representation and then clustering that representation with HDBSCAN. This is a course example, not a guarantee that the same settings work for every dataset.
+      </div>
+      <p>A 2D visualization can make patterns easier to see, but visual spacing should not be treated as a precise measurement of all original-space distances or as proof that a “true” group exists.</p>
+    </section>
+
+    <section id="example">
+      <h2>6. Worked real-world example: finding themes in customer feedback</h2>
+      <p><em>Illustrative workflow—not a measured result from the course dataset.</em></p>
+      <p>Imagine a support team has thousands of short customer messages. Each document has been turned into a numeric sentence embedding. The team wants to explore recurring issues and help route similar complaints for review.</p>
+      <ol>
+        <li><strong>Start with the goal.</strong> If the question is “What themes appear?”, topic modeling may provide a theme-oriented summary. If the question is “Which messages are similar?”, embedding-based clustering may be a better fit.</li>
+        <li><strong>Choose a representation.</strong> Sentence embeddings can encode contextual meaning in each message, instead of just counting exact words.</li>
+        <li><strong>Reduce only if it helps.</strong> Try PCA when a fast, linear, variance-based compression is appropriate. If the objective is to inspect nonlinear neighborhoods, try a visualization method such as UMAP or t-SNE.</li>
+        <li><strong>Use a downstream method deliberately.</strong> A course-style pipeline could reduce embeddings with UMAP and then try HDBSCAN. Do not assume every reduced map is appropriate input for every clustering algorithm.</li>
+        <li><strong>Validate with people and evidence.</strong> Read representative messages, check for small but important complaint types, and test whether decisions based on groups improve the team’s workflow.</li>
+      </ol>
+      <p>For example, a map might place “package arrived late” and “delivery never showed” messages near one another. The team should inspect actual messages to see whether the similarity is useful, whether important exceptions were merged, and whether apparent gaps are meaningful.</p>
+    </section>
+
+    <section id="workflow">
+      <h2>7. A simple method-selection workflow</h2>
+      <ol>
+        <li><strong>Write down the purpose.</strong> Is the goal compression, visualization, theme discovery, clustering support, or a combination?</li>
+        <li><strong>Understand the input.</strong> Is it a word-count matrix, document embedding, or numeric feature table? Check feature scale and unusual observations.</li>
+        <li><strong>Choose a method aligned to the purpose.</strong> PCA is a useful linear baseline; t-SNE and UMAP are often used to visualize neighborhoods; topic models and LSA provide other ways to form compact text representations.</li>
+        <li><strong>Check what the smaller representation preserves.</strong> Inspect explained variance for PCA, or inspect neighborhoods and representative examples for nonlinear maps. Use task-relevant checks, not just an attractive plot.</li>
+        <li><strong>Evaluate the whole pipeline.</strong> If another method follows the reduction step, assess the combined workflow and compare with a baseline that skips reduction.</li>
+        <li><strong>Keep human review in the loop.</strong> Look for lost edge cases, misleading clusters, or representations that are difficult to explain.</li>
+      </ol>
+    </section>
+
+    <section id="pitfalls">
+      <h2>8. Common mistakes and limitations</h2>
+      <ul>
+        <li><strong>Confusing fewer dimensions with better analysis.</strong> Compression is a trade-off; some information is discarded or transformed.</li>
+        <li><strong>Treating PCA components as ready-made topics.</strong> PCA components are weighted combinations of features, not automatically human-readable themes.</li>
+        <li><strong>Calling LSA and LDA the same thing.</strong> LSA uses singular value decomposition; LDA is a probabilistic topic model.</li>
+        <li><strong>Assuming a 2D plot preserves every distance.</strong> Visualization is a simplified view, not the original space.</li>
+        <li><strong>Using t-SNE as a general preprocessing default.</strong> The lecture presents it primarily as a visualization technique, with run variability and computational cost.</li>
+        <li><strong>Putting UMAP before any distance-based algorithm without checking.</strong> UMAP can be used in some preprocessing pipelines, but the lecture warns it may not work well with distance-based methods; evaluate the complete pipeline.</li>
+        <li><strong>Ignoring scale, outliers, or rare cases.</strong> Standardization can help with scale for PCA, but outliers and low-variance edge cases still deserve attention.</li>
+      </ul>
+      <div class="callout caution">
+        <strong>Practical reminder:</strong> a smaller feature set is a means to an end. Prefer the simplest representation that retains the information your particular task needs.
+      </div>
+    </section>
+
+    <section id="check">
+      <h2>9. Quick self-check</h2>
+      <details>
+        <summary>1. What does dimensionality reduction change?</summary>
+        <p>It reduces the number of features or dimensions used to describe observations, often by making new, more compact representations.</p>
+      </details>
+      <details>
+        <summary>2. What is the basic idea behind PCA?</summary>
+        <p>Find new, orthogonal directions that capture as much variation as possible, then represent the data with fewer of those directions.</p>
+      </details>
+      <details>
+        <summary>3. Why might a high-variance PCA component still be a poor fit for a particular goal?</summary>
+        <p>Variance is not the same as task relevance. A small-variance feature or rare case may matter more to the practical question.</p>
+      </details>
+      <details>
+        <summary>4. In broad terms, when would you use t-SNE?</summary>
+        <p>To visualize relationships among points in high-dimensional data; the lesson cautions against treating it as general-purpose preprocessing.</p>
+      </details>
+      <details>
+        <summary>5. What is UMAP trying to preserve?</summary>
+        <p>Neighborhood relationships in a lower-dimensional space, with the lesson describing efforts to preserve local and broader structure.</p>
+      </details>
+      <details>
+        <summary>6. How does LSA differ from LDA?</summary>
+        <p>LSA uses singular value decomposition to uncover latent structure; LDA is a probabilistic topic-modeling approach.</p>
+      </details>
+      <details>
+        <summary>7. What should you do after making a 2D plot?</summary>
+        <p>Use it as an exploratory view, inspect representative examples, and verify patterns against the original data and the intended task.</p>
+      </details>
+    </section>
+
+    <section id="recap">
+      <h2>10. Takeaway</h2>
+      <ul>
+        <li>Dimensionality reduction gives a simpler representation, not a free improvement.</li>
+        <li>PCA is fast, deterministic, and linear; it summarizes variance but may obscure meaning or edge cases.</li>
+        <li>t-SNE and UMAP are nonlinear tools often used to visualize relationships among points.</li>
+        <li>Embeddings, topic models, and LSA can also provide lower-dimensional text representations, each with a different interpretation.</li>
+        <li>Choose the method for the task, and validate the full pipeline rather than relying on a plot alone.</li>
+      </ul>
+    </section>
+
+
+  </main>
+  <footer class="wrap">
+    <p>Study aid for introductory review. Explanations are paraphrased and examples are illustrative unless explicitly identified as course material.</p>
+  </footer>
+</body>
+</html>

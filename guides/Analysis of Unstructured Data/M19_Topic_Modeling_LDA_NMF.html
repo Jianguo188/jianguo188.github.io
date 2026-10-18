@@ -1,0 +1,384 @@
+---
+title: "M19: Topic Modeling, LDA, and NMF"
+description: "Learn a practical topic-modeling workflow, from document-term matrices to interpreting and evaluating themes produced by LDA and NMF."
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A beginner-friendly guide to topic modeling, LDA, NMF, text preprocessing, and evaluating topics, based on Week 5 Lesson 2 and Demo A.">
+  <title>M19: Topic Modeling, LDA, and NMF</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1d2939;
+      --muted: #475467;
+      --paper: #ffffff;
+      --page: #f3f6fa;
+      --accent: #155eef;
+      --accent-dark: #123b83;
+      --line: #d0d5dd;
+      --note: #eff8ff;
+      --warm: #fff7e6;
+      --code: #101828;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font: 1rem/1.65 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: var(--accent-dark); text-underline-offset: 0.18em; }
+    a:focus-visible, summary:focus-visible {
+      outline: 3px solid #f79009;
+      outline-offset: 3px;
+      border-radius: 3px;
+    }
+    .shell { width: min(100% - 2rem, 980px); margin: 0 auto; }
+    header {
+      padding: 3rem 0 2rem;
+      background: #eaf2ff;
+      border-bottom: 1px solid #c7d7fe;
+    }
+    header p { max-width: 74ch; }
+    .eyebrow {
+      margin: 0 0 0.5rem;
+      color: var(--accent-dark);
+      font-size: 0.85rem;
+      font-weight: 750;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    h1 { max-width: 22ch; margin: 0; font-size: clamp(2rem, 6vw, 3.25rem); line-height: 1.12; }
+    h2 { margin-top: 0; font-size: clamp(1.45rem, 4vw, 2rem); line-height: 1.25; }
+    h3 { margin-bottom: 0.35rem; font-size: 1.15rem; }
+    main { padding: 1.5rem 0 3rem; }
+    section, nav.toc {
+      margin: 1.25rem 0;
+      padding: clamp(1.1rem, 3vw, 2rem);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 0.75rem;
+    }
+    nav.toc ul { display: flex; flex-wrap: wrap; gap: 0.55rem 1.25rem; margin-bottom: 0; padding-left: 1.2rem; }
+    .lead { font-size: 1.12rem; }
+    .callout {
+      margin: 1rem 0;
+      padding: 0.9rem 1rem;
+      background: var(--note);
+      border-left: 4px solid var(--accent);
+      border-radius: 0.25rem;
+    }
+    .caution { background: var(--warm); border-left-color: #b54708; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 1rem; }
+    .card { padding: 1rem; border: 1px solid var(--line); border-radius: 0.55rem; }
+    .card h3 { margin-top: 0; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    th, td { padding: 0.7rem; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: #f2f4f7; }
+    code { padding: 0.1em 0.3em; background: #f2f4f7; border-radius: 0.25rem; font-size: 0.95em; }
+    pre {
+      overflow-x: auto;
+      padding: 1rem;
+      background: var(--code);
+      color: #f9fafb;
+      border-radius: 0.5rem;
+      font: 0.93rem/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    pre code { padding: 0; background: transparent; color: inherit; }
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+      gap: 0.65rem;
+      align-items: stretch;
+      margin: 1rem 0;
+    }
+    .flow div {
+      padding: 0.85rem;
+      background: #f2f4f7;
+      border: 1px solid var(--line);
+      border-radius: 0.5rem;
+      text-align: center;
+    }
+    .flow strong { display: block; color: var(--accent-dark); }
+    ol, ul { padding-left: 1.4rem; }
+    li + li { margin-top: 0.35rem; }
+    details { margin: 0.75rem 0; padding: 0.7rem 0.9rem; border: 1px solid var(--line); border-radius: 0.45rem; }
+    summary { cursor: pointer; font-weight: 700; }
+    details p { margin-bottom: 0.25rem; }
+    .small { color: var(--muted); font-size: 0.93rem; }
+    footer { padding: 0 0 2rem; color: var(--muted); }
+
+    @media (max-width: 600px) {
+      .shell { width: min(100% - 1rem, 980px); }
+      header { padding: 2rem 0 1.5rem; }
+      th, td { padding: 0.5rem; }
+    }
+    @media print {
+      body { background: #fff; color: #000; font-size: 11pt; }
+      header { padding: 1rem 0; background: #fff; border-bottom: 1px solid #777; }
+      .shell { width: 100%; }
+      section, nav.toc { break-inside: avoid; margin: 0.7rem 0; padding: 0.8rem; border-color: #999; }
+      a { color: #000; }
+      a::after { content: " (" attr(href) ")"; font-size: 0.85em; overflow-wrap: anywhere; }
+      details > *:not(summary) { display: block; }
+      pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #f2f4f7; color: #000; }
+      footer { padding-bottom: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell">
+      <p class="eyebrow">Week 5 · Lesson 2 + Demo A</p>
+      <h1>M19: Topic Modeling, LDA, and NMF</h1>
+      <p class="lead">Topic modeling is a way to summarize a large collection of text by finding recurring themes. This beginner guide walks through the workflow, explains two common methods—Latent Dirichlet Allocation (LDA) and Nonnegative Matrix Factorization (NMF)—and shows how to inspect and evaluate their results.</p>
+      <p><strong>Learning goals:</strong> describe the steps in a topic-modeling project; explain the basic intuitions behind LDA and NMF; read document-topic and topic-word outputs; and recognize several ways to judge model and topic quality.</p>
+    </div>
+  </header>
+
+  <main class="shell">
+    <nav class="toc" aria-label="Study guide contents">
+      <h2>On this page</h2>
+      <ul>
+        <li><a href="#overview">Roadmap</a></li>
+        <li><a href="#terms">Key terms</a></li>
+        <li><a href="#workflow">Topic-modeling workflow</a></li>
+        <li><a href="#matrices">Document-term matrix</a></li>
+        <li><a href="#lda">LDA</a></li>
+        <li><a href="#nmf">NMF</a></li>
+        <li><a href="#outputs">Reading model outputs</a></li>
+        <li><a href="#quality">Evaluating quality</a></li>
+        <li><a href="#example">Real-world example</a></li>
+        <li><a href="#pitfalls">Common pitfalls</a></li>
+        <li><a href="#check">Self-check</a></li>
+      </ul>
+    </nav>
+
+    <section id="overview">
+      <h2>1. The big picture</h2>
+      <p>Imagine being asked to identify the main issues in hundreds of thousands of customer complaints. Reading every document by hand could be slow and inconsistent. Keyword rules can help, but may miss rare themes or phrases that were not anticipated. Topic modeling offers another approach: use patterns across the corpus to discover recurring word themes and estimate how strongly each document relates to those themes.</p>
+      <p>Topic models are <strong>unsupervised</strong>: they are not given the correct topic label for every document. The analyst still makes important choices—what text to include, how to preprocess it, how many topics to request, and whether the resulting themes are useful.</p>
+      <div class="callout"><strong>Memory cue:</strong> prepare text → turn it into numbers → fit a model → inspect themes and document relevance → evaluate, tune, and communicate.</div>
+    </section>
+
+    <section id="terms">
+      <h2>2. Key terms in plain language</h2>
+      <ul>
+        <li><strong>Corpus:</strong> the collection of documents being analyzed.</li>
+        <li><strong>Token:</strong> a unit of text, often a word or a phrase represented as one feature.</li>
+        <li><strong>Vocabulary:</strong> the set of terms retained for the analysis.</li>
+        <li><strong>Document-term matrix (DTM):</strong> a table where rows are documents and columns are vocabulary terms; each cell records a term’s value for that document.</li>
+        <li><strong>Topic:</strong> a learned pattern of terms that tend to represent a recurring theme. A model’s topic number is an index, not a human-readable name.</li>
+        <li><strong>Topic-document / document-topic matrix:</strong> a row for each document and a column for each topic, showing the document’s relationship to each topic.</li>
+        <li><strong>Topic-word matrix:</strong> a row for each topic and a column for each vocabulary term, showing how relevant each word is to each topic.</li>
+        <li><strong>Hyperparameter:</strong> a setting chosen before or during fitting, such as the number of topics or a prior that controls how sparse topic distributions should be.</li>
+      </ul>
+      <p>The phrases “document-topic” and “topic-document” are sometimes used in different orders. Check the actual row and column meaning rather than relying on the name alone.</p>
+    </section>
+
+    <section id="workflow">
+      <h2>3. A practical topic-modeling workflow</h2>
+      <ol>
+        <li><strong>Define the question and corpus.</strong> Decide which documents are in scope and what kind of themes would be useful to discover.</li>
+        <li><strong>Preprocess the text.</strong> Clean or normalize text with choices appropriate to the task. Common options include removing punctuation, dates, or boilerplate; handling case; and stemming or lemmatizing. Avoid removing meaningful words just because they are frequent.</li>
+        <li><strong>Extract numerical features.</strong> Create a document-term matrix from term counts or another suitable representation. Choices such as unigram vs. bigram features and vocabulary limits affect what the model can discover.</li>
+        <li><strong>Select a model.</strong> LDA and NMF are two common topic-modeling approaches, with different assumptions and input requirements.</li>
+        <li><strong>Choose settings and fit.</strong> In particular, select a candidate number of topics. Tune other model-specific settings as needed.</li>
+        <li><strong>Inspect both outputs.</strong> Read the leading words for each topic and inspect which topics are prominent in representative documents.</li>
+        <li><strong>Evaluate and revise.</strong> Combine numeric diagnostics with human interpretation; try alternative settings if topics are confusing or redundant.</li>
+        <li><strong>Communicate the findings.</strong> Explain what the topics appear to mean, how prevalent they are, how the analysis was made, and what its limitations are.</li>
+      </ol>
+      <p>Preprocessing is not a cosmetic step. If a corpus contains repeated privacy placeholders, dates, or generic boilerplate, those tokens can dominate themes unless handled thoughtfully. Conversely, an over-aggressive stop-word list may erase meaningful signals.</p>
+    </section>
+
+    <section id="matrices">
+      <h2>4. From text to a document-term matrix</h2>
+      <p>A topic model needs numbers, not raw paragraphs. A document-term matrix represents each document by counts or weights for the vocabulary terms. Most documents use only a small fraction of all possible terms, so these matrices are often <strong>sparse</strong>: mostly zeros. Sparse storage avoids wasting memory on zeros.</p>
+      <p>The demo’s preprocessing choices include letter-only terms of at least three characters, removing English stop words and selected redaction/date strings, allowing unigrams and bigrams, and limiting the vocabulary to the 1,000 most frequent features. These are example settings for one complaint corpus—not universal recommendations.</p>
+      <table>
+        <thead><tr><th>Feature choice</th><th>What it means</th><th>Possible trade-off</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Unigrams</th><td>Single terms such as <code>credit</code>.</td><td>Simple, but loses some phrase meaning.</td></tr>
+          <tr><th scope="row">Bigrams</th><td>Adjacent two-term phrases such as <code>credit report</code>.</td><td>Can preserve useful phrases, but expands the vocabulary.</td></tr>
+          <tr><th scope="row">Stop-word removal</th><td>Exclude selected very common terms.</td><td>May reduce noise, but some frequent words can still matter for a task.</td></tr>
+          <tr><th scope="row">Vocabulary cap</th><td>Keep only a selected number of features.</td><td>Saves time and memory, but may omit rare yet important terms.</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="lda">
+      <h2>5. LDA: documents mix topics, topics mix words</h2>
+      <p><strong>Latent Dirichlet Allocation (LDA)</strong> is a probabilistic model. “Latent” means hidden; “allocation” refers to how topics and words are distributed. A helpful simplified story is:</p>
+      <ol>
+        <li>A document has a distribution over topics.</li>
+        <li>A topic has a distribution over words.</li>
+        <li>To generate a word in a document, the process selects a topic from that document and then selects a word associated with that topic.</li>
+      </ol>
+      <p>This gives LDA two complementary views: which topics are present in each document, and which words characterize each topic. LDA commonly represents documents as mixtures rather than forcing exactly one topic per document.</p>
+      <h3>What do α (alpha) and β (beta) mean?</h3>
+      <ul>
+        <li><strong>α (alpha), the document-topic prior:</strong> influences how concentrated or spread out topic proportions are within a document. In the lesson’s intuition, higher values encourage a more even mixture; lower values encourage documents dominated by fewer topics.</li>
+        <li><strong>β (beta), the topic-word prior:</strong> influences how concentrated or spread out word distributions are within a topic. Higher values encourage more even word distributions; lower values encourage topics with fewer especially prominent words.</li>
+      </ul>
+      <p>These are model settings—not labels and not findings. The best values depend on the corpus and implementation.</p>
+      <div class="callout caution"><strong>Input reminder:</strong> the lesson presents LDA as a count-based generative model and says not to use TF-IDF for this setup. The demo uses a count-based DTM. Follow the requirements of the chosen implementation and do not assume any numeric text representation is a valid LDA input.</div>
+    </section>
+
+    <section id="nmf">
+      <h2>6. NMF: factor a large nonnegative matrix into smaller parts</h2>
+      <p><strong>Nonnegative Matrix Factorization (NMF)</strong> starts with a nonnegative document-term matrix and approximates it as the product of two smaller matrices. “Nonnegative” means values are zero or greater; “factorization” means decomposing one matrix into factors.</p>
+      <pre><code>V ≈ W × H
+
+V: documents × vocabulary
+W: documents × topics
+H: topics × vocabulary</code></pre>
+      <p>Each row of <code>W</code> says how strongly topics relate to a document; each row of <code>H</code> says how strongly terms relate to a topic. The dimensions fit together: if there are <em>n</em> documents, <em>m</em> terms, and <em>k</em> topics, then <code>V</code> is <em>n × m</em>, <code>W</code> is <em>n × k</em>, and <code>H</code> is <em>k × m</em>. Multiplying <code>W × H</code> gives an <em>n × m</em> approximation of the original DTM.</p>
+      <p>Unlike LDA, NMF is not inherently a probabilistic topic mixture model. Its document-topic values do not automatically sum to 1. One may normalize rows for a particular comparison or display, but the normalized values are then a derived presentation—not native LDA probabilities.</p>
+      <p>NMF requires nonnegative input. Counts and nonnegative TF-IDF values can be suitable, depending on the goal and implementation. The course demo uses simple counts to keep the comparison consistent.</p>
+    </section>
+
+    <section id="outputs">
+      <h2>7. Reading the model outputs</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>Document-topic matrix</h3>
+          <p>Rows are documents; columns are topics. In the LDA demo, the selected sample has 10,000 documents and the model has 100 topics, so the matrix has shape 10,000 × 100. Each LDA row is a distribution across topics and sums to about 1 (100%).</p>
+          <p>To summarize a document with binary topic flags, the demo applies a 0.10 threshold: values above 10% count as topic-relevant for that analysis. This is an analyst’s chosen cutoff, not a universal LDA rule.</p>
+        </article>
+        <article class="card">
+          <h3>Topic-word matrix</h3>
+          <p>Rows are topics; columns are words. In the demo’s 100-topic, 1,000-feature setup, it has shape 100 × 1,000. Sort a topic’s word scores to inspect its leading terms and use the vocabulary index to recover the words.</p>
+          <p>Scikit-learn’s LDA <code>components_</code> values are unnormalized component weights (often described as pseudocounts), not already-normalized probabilities. Larger values within a topic point to more associated terms; normalize explicitly if you need probabilities.</p>
+        </article>
+      </div>
+      <p>Topic indices such as “Topic 3” are arbitrary identifiers. Give a topic a human-readable description only after reviewing several leading words and representative documents. If a topic contains words from different themes, it may be broad, noisy, or poorly separated—or the corpus may truly mix those concepts.</p>
+    </section>
+
+    <section id="compare">
+      <h2>8. LDA and NMF at a glance</h2>
+      <table>
+        <thead><tr><th>Aspect</th><th>LDA</th><th>NMF</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Core idea</th><td>Probabilistic generative model: documents mix topics; topics distribute probability across words.</td><td>Approximate a nonnegative document-term matrix as document-topic × topic-term factors.</td></tr>
+          <tr><th scope="row">Common input in this course</th><td>Word-count document-term matrix.</td><td>Nonnegative matrix; the demo uses word counts.</td></tr>
+          <tr><th scope="row">Document-topic output</th><td>Topic proportions, typically summing to 1 for each document.</td><td>Nonnegative factor weights; not automatically probabilities or row-normalized.</td></tr>
+          <tr><th scope="row">Key modeling choice</th><td>Number of topics plus priors such as α and β.</td><td>Number of factors/topics plus implementation-specific settings.</td></tr>
+          <tr><th scope="row">Useful intuition</th><td>“A document can discuss several topics with different proportions.”</td><td>“A document is reconstructed from weighted topic patterns.”</td></tr>
+        </tbody>
+      </table>
+      <p>Neither method discovers the one objectively correct set of themes. Both approximate structure in the chosen representation, and both require interpretation and evaluation.</p>
+    </section>
+
+    <section id="quality">
+      <h2>9. Evaluating and tuning topic quality</h2>
+      <p>There is no single score that proves a topic model is useful. Evaluate at more than one level:</p>
+      <div class="grid">
+        <article class="card">
+          <h3>Model-level fit</h3>
+          <p>Ask how well the model accounts for the corpus under its assumptions. <strong>Perplexity</strong> is one common measure; its value depends on the data, representation, and implementation, so it is not meaningful to interpret in isolation.</p>
+        </article>
+        <article class="card">
+          <h3>Topic-level coherence</h3>
+          <p>Ask whether a topic’s leading words seem to belong together. Coherence scores use patterns such as word co-occurrence. The demo includes UMass coherence, where higher (often less negative) values are generally better for the specified metric.</p>
+        </article>
+        <article class="card">
+          <h3>Human judgment</h3>
+          <p>Ask people familiar with the domain to inspect topic words and example documents. A numeric metric may prefer a topic that is less meaningful to a human reviewer.</p>
+        </article>
+      </div>
+      <h3>Word intrusion test</h3>
+      <p>Show reviewers several leading words from a topic plus one unrelated “intruder” word, with the list order randomized. If a topic is coherent, people should often spot the intruder. This checks whether the topic makes sense to a reader; it is not a complete measure of model quality.</p>
+      <h3>Tuning the number of topics</h3>
+      <p>Try a range of topic counts and inspect both metrics and topic interpretability. Grid search evaluates combinations exhaustively; randomized search samples combinations when the search space is large. Tuning can be computationally expensive, so compare a purposeful set of candidates and document the choices.</p>
+      <div class="callout caution"><strong>Perplexity warning from the course demo:</strong> the notebook reports that the scikit-learn perplexity behavior in the version used appeared counterintuitive and should not be relied on alone. Treat that as an implementation/version-specific caution, not a universal statement about all perplexity calculations. Compare multiple measures and inspect the topics.</div>
+      <p>The notebook demonstrates trying topic counts from 50 to 150 in steps of 10, comparing perplexity and mean UMass, and noting that the plotted curves looked relatively flat at their displayed scale. Those are example diagnostic runs, not a recommendation that those counts are best for another dataset.</p>
+    </section>
+
+    <section id="example">
+      <h2>10. Real-world example: finding themes in customer complaints</h2>
+      <p><em>Illustrative explanation based on the complaint-analysis scenario in the lesson; the theme names below are examples, not claims about the dataset’s measured output.</em></p>
+      <p>A customer-care team has many long text complaints and needs to identify recurring issues so they can be routed to the right product or operations group.</p>
+      <ol>
+        <li><strong>Set the scope:</strong> include complaints with usable text and decide which time period or products matter.</li>
+        <li><strong>Prepare features:</strong> clean placeholders and dates; decide whether to retain phrases such as “credit report”; build a count-based DTM for LDA.</li>
+        <li><strong>Fit candidate models:</strong> try a reasonable range of topic counts with LDA and/or NMF.</li>
+        <li><strong>Interpret themes:</strong> inspect leading terms and example complaints. A possible theme might involve account access; another might concern disputed transactions. These are hypothetical examples, not results reported here.</li>
+        <li><strong>Estimate prevalence:</strong> examine topic weights by document. For LDA, a chosen cutoff can help count documents where a topic is prominent, but report the cutoff and consider showing the underlying proportions too.</li>
+        <li><strong>Validate with people:</strong> ask product managers or complaint specialists whether the themes are coherent and actionable, and look for rare issues that may be important despite low prevalence.</li>
+        <li><strong>Communicate limitations:</strong> describe preprocessing, model settings, uncertainty, and how topics were named.</li>
+      </ol>
+      <p>The demo notebook uses a random sample of 10,000 complaint records from a much larger Consumer Financial Protection Bureau complaints file to make the exercise more manageable. The notebook’s saved sample outputs illustrate one analysis configuration; they should not be interpreted as current population statistics.</p>
+    </section>
+
+    <section id="pitfalls">
+      <h2>11. Common pitfalls and misconceptions</h2>
+      <ul>
+        <li><strong>Assuming model output automatically has human meaning.</strong> A topic’s top words need to be interpreted alongside documents and domain knowledge.</li>
+        <li><strong>Treating topic numbers as real categories.</strong> A topic ID is just a model index; it is not a pre-existing business label.</li>
+        <li><strong>Using TF-IDF with the count-based LDA setup shown in the lesson.</strong> LDA’s generative count assumptions differ from a TF-IDF representation. NMF can work with other nonnegative weighted matrices, subject to method and task.</li>
+        <li><strong>Calling all matrix values probabilities.</strong> LDA document-topic proportions are normalized; raw scikit-learn topic-word components are not automatically probabilities; NMF factor values are not probabilities by default.</li>
+        <li><strong>Choosing a topic threshold without disclosure.</strong> A cutoff such as 10% changes which topics count as present, especially when comparing models with different numbers of topics.</li>
+        <li><strong>Trusting one metric or one “best” model.</strong> Perplexity, coherence, topic interpretability, and business usefulness can disagree.</li>
+        <li><strong>Ignoring preprocessing assumptions.</strong> Removing dates, redactions, stop words, or rare terms may help one corpus but harm another.</li>
+        <li><strong>Confusing a demo sample with the full data.</strong> The model was fit to a random sample to demonstrate a workflow; outputs do not summarize every complaint in the original file.</li>
+      </ul>
+    </section>
+
+    <section id="recap">
+      <h2>12. Quick recap</h2>
+      <ul>
+        <li>Topic modeling discovers recurring word themes in an unlabeled corpus; analysts still choose features, settings, and interpretations.</li>
+        <li>LDA models each document as a distribution over topics and each topic as a distribution over words.</li>
+        <li>NMF approximates a nonnegative document-term matrix with document-topic and topic-word factors.</li>
+        <li>Read document-topic outputs to see where topics appear; read topic-word outputs to understand what each topic may represent.</li>
+        <li>Evaluate the whole model and individual topics with multiple metrics and human judgment.</li>
+        <li>Preprocessing, topic count, priors, thresholds, and sampling all influence what you conclude.</li>
+      </ul>
+    </section>
+
+    <section id="check">
+      <h2>13. Self-check</h2>
+      <p>Try each question before opening its explanation.</p>
+      <details>
+        <summary>1. What are the five broad steps in the topic-modeling workflow?</summary>
+        <p>Preprocessing, feature extraction, model selection, model tuning and evaluation, and communicating results.</p>
+      </details>
+      <details>
+        <summary>2. In an LDA document-topic matrix, what does one row represent?</summary>
+        <p>One document’s topic proportions. For a standard LDA output such as the demo’s, the topic values for one document sum to approximately 1.</p>
+      </details>
+      <details>
+        <summary>3. What does alpha influence in LDA? What does beta influence?</summary>
+        <p>Alpha is the prior for topic mixtures within documents; beta is the prior for word distributions within topics. Their settings influence how concentrated or spread out those distributions are.</p>
+      </details>
+      <details>
+        <summary>4. Why is a raw NMF document-topic row not automatically a probability distribution?</summary>
+        <p>NMF produces nonnegative factor weights, but does not inherently normalize each row to sum to 1. Row normalization can be applied for a particular comparison, but is an additional transformation.</p>
+      </details>
+      <details>
+        <summary>5. What is the difference between a document-topic matrix and a topic-word matrix?</summary>
+        <p>The document-topic matrix relates each document to topics. The topic-word matrix relates each topic to vocabulary terms.</p>
+      </details>
+      <details>
+        <summary>6. Name two ways to evaluate a topic model and one limitation of each.</summary>
+        <p>Perplexity summarizes model-level fit but depends on representation and implementation and may be hard to interpret. Coherence scores measure word co-occurrence but may not match human judgment. Human review is useful but can be subjective and requires appropriate reviewers.</p>
+      </details>
+      <details>
+        <summary>7. Why should you not treat the demo’s 10% topic threshold as a universal rule?</summary>
+        <p>It is a chosen cutoff for one analysis configuration. The right threshold depends on the number of topics, model, data, and intended interpretation.</p>
+      </details>
+    </section>
+
+
+  </main>
+
+  <footer class="shell">
+    <p>Prepared as a beginner study aid for Week 5, Lesson 2 and Demo A. The customer-complaint walkthrough uses the course scenario; illustrative theme examples are explicitly labeled and are not claimed as model results.</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,395 @@
+---
+title: "M20: Clustering, PCA, and UMAP"
+description: "Learn how K-means and HDBSCAN group text, and how PCA and UMAP help explore and visualize high-dimensional data."
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A beginner-friendly guide to clustering text, K-means, HDBSCAN, PCA, UMAP, and cluster evaluation, based on Week 5 Lesson 3 and Demo B.">
+  <title>M20: Clustering, PCA, and UMAP</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1d2939;
+      --muted: #475467;
+      --paper: #ffffff;
+      --page: #f3f6fa;
+      --accent: #155eef;
+      --accent-dark: #123b83;
+      --line: #d0d5dd;
+      --note: #eff8ff;
+      --warm: #fff7e6;
+      --code: #101828;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font: 1rem/1.65 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: var(--accent-dark); text-underline-offset: 0.18em; }
+    a:focus-visible, summary:focus-visible {
+      outline: 3px solid #f79009;
+      outline-offset: 3px;
+      border-radius: 3px;
+    }
+    .shell { width: min(100% - 2rem, 980px); margin: 0 auto; }
+    header {
+      padding: 3rem 0 2rem;
+      background: #eaf2ff;
+      border-bottom: 1px solid #c7d7fe;
+    }
+    header p { max-width: 74ch; }
+    .eyebrow {
+      margin: 0 0 0.5rem;
+      color: var(--accent-dark);
+      font-size: 0.85rem;
+      font-weight: 750;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    h1 { max-width: 22ch; margin: 0; font-size: clamp(2rem, 6vw, 3.25rem); line-height: 1.12; }
+    h2 { margin-top: 0; font-size: clamp(1.45rem, 4vw, 2rem); line-height: 1.25; }
+    h3 { margin-bottom: 0.35rem; font-size: 1.15rem; }
+    main { padding: 1.5rem 0 3rem; }
+    section, nav.toc {
+      margin: 1.25rem 0;
+      padding: clamp(1.1rem, 3vw, 2rem);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 0.75rem;
+    }
+    nav.toc ul { display: flex; flex-wrap: wrap; gap: 0.55rem 1.25rem; margin-bottom: 0; padding-left: 1.2rem; }
+    .lead { font-size: 1.12rem; }
+    .callout {
+      margin: 1rem 0;
+      padding: 0.9rem 1rem;
+      background: var(--note);
+      border-left: 4px solid var(--accent);
+      border-radius: 0.25rem;
+    }
+    .caution { background: var(--warm); border-left-color: #b54708; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 1rem; }
+    .card { padding: 1rem; border: 1px solid var(--line); border-radius: 0.55rem; }
+    .card h3 { margin-top: 0; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    th, td { padding: 0.7rem; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: #f2f4f7; }
+    code { padding: 0.1em 0.3em; background: #f2f4f7; border-radius: 0.25rem; font-size: 0.95em; }
+    pre {
+      overflow-x: auto;
+      padding: 1rem;
+      background: var(--code);
+      color: #f9fafb;
+      border-radius: 0.5rem;
+      font: 0.93rem/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    pre code { padding: 0; background: transparent; color: inherit; }
+    ol, ul { padding-left: 1.4rem; }
+    li + li { margin-top: 0.35rem; }
+    details { margin: 0.75rem 0; padding: 0.7rem 0.9rem; border: 1px solid var(--line); border-radius: 0.45rem; }
+    summary { cursor: pointer; font-weight: 700; }
+    details p { margin-bottom: 0.25rem; }
+    .small { color: var(--muted); font-size: 0.93rem; }
+    footer { padding: 0 0 2rem; color: var(--muted); }
+
+    @media (max-width: 600px) {
+      .shell { width: min(100% - 1rem, 980px); }
+      header { padding: 2rem 0 1.5rem; }
+      th, td { padding: 0.5rem; }
+    }
+    @media print {
+      body { background: #fff; color: #000; font-size: 11pt; }
+      header { padding: 1rem 0; background: #fff; border-bottom: 1px solid #777; }
+      .shell { width: 100%; }
+      section, nav.toc { break-inside: avoid; margin: 0.7rem 0; padding: 0.8rem; border-color: #999; }
+      a { color: #000; }
+      a::after { content: " (" attr(href) ")"; font-size: 0.85em; overflow-wrap: anywhere; }
+      details > *:not(summary) { display: block; }
+      pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #f2f4f7; color: #000; }
+      footer { padding-bottom: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="shell">
+      <p class="eyebrow">Week 5 · Lesson 3 + Demo B</p>
+      <h1>M20: Clustering, PCA, and UMAP</h1>
+      <p class="lead">Clustering groups documents that look similar according to chosen features. This guide introduces the main clustering families, explains how K-means and HDBSCAN work, and shows why preprocessing, scaling, dimension reduction, and careful evaluation matter for text.</p>
+      <p><strong>Learning goals:</strong> outline a clustering workflow; compare centroid-, hierarchical-, and density-based approaches; implement the intuition behind K-means and HDBSCAN; and assess whether a clustering solution is useful rather than merely mathematically tidy.</p>
+    </div>
+  </header>
+
+  <main class="shell">
+    <nav class="toc" aria-label="Study guide contents">
+      <h2>On this page</h2>
+      <ul>
+        <li><a href="#overview">Roadmap</a></li>
+        <li><a href="#terms">Key terms</a></li>
+        <li><a href="#approaches">Clustering approaches</a></li>
+        <li><a href="#kmeans">K-means</a></li>
+        <li><a href="#evaluation">Evaluating clusters</a></li>
+        <li><a href="#interpret">Understanding groups</a></li>
+        <li><a href="#scaling">Scaling and PCA</a></li>
+        <li><a href="#hdbscan">HDBSCAN and UMAP</a></li>
+        <li><a href="#example">Real-world example</a></li>
+        <li><a href="#workflow">Choosing a workflow</a></li>
+        <li><a href="#pitfalls">Limitations</a></li>
+        <li><a href="#check">Self-check</a></li>
+      </ul>
+    </nav>
+
+    <section id="overview">
+      <h2>1. The big picture</h2>
+      <p>Clustering is an unsupervised way to group observations—such as customer complaints—so that items within a group are relatively similar under a chosen representation and distance measure. Unlike a supervised classifier, it does not learn pre-supplied “correct” group labels.</p>
+      <p>Before choosing an algorithm, ask four questions:</p>
+      <ol>
+        <li>What features represent each document: word counts, TF-IDF, topics, or embeddings?</li>
+        <li>Do you know how many groups you expect?</li>
+        <li>What shapes and densities might the groups have?</li>
+        <li>What does “similar” mean for this data, and how will you judge the result?</li>
+      </ol>
+      <div class="callout"><strong>Memory cue:</strong> a clustering model can only group what its representation and distance measure make “close.”</div>
+    </section>
+
+    <section id="terms">
+      <h2>2. Key terms in plain language</h2>
+      <ul>
+        <li><strong>Observation:</strong> one item to group, such as a complaint or review.</li>
+        <li><strong>Feature:</strong> a numerical property used to represent an observation. Text can be represented with term counts, TF-IDF values, topic proportions, or vectors.</li>
+        <li><strong>Distance:</strong> a numerical measure of how far apart two observations are under the selected representation.</li>
+        <li><strong>Centroid:</strong> the center or average location of the points assigned to a cluster.</li>
+        <li><strong>Dimensionality:</strong> the number of features or coordinates describing an observation.</li>
+        <li><strong>Standardization:</strong> shifting and scaling features, often to mean 0 and standard deviation 1, so distances are not dominated by features with larger numeric scales.</li>
+        <li><strong>Noise / outlier:</strong> a point that a density-based method does not assign to a stable cluster.</li>
+        <li><strong>Dimensionality reduction:</strong> representing data with fewer coordinates while retaining selected structure or variation.</li>
+      </ul>
+    </section>
+
+    <section id="approaches">
+      <h2>3. Three broad clustering approaches</h2>
+      <table>
+        <thead><tr><th>Approach</th><th>How it groups data</th><th>Useful when…</th><th>Watch out for…</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row">Centroid-based</th>
+            <td>Assign points to a nearby representative center.</td>
+            <td>Groups are reasonably compact and distance to a center is meaningful.</td>
+            <td>Often favors round/spherical clusters and needs a chosen cluster count.</td>
+          </tr>
+          <tr>
+            <th scope="row">Hierarchical</th>
+            <td>Build a tree by repeatedly merging similar items/groups (agglomerative) or splitting groups (divisive).</td>
+            <td>You want to examine groupings at different levels or use a flexible similarity rule.</td>
+            <td>Can be computationally expensive; the tree still needs a chosen cut or level to get groups.</td>
+          </tr>
+          <tr>
+            <th scope="row">Density-based</th>
+            <td>Find dense regions separated by sparse areas; some points may remain noise.</td>
+            <td>Groups may have irregular shapes, different densities, or outliers.</td>
+            <td>High-dimensional sparse text can make local density hard to estimate; results need interpretation.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>Clustering can also be stacked with other methods. For example, represent documents with topics or embeddings first, then cluster those representations.</p>
+    </section>
+
+    <section id="kmeans">
+      <h2>4. K-means: group around centers</h2>
+      <p>K-means is a centroid-based method. It asks for a value <code>k</code>, the number of clusters, and repeatedly assigns each observation to the nearest centroid and updates the centroid to the mean of its assigned points.</p>
+      <ol>
+        <li>Choose <code>k</code> and initialize <code>k</code> centroids.</li>
+        <li>Assign each observation to its nearest centroid, often using Euclidean distance.</li>
+        <li>Recompute each centroid as the mean of the points assigned to that cluster.</li>
+        <li>Repeat assignment and update until the centers stop moving much or another stopping rule is met.</li>
+      </ol>
+      <p>The procedure is simple and can be efficient, including with mini-batch variants that update centers from samples of the data. But K-means assumes that distance to a centroid is meaningful and works best for roughly round, similarly scaled groups. It can be sensitive to the starting centers and may settle on a local rather than the best overall solution.</p>
+      <div class="callout caution"><strong>Text-data caution:</strong> word-count and TF-IDF matrices can be high-dimensional and sparse. In thousands of dimensions, distances and “spherical” shapes are not easy to reason about visually. Standardization may help one problem but can also change which features matter; it should be tested rather than applied automatically.</div>
+    </section>
+
+    <section id="evaluation">
+      <h2>5. Evaluating clusters</h2>
+      <p>There is no single score that proves a clustering solution is useful. Match the measure to the algorithm, representation, and decision the groups are meant to support.</p>
+      <table>
+        <thead><tr><th>Measure</th><th>What it summarizes</th><th>Usual direction / caution</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row">Within-cluster sum of squares (WCSS) / inertia</th>
+            <td>Squared distances from points to their assigned K-means centroids.</td>
+            <td>Lower is tighter, but usually falls as <code>k</code> grows. Compare within the same representation; absolute values change with scaling and dimensionality.</td>
+          </tr>
+          <tr>
+            <th scope="row">Elbow method</th>
+            <td>Looks for where improvement in WCSS begins to flatten as <code>k</code> increases.</td>
+            <td>Useful visual aid, but the elbow may be vague and does not guarantee useful groups.</td>
+          </tr>
+          <tr>
+            <th scope="row">Calinski–Harabasz index</th>
+            <td>Ratio of between-cluster dispersion to within-cluster dispersion.</td>
+            <td>Higher often suggests more separated, compact clusters for compatible settings.</td>
+          </tr>
+          <tr>
+            <th scope="row">Davies–Bouldin index</th>
+            <td>Average similarity of each cluster to its most similar other cluster.</td>
+            <td>Lower generally indicates better separation under the measure.</td>
+          </tr>
+          <tr>
+            <th scope="row">Silhouette score</th>
+            <td>For each point, compares average distance to its own cluster with distance to the nearest other cluster.</td>
+            <td>Ranges from -1 to 1; higher is generally better. Negative values can mean a point is closer to another cluster. Assumes the chosen distance is meaningful.</td>
+          </tr>
+          <tr>
+            <th scope="row">External validation</th>
+            <td>Compares clusters with independently known labels (“ground truth”).</td>
+            <td>Can be informative if trustworthy labels exist; unsupervised projects often have no such labels.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>For HDBSCAN, evaluate cluster counts and sizes, the share of points labeled noise, and whether the groups are stable and meaningful to people who know the domain. K-means distance measures do not automatically transfer to density-based clusters.</p>
+    </section>
+
+    <section id="interpret">
+      <h2>6. How do you explain what a cluster means?</h2>
+      <p>A cluster ID (such as “cluster 7”) is only a label from the algorithm. It does not explain the group. The Demo B materials use several complementary ways to inspect K-means clusters:</p>
+      <ul>
+        <li><strong>Frequent terms:</strong> sum feature values across documents assigned to a cluster and inspect the most prominent terms. In TF-IDF data these are weighted values, not necessarily raw word counts.</li>
+        <li><strong>Distinctive features:</strong> compare each cluster’s centroid to other centroids to see which words/features are unusually high or low for that cluster.</li>
+        <li><strong>Representative documents:</strong> find documents closest to a centroid and read them. They can be useful examples, but are not guaranteed to capture every nuance in the group.</li>
+        <li><strong>Domain review:</strong> ask subject-matter experts whether the group is coherent and whether its interpretation would support a real decision.</li>
+      </ul>
+      <p>Using these views together is safer than naming a cluster from its top words alone. A few common words may reflect boilerplate or preprocessing choices rather than the underlying issue.</p>
+    </section>
+
+    <section id="scaling">
+      <h2>7. Standardization and PCA</h2>
+      <h3>Why standardize?</h3>
+      <p>Distance-based models can be dominated by features with larger numeric scales. If one feature ranges from 0 to millions and another from 0 to 10, the large-scale feature can overwhelm the distance calculation. Standard scaling commonly subtracts a feature’s mean and divides by its standard deviation, putting features on comparable scales.</p>
+      <p>Standardization changes the geometry of the data. For text, common-term counts, rare terms, and sparse zeros may be affected in ways that do not necessarily improve clusters. The demo compares original and standardized representations rather than claiming one always wins.</p>
+      <h3>Principal Component Analysis (PCA)</h3>
+      <p>PCA constructs new, usually uncorrelated axes (principal components) that capture variation in the data, ordered from most to least variance explained. Keeping fewer components can make a high-dimensional dataset more compact and may reduce noise, but it also changes the information and distances the clustering method sees.</p>
+      <p>Possible choices include keeping components with eigenvalues above 1 in a standardized-feature setting or retaining enough components to reach a chosen cumulative explained-variance threshold. These are heuristics, not universal rules. In the demo’s particular sample, about 357 components were needed to reach 75% cumulative variance; that number is specific to that dataset and representation.</p>
+      <p>PCA is a linear transformation; it does not guarantee that the retained dimensions are the ones most useful for the business question or for clustering.</p>
+    </section>
+
+    <section id="hdbscan">
+      <h2>8. HDBSCAN and UMAP</h2>
+      <h3>HDBSCAN: find dense regions and allow noise</h3>
+      <p>HDBSCAN (Hierarchical Density-Based Spatial Clustering of Applications with Noise) builds a hierarchy of density-based groupings and selects stable clusters from it. Unlike K-means, it does not require a fixed <code>k</code> and it does not force every point into a cluster. Points labeled <code>-1</code> are treated as noise or unassigned, not as one meaningful cluster.</p>
+      <p>It can find non-spherical shapes and clusters at different densities, but high-dimensional sparse text can still make density difficult to estimate. It can also produce many small groups or mark a large fraction of points as noise. Inspect outcomes, do not optimize a single count in isolation.</p>
+      <h3>UMAP: reduce dimensions while emphasizing local structure</h3>
+      <p>UMAP (Uniform Manifold Approximation and Projection) is a nonlinear dimensionality-reduction method often used for visualization and for producing lower-dimensional representations. The demo uses a higher-dimensional UMAP representation before HDBSCAN and chooses cosine distance for text. UMAP’s parameters—including output dimensions, distance metric, and neighborhood size—affect the resulting space.</p>
+      <p>PCA and UMAP are not interchangeable: PCA is a linear variance-based projection; UMAP is nonlinear and designed to preserve neighborhood relationships. UMAP can help density-based clustering in some text settings, but it does not guarantee good clusters. A two-dimensional visualization can also distort distances and should not be treated as proof of cluster quality.</p>
+      <h3>Practical HDBSCAN checks</h3>
+      <ul>
+        <li>How many observations are labeled noise?</li>
+        <li>How many clusters are returned, and is that number interpretable?</li>
+        <li>Is one cluster dominating, or are sizes plausible for the task?</li>
+        <li>Are there many tiny clusters at the minimum size?</li>
+        <li>Do representative examples form coherent, actionable groups?</li>
+      </ul>
+      <p>Demo B explores settings such as <code>min_cluster_size</code>, <code>min_samples</code>, <code>cluster_selection_method</code> (<code>eom</code> or <code>leaf</code>), and <code>cluster_selection_epsilon</code>. Their effects interact; tune with the application in mind.</p>
+      <div class="callout caution"><strong>Demo result, not a general benchmark:</strong> in the saved notebook output, default HDBSCAN on the original high-dimensional complaint features labeled about 80% of observations as noise; applying it after 10-dimensional UMAP reduced that example’s noise share to about one-third but still returned many clusters. These are outputs from one course configuration and should not be generalized to other datasets.</div>
+    </section>
+
+    <section id="example">
+      <h2>9. Real-world example: route customer complaints</h2>
+      <p><em>Illustrative scenario based on the lesson; the group names here are examples, not claims about measured notebook results.</em> A customer-care manager wants to group complaints so similar issues can be assigned to teams that can resolve them efficiently.</p>
+      <ol>
+        <li><strong>Define the unit:</strong> one complaint is one observation.</li>
+        <li><strong>Choose the representation:</strong> for example, a TF-IDF document-term matrix that downweights terms common across many complaints and gives more weight to relatively distinctive terms.</li>
+        <li><strong>Decide whether a cluster count is known:</strong> if the team can specify a useful number of broad queues, try K-means; if the number and shapes of groups are unknown and some complaints may be outliers, consider HDBSCAN.</li>
+        <li><strong>Prepare the geometry:</strong> test the original features and considered scaling or dimension reduction. Use a distance measure appropriate to the representation.</li>
+        <li><strong>Fit multiple candidates:</strong> vary <code>k</code> for K-means, or relevant HDBSCAN/UMAP settings, and record diagnostics.</li>
+        <li><strong>Inspect groups:</strong> compare frequent and distinctive terms, representative complaints, cluster sizes, noise share, and available metrics.</li>
+        <li><strong>Review with staff:</strong> confirm whether the groups describe real issues and help route work. Revise the approach if the groups are hard to explain or not actionable.</li>
+      </ol>
+      <p>For example, a cluster might be described as “account access” only if its representative documents and distinguishing terms support that interpretation. A cluster label alone is not enough.</p>
+    </section>
+
+    <section id="workflow">
+      <h2>10. A practical decision workflow</h2>
+      <ol>
+        <li><strong>Clarify the use:</strong> are you exploring, routing, summarizing, or making a consequential decision?</li>
+        <li><strong>Choose features and distance:</strong> word counts, TF-IDF, embeddings, or another representation each imply a different notion of similarity.</li>
+        <li><strong>Select an algorithm family:</strong> centroid-based if a chosen number of compact groups fits; density-based if irregular shapes and noise are important; hierarchical if a multilevel structure is useful and feasible.</li>
+        <li><strong>Address scale and dimensionality:</strong> test whether scaling or reduction improves meaningful separation; do not assume a lower-dimensional plot preserves every relevant relationship.</li>
+        <li><strong>Evaluate at multiple levels:</strong> model scores, per-point diagnostics, cluster size balance, stability across initializations/settings, and human interpretability.</li>
+        <li><strong>Communicate trade-offs:</strong> explain chosen parameters, what counts as noise, how clusters were named, and which observations may not fit.</li>
+      </ol>
+      <div class="callout">A mathematically optimized solution is not automatically the most useful one. A smaller number of clear, actionable groups may be preferable to many groups that are difficult for people to use.</div>
+    </section>
+
+    <section id="pitfalls">
+      <h2>11. Common pitfalls and limitations</h2>
+      <ul>
+        <li><strong>Assuming distance always means semantic similarity.</strong> The answer depends on text features, scaling, and the chosen metric.</li>
+        <li><strong>Forgetting the K-means shape assumption.</strong> K-means tends toward centroid-centered, roughly spherical partitions and may split curved or uneven-density groups poorly.</li>
+        <li><strong>Comparing inertia across different feature spaces as if directly equivalent.</strong> Changing scaling or PCA changes distance magnitudes; compare carefully and use complementary measures.</li>
+        <li><strong>Treating silhouette as universal truth.</strong> It relies on distances that may be uninformative in sparse, high-dimensional text and favors some geometries over others.</li>
+        <li><strong>Calling all HDBSCAN “noise” true junk.</strong> Noise means unassigned under this representation and settings; it may include rare but important complaints.</li>
+        <li><strong>Assuming UMAP has preserved every global distance.</strong> It is designed to preserve aspects of neighborhood structure, not to provide a perfect copy of the original geometry.</li>
+        <li><strong>Interpreting one run as stable.</strong> K-means initialization and stochastic reduction can affect results. Check stability across appropriate seeds or settings.</li>
+        <li><strong>Using feature standardization mechanically.</strong> Standardization can change sparse text geometry and may amplify low-variance features.</li>
+        <li><strong>Equating more clusters with more insight.</strong> Too many clusters can be noisy and unactionable; too few can merge distinct issues.</li>
+      </ul>
+    </section>
+
+    <section id="recap">
+      <h2>12. Quick recap</h2>
+      <ul>
+        <li>Clustering groups items based on a chosen representation and similarity/distance measure.</li>
+        <li>K-means iteratively assigns points to the nearest centroid and updates centers; it needs <code>k</code> and works best when Euclidean distance and compact, roughly spherical groups make sense.</li>
+        <li>HDBSCAN uses hierarchical density structure, can find irregular groups, does not require <code>k</code>, and can leave points as noise.</li>
+        <li>Silhouette, WCSS/inertia, elbow plots, Calinski–Harabasz, Davies–Bouldin, and external validation answer different questions and have different assumptions.</li>
+        <li>PCA is linear and variance-oriented; UMAP is nonlinear and emphasizes neighborhood relationships. Neither guarantees useful clusters.</li>
+        <li>Interpret clusters with words, representative documents, diagnostics, and domain expertise—not IDs alone.</li>
+      </ul>
+    </section>
+
+    <section id="check">
+      <h2>13. Self-check</h2>
+      <p>Try each question before opening its explanation.</p>
+      <details>
+        <summary>1. Why must K-means ask for a value of <code>k</code>?</summary>
+        <p>The method needs to know how many centroids to initialize and update. Choosing a suitable <code>k</code> is part of model selection.</p>
+      </details>
+      <details>
+        <summary>2. What does a K-means silhouette score near -1 suggest?</summary>
+        <p>The observation may be closer on average to another cluster than to the cluster it was assigned to. Investigate the point and whether the selected distance makes sense.</p>
+      </details>
+      <details>
+        <summary>3. What does the HDBSCAN label <code>-1</code> usually mean?</summary>
+        <p>The observation was labeled noise or left unassigned under that model and its settings; it is not a normal cluster ID.</p>
+      </details>
+      <details>
+        <summary>4. How does PCA differ from UMAP at a high level?</summary>
+        <p>PCA is a linear projection ordered by explained variance; UMAP is a nonlinear method designed to preserve neighborhood relationships. Both change the representation, and neither guarantees better clusters.</p>
+      </details>
+      <details>
+        <summary>5. Why might standardizing features affect the result?</summary>
+        <p>Distance-based methods can be dominated by large-scale features. Standardization changes feature scales so distances are reweighted, which may help or hurt depending on what features should matter.</p>
+      </details>
+      <details>
+        <summary>6. Name two ways to interpret a K-means cluster besides looking at its numeric label.</summary>
+        <p>Inspect frequent or distinctive terms in the cluster, read documents closest to its centroid, and consult domain experts about whether the group is coherent.</p>
+      </details>
+      <details>
+        <summary>7. Why might HDBSCAN still perform poorly on raw text features?</summary>
+        <p>Text vectors can be high-dimensional and sparse, making density and neighborhood relationships difficult to estimate. HDBSCAN may then mark many points as noise or form too many small groups.</p>
+      </details>
+    </section>
+
+
+  </main>
+
+  <footer class="shell">
+    <p>Prepared as a beginner study aid for Week 5, Lesson 3 and Demo B. Practical examples are illustrative, and saved demo metrics are identified as configuration-specific rather than general benchmarks.</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,323 @@
+---
+title: "M27: Neural Networks"
+description: "Understand neural network layers, how models learn from examples, and practical considerations when applying neural networks to text."
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A beginner-friendly guide to artificial neural networks and their design considerations for NLP.">
+  <title>M27: Neural Networks</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #182535;
+      --muted: #506174;
+      --paper: #f4f7fb;
+      --surface: #fff;
+      --line: #d5deea;
+      --blue: #124b78;
+      --teal: #087e78;
+      --soft-blue: #e8f2fb;
+      --soft-teal: #e7f5f3;
+      --soft-gold: #fff5d9;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font: 16px/1.65 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: var(--blue); text-underline-offset: .18em; }
+    a:hover { color: #073356; }
+    a:focus-visible, summary:focus-visible {
+      outline: 3px solid #d29100;
+      outline-offset: 3px;
+      border-radius: 3px;
+    }
+    .wrap { width: min(100% - 2rem, 960px); margin-inline: auto; }
+    header {
+      padding: 3.5rem 0 2.5rem;
+      color: white;
+      background: linear-gradient(125deg, #123d64, #087e78);
+    }
+    header p { max-width: 720px; color: #e6f3fa; margin-bottom: 0; }
+    .eyebrow { font-size: .85rem; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; }
+    h1 { max-width: 780px; margin: .4rem 0 .8rem; font-size: clamp(2rem, 5vw, 3.4rem); line-height: 1.1; }
+    main { padding: 1.5rem 0 3.5rem; }
+    section, nav.toc, .callout {
+      margin: 1.2rem 0;
+      padding: clamp(1.1rem, 3vw, 1.8rem);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--surface);
+      box-shadow: 0 5px 18px rgb(25 48 72 / 5%);
+    }
+    h2 { margin: 0 0 .7rem; color: #153d60; font-size: clamp(1.45rem, 3vw, 1.9rem); line-height: 1.25; }
+    h3 { margin: 1.35rem 0 .35rem; color: #174f6c; font-size: 1.15rem; }
+    p { margin: .55rem 0; }
+    ul, ol { padding-left: 1.35rem; }
+    li + li { margin-top: .35rem; }
+    .toc ul { display: flex; flex-wrap: wrap; gap: .45rem 1.2rem; margin: .7rem 0 0; padding: 0; list-style: none; }
+    .toc li { margin: 0; }
+    .lead { font-size: 1.1rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 1rem; }
+    .card { padding: 1rem; border: 1px solid var(--line); border-radius: 10px; background: #fbfdff; }
+    .card h3 { margin-top: 0; }
+    .callout { border-left: 5px solid var(--teal); background: var(--soft-teal); }
+    .caution { border-left-color: #b57900; background: var(--soft-gold); }
+    .definition { color: var(--muted); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 620px; }
+    caption { padding: .5rem; text-align: left; font-weight: 700; color: #153d60; }
+    th, td { padding: .75rem; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: var(--soft-blue); }
+    code { padding: .08rem .28rem; border-radius: 4px; background: #eef2f6; font: .94em ui-monospace, SFMono-Regular, Consolas, monospace; }
+    details { margin: .8rem 0; padding: .75rem 1rem; border: 1px solid var(--line); border-radius: 9px; background: #fbfdff; }
+    summary { color: #153d60; font-weight: 700; cursor: pointer; }
+    footer { padding: 1rem 0 2.5rem; color: var(--muted); font-size: .92rem; }
+    @media (max-width: 540px) {
+      header { padding: 2.5rem 0 2rem; }
+      .wrap { width: min(100% - 1.2rem, 960px); }
+      section, nav.toc, .callout { border-radius: 10px; }
+    }
+    @media print {
+      body { background: white; color: #111; font-size: 11pt; }
+      header { padding: 1rem 0; background: white; color: #111; }
+      header p { color: #333; }
+      section, nav.toc, .callout { box-shadow: none; break-inside: avoid; }
+      a { color: #111; }
+      .toc ul { display: block; }
+      details > *:not(summary) { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="eyebrow">Week 7 · Lesson 1</div>
+      <h1>M27: Neural Networks</h1>
+      <p>Understand how a neural network turns examples into predictions, how it learns, and what to consider when the data is text.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <nav class="toc" aria-label="On this page">
+      <strong>On this page</strong>
+      <ul>
+        <li><a href="#overview">Big idea</a></li>
+        <li><a href="#parts">Network parts</a></li>
+        <li><a href="#node">What a node computes</a></li>
+        <li><a href="#training">How it learns</a></li>
+        <li><a href="#text">Neural networks and text</a></li>
+        <li><a href="#example">Worked example</a></li>
+        <li><a href="#resources">Data and resources</a></li>
+        <li><a href="#ethics">Ethics and interpretation</a></li>
+        <li><a href="#check">Self-check</a></li>
+      </ul>
+    </nav>
+
+    <section id="overview">
+      <h2>1. The big idea</h2>
+      <p class="lead">An <strong>artificial neural network (ANN)</strong> learns combinations of input features that help predict an outcome. It does this by passing signals through connected layers and adjusting the strengths of those connections using examples.</p>
+      <p>The “neural” name is an inspiration, not a claim that a computer network works just like a human brain. For this lesson, think of it as a flexible mathematical model made of layers of simple computations.</p>
+      <p><strong>Deep learning</strong> refers broadly to learning with multiple layers and nonlinear transformations. More layers can model more complex patterns, but they also add parameters and training demands. A deeper model is not automatically better for every dataset.</p>
+      <div class="callout">
+        <strong>Learning roadmap:</strong> represent the input as numbers → pass it through the network → compare its prediction with the known answer → adjust weights → repeat → check performance on examples not used for fitting.
+      </div>
+    </section>
+
+    <section id="parts">
+      <h2>2. The three parts of a basic network</h2>
+      <div class="grid">
+        <article class="card">
+          <h3>Input layer</h3>
+          <p>Receives the model’s features. Its size is determined by the shape of the input data—for example, the number of columns in a document-term matrix or the dimensions in an embedding.</p>
+        </article>
+        <article class="card">
+          <h3>Hidden layer(s)</h3>
+          <p>Transform and combine input signals. The analyst chooses how many hidden layers and how many nodes each layer has. More nodes and layers mean more trainable parameters.</p>
+        </article>
+        <article class="card">
+          <h3>Output layer</h3>
+          <p>Produces the model’s prediction. Its design depends on the task: one numeric prediction for a single regression outcome, or outputs corresponding to the classes in a classification task.</p>
+        </article>
+      </div>
+      <p>For example, a three-class sentiment task might produce scores for <em>negative</em>, <em>neutral</em>, and <em>positive</em>. The output structure should match the prediction the model is meant to make.</p>
+      <div class="callout caution">
+        <strong>Size is a design choice, not a magic formula.</strong> The lecture recommends starting relatively small and expanding if needed, considering the amount and shape of the available data.
+      </div>
+    </section>
+
+    <section id="node">
+      <h2>3. What happens inside one node?</h2>
+      <p>A node receives values from the previous layer. It multiplies each input by a learned <strong>weight</strong>, adds a <strong>bias</strong>, then applies an <strong>activation function</strong>.</p>
+      <p><code>node output = activation(weighted sum of inputs + bias)</code></p>
+      <p>Weights control how strongly inputs influence the node. A bias works like an adjustable intercept, shifting the combined signal. The activation function shapes the signal before it moves to the next layer.</p>
+      <div class="table-wrap">
+        <table>
+          <caption>Two activation functions introduced in the lesson</caption>
+          <thead><tr><th>Function</th><th>Simple description</th><th>Common intuition</th></tr></thead>
+          <tbody>
+            <tr>
+              <th scope="row">ReLU</th>
+              <td>Returns 0 for negative input and returns the input itself for positive input: <code>max(0, z)</code>.</td>
+              <td>Lets positive signals through while setting negative signals to zero.</td>
+            </tr>
+            <tr>
+              <th scope="row">Sigmoid</th>
+              <td>Maps a value to a number between 0 and 1.</td>
+              <td>Can express a binary-class score as a probability-like value; it is often used for a binary output.</td>
+            </tr>
+            <tr>
+              <th scope="row">Linear</th>
+              <td>Applies no nonlinear transformation to the weighted sum.</td>
+              <td>Useful in some outputs, but stacking only linear transformations does not create the same nonlinear flexibility.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Nonlinear activations allow networks to learn relationships more complex than a single linear rule. Activations at hidden layers and the output function serve different purposes; choose them to fit the task.</p>
+    </section>
+
+    <section id="training">
+      <h2>4. How the network learns</h2>
+      <ol>
+        <li><strong>Initialize weights.</strong> The network starts with initial values for its weights and biases, commonly chosen using a randomized initialization scheme.</li>
+        <li><strong>Make a forward pass.</strong> Send input examples through the layers to get predictions. Training may process examples in small groups called <em>batches</em>.</li>
+        <li><strong>Measure the error.</strong> A loss function quantifies how far predictions are from the known training answers.</li>
+        <li><strong>Compute gradients.</strong> A gradient describes how the loss would change as the weights change.</li>
+        <li><strong>Update weights with backpropagation and an optimizer.</strong> Backpropagation uses the error information to calculate how weights contributed to the loss; an optimization method adjusts them to reduce it. The learning rate controls the size of updates.</li>
+        <li><strong>Repeat and monitor.</strong> Continue over batches and epochs, checking validation performance and stopping or changing settings as appropriate.</li>
+      </ol>
+      <dl>
+        <dt><strong>Epoch</strong></dt>
+        <dd class="definition">One complete pass over the training dataset.</dd>
+        <dt><strong>Batch</strong></dt>
+        <dd class="definition">A group of examples processed together before an update. In stochastic gradient descent, the batch size is one example.</dd>
+        <dt><strong>Hyperparameter</strong></dt>
+        <dd class="definition">A setting selected by the practitioner, such as layer sizes, learning rate, batch size, or number of epochs.</dd>
+        <dt><strong>Validation set</strong></dt>
+        <dd class="definition">Held-out examples used to monitor how the model performs beyond the examples it is fitting on.</dd>
+      </dl>
+      <p>Training examples teach the model; validation examples help reveal whether it is generalizing or simply getting better at the training data. An evaluation metric should reflect what matters for the task.</p>
+    </section>
+
+    <section id="text">
+      <h2>5. What is different when the inputs are text?</h2>
+      <p>A neural network cannot directly learn from ordinary sentences as strings. Text must first be represented numerically, and design choices affect what the model can learn.</p>
+      <div class="grid">
+        <article class="card">
+          <h3>Text representation</h3>
+          <p>Bag-of-words and TF-IDF create document-term features, but they do not inherently preserve word order or context. Embeddings represent words or larger text units as dense vectors and can encode semantic relationships. Select a representation that fits the task.</p>
+        </article>
+        <article class="card">
+          <h3>Scope and sequence length</h3>
+          <p>Decide whether one example is a full document, paragraph, sentence, or another unit. Some architectures expect a fixed number of tokens; shorter sequences may be padded and longer ones truncated. Truncation can discard useful information.</p>
+        </article>
+        <article class="card">
+          <h3>Casing and preprocessing</h3>
+          <p>Lowercasing can simplify text, but retaining case may help distinguish names or other meaningful patterns when there is enough data. Preprocessing should be chosen for the problem, not applied blindly.</p>
+        </article>
+        <article class="card">
+          <h3>Architecture</h3>
+          <p>Different architectures suit different patterns. The lesson notes recurrent approaches such as LSTMs and GRUs for sequence-dependent tasks and transformers for modeling broad token relationships. This lesson introduces the considerations; later Week 7 lessons cover transfer learning and transformers.</p>
+        </article>
+      </div>
+      <p>Text representations can be very wide, and the number of model parameters can grow quickly. Consider data volume, memory, compute time, and whether a pretrained model or transfer learning is a more suitable route than training a large model from scratch.</p>
+    </section>
+
+    <section id="example">
+      <h2>6. Worked real-world example: routing customer feedback</h2>
+      <p><em>Illustrative example—not a measured result from the course materials.</em></p>
+      <p>Suppose a service company wants to send customer messages to one of three teams: <strong>billing</strong>, <strong>delivery</strong>, or <strong>technical support</strong>.</p>
+      <ol>
+        <li><strong>Collect examples and labels.</strong> Gather past messages with reliable team labels. The model learns from these examples, so unclear or inconsistent labels can limit its performance.</li>
+        <li><strong>Represent each message.</strong> Convert text into features such as term counts or embeddings. A basic document-term matrix might have thousands of columns; the input layer reflects the chosen feature shape.</li>
+        <li><strong>Choose a small initial network.</strong> Feed the input features through one or more hidden layers. Each node combines signals using weights and biases, with nonlinear activations.</li>
+        <li><strong>Produce class outputs.</strong> Set up the output for the three routing categories. Train using known labels and an appropriate loss function.</li>
+        <li><strong>Check unseen cases.</strong> Use validation data and a relevant metric. Review mistakes, especially cases where an incorrect route could create delays or harm customers.</li>
+        <li><strong>Monitor fairness and changes.</strong> Check whether the model performs differently across language styles or customer groups, and revisit it as new types of requests appear.</li>
+      </ol>
+      <p>If a message says “I was charged twice, and my package is late,” a single-label model may need a routing rule for mixed issues. That is not solved merely by adding more layers: it is a question about the task definition and labels.</p>
+    </section>
+
+    <section id="resources">
+      <h2>7. Data, computation, and model fit</h2>
+      <ul>
+        <li><strong>Model complexity:</strong> adding layers or nodes increases the number of weights to learn. With limited examples, an oversized network can memorize training data rather than generalize.</li>
+        <li><strong>Overfitting:</strong> performance looks strong on training data but weaker on new examples. Validation monitoring and regularization methods such as dropout or weight decay can help, though they do not guarantee a good model.</li>
+        <li><strong>Computing resources:</strong> large models and high-dimensional text features can demand substantial memory and processing. GPUs can speed up many parallel computations, but resources still matter.</li>
+        <li><strong>Metric choice:</strong> choose evaluation measures based on the real cost of errors. Accuracy alone can be misleading when classes are imbalanced or some mistakes matter more.</li>
+        <li><strong>Training from scratch vs. transfer learning:</strong> training a complex language model from scratch can require substantial data and compute. A pretrained model can begin with learned language patterns and be adapted to a specific task; this is introduced in the next lesson, not the focus of this guide.</li>
+      </ul>
+    </section>
+
+    <section id="ethics">
+      <h2>8. Ethical use and careful interpretation</h2>
+      <ul>
+        <li><strong>Training data can carry social bias.</strong> If some groups or language varieties are underrepresented, model performance may be uneven. Patterns in the text can also lead to problematic associations.</li>
+        <li><strong>Define the purpose and consequences.</strong> Ask who may be affected by a prediction and what happens when it is wrong.</li>
+        <li><strong>Review features and preprocessing thoughtfully.</strong> Decide whether names or sensitive attributes should be included, masked, or separately audited. Removing an obvious word does not necessarily remove all related bias.</li>
+        <li><strong>Check labels.</strong> Noisy or subjective labels teach the model the labeling process, not necessarily the concept you intended.</li>
+        <li><strong>Probe behavior.</strong> Inspect feature influences where possible and test carefully designed example sentences that might reveal unwanted associations.</li>
+        <li><strong>Remember that scores are uncertain.</strong> A model often produces scores or probabilities; turning them into a fixed class requires a threshold or decision rule and should not hide uncertainty.</li>
+      </ul>
+      <div class="callout caution">
+        <strong>Practical principle:</strong> neural-network predictions are evidence to review, not automatically objective facts. A high score does not fix biased data, unclear labels, or a poorly chosen task.
+      </div>
+    </section>
+
+    <section id="check">
+      <h2>9. Quick self-check</h2>
+      <details>
+        <summary>1. What determines the input layer’s size?</summary>
+        <p>The shape of the numeric input representation—for example, the number of features or dimensions passed into the model.</p>
+      </details>
+      <details>
+        <summary>2. What does a node do with its inputs?</summary>
+        <p>It combines weighted inputs with a bias, then applies an activation function.</p>
+      </details>
+      <details>
+        <summary>3. In plain language, what is backpropagation for?</summary>
+        <p>It traces how prediction error relates to the network’s weights so an optimizer can adjust those weights to reduce the loss.</p>
+      </details>
+      <details>
+        <summary>4. Why use a validation set?</summary>
+        <p>To monitor performance on examples not used to fit the model and help identify overfitting or guide model choices.</p>
+      </details>
+      <details>
+        <summary>5. What can bag-of-words miss compared with contextual representations?</summary>
+        <p>Basic bag-of-words features do not inherently retain token order or contextual meaning; embeddings can encode richer semantic relationships.</p>
+      </details>
+      <details>
+        <summary>6. Why is starting with a small model often sensible?</summary>
+        <p>A smaller model can reduce unnecessary parameters, training time, and overfitting risk when data is limited; increase complexity only when evidence supports it.</p>
+      </details>
+      <details>
+        <summary>7. Name one way bias can enter an NLP model.</summary>
+        <p>Training data may underrepresent some people or language varieties, or contain repeated social associations that the model can learn and reproduce.</p>
+      </details>
+    </section>
+
+    <section id="recap">
+      <h2>10. Takeaway</h2>
+      <ul>
+        <li>An ANN has input, hidden, and output layers; the input and output shapes depend on the data and task.</li>
+        <li>Nodes combine inputs through learned weights and biases, then apply activations.</li>
+        <li>Training uses predictions, loss, gradients, and weight updates; validation checks generalization.</li>
+        <li>NLP requires deliberate choices about text representation, casing, unit of analysis, sequence length, and architecture.</li>
+        <li>Complexity, compute limits, label quality, bias, and uncertainty all matter—not only predictive performance.</li>
+      </ul>
+    </section>
+
+
+  </main>
+  <footer class="wrap">
+    <p>Introductory study aid. Examples are illustrative unless identified as course material; paraphrased explanations are intended to support, not replace, the original lessons.</p>
+  </footer>
+</body>
+</html>
