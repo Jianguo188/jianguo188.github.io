@@ -46,6 +46,9 @@
     .topic { padding: 7px 12px; border: 1px solid rgb(191 229 226 / 25%); border-radius: 999px; background: rgb(255 255 255 / 7%); color: #c4eee5; font-size: .76rem; font-weight: 650; letter-spacing: .025em; }
     h1 { max-width: 760px; margin: 16px 0 14px; font-size: clamp(2.6rem, 7vw, 5.2rem); letter-spacing: -.055em; line-height: 1.02; }
     .tagline { max-width: 620px; margin: 0; color: #c5d0e0; font-size: clamp(1.05rem, 2.4vw, 1.25rem); line-height: 1.7; }
+    .contact-link { display: inline-flex; align-items: center; gap: 9px; max-width: 100%; margin-top: 23px; padding: 11px 15px; border: 1px solid rgb(191 229 226 / 35%); border-radius: 9px; background: rgb(255 255 255 / 8%); color: #e4f7f3; font-size: .9rem; font-weight: 650; text-decoration: none; transition: border-color .18s ease, background .18s ease; }
+    .contact-link::before { color: #8ee0cf; content: "✉"; font-size: 1rem; }
+    .contact-link:hover { border-color: #8ee0cf; background: rgb(255 255 255 / 13%); }
     .content { max-width: 1160px; margin: -36px auto 0; padding: 0 24px 80px; }
     .library { padding: clamp(24px, 3.2vw, 40px); border: 1px solid #e4e9f1; border-radius: 18px; background: #fff; box-shadow: 0 24px 65px rgb(22 37 61 / 8%); }
     .library-layout { display: grid; grid-template-columns: 225px minmax(0, 1fr); gap: 36px; }
@@ -74,8 +77,6 @@
     .more-guides .cards { margin-top: 16px; }
     .empty { margin: 0; color: #64738a; }
     footer { max-width: 1160px; margin: 28px auto 0; color: #79869a; font-size: .85rem; text-align: center; }
-    footer a { color: #52647b; text-decoration: none; }
-    footer a:hover { color: #147b6d; text-decoration: underline; text-underline-offset: 3px; }
     @media (max-width: 600px) {
       .hero { padding-top: 22px; padding-bottom: 70px; }
       .hero-copy { margin-top: 60px; }
@@ -108,6 +109,7 @@
       </div>
       <h1>Making complex ideas easier to understand.</h1>
       <p class="tagline">{{ site.description | escape }}</p>
+      <a class="contact-link" href="mailto:jianguo.yang188+blog@gmail.com">jianguo.yang188+blog@gmail.com</a>
     </div>
   </header>
 
@@ -168,7 +170,7 @@
         </div>
       </div>
     </div>
-    <footer>&copy; {{ site.time | date: "%Y" }} {{ site.author | escape }} · Built for curious minds. · <a href="mailto:jianguo.yang188+blog@gmail.com">Get in touch</a></footer>
+    <footer>&copy; {{ site.time | date: "%Y" }} {{ site.author | escape }} · Built for curious minds.</footer>
   </main>
 </body>
 </html>
