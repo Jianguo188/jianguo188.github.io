@@ -65,6 +65,13 @@
     .card p { margin: 0 0 22px; color: #64738a; font-size: .94rem; line-height: 1.65; }
     .read-link { margin-top: auto; color: #147b6d; font-size: .9rem; font-weight: 750; text-decoration: none; }
     .read-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+    .more-guides { margin-top: 18px; }
+    .more-guides summary { display: inline-flex; align-items: center; gap: 9px; padding: 9px 13px; border: 1px solid #dce9e6; border-radius: 999px; color: #147b6d; cursor: pointer; font-size: .86rem; font-weight: 700; list-style: none; transition: border-color .18s ease, background .18s ease; }
+    .more-guides summary::-webkit-details-marker { display: none; }
+    .more-guides summary::after { content: "＋"; font-size: 1rem; line-height: 1; }
+    .more-guides[open] summary::after { content: "−"; }
+    .more-guides summary:hover { border-color: #b8ddd6; background: #f4fbf9; }
+    .more-guides .cards { margin-top: 16px; }
     .empty { margin: 0; color: #64738a; }
     footer { max-width: 1160px; margin: 28px auto 0; color: #79869a; font-size: .85rem; text-align: center; }
     @media (max-width: 600px) {
@@ -125,7 +132,7 @@
             <section class="category" id="category-{{ forloop.index }}" aria-label="{{ category_name | escape }}">
               <h3 class="category-title">{{ category_name | escape }}</h3>
               <div class="cards">
-                {% for page in category_pages %}
+                {% for page in category_pages limit: 3 %}
                   {% assign fallback_title = page.name | remove: ".html" | replace: "-", " " | replace: "_", " " %}
                   <article class="card">
                     <h4>{{ page.title | default: fallback_title | escape }}</h4>
@@ -134,6 +141,23 @@
                   </article>
                 {% endfor %}
               </div>
+              {% assign extra_count = category_pages.size | minus: 3 %}
+              {% if extra_count > 0 %}
+                {% assign extra_pages = category_pages | slice: 3, extra_count %}
+                <details class="more-guides">
+                  <summary>Show {{ extra_count }} more {% if extra_count == 1 %}guide{% else %}guides{% endif %}</summary>
+                  <div class="cards">
+                    {% for page in extra_pages %}
+                      {% assign fallback_title = page.name | remove: ".html" | replace: "-", " " | replace: "_", " " %}
+                      <article class="card">
+                        <h4>{{ page.title | default: fallback_title | escape }}</h4>
+                        <p>{{ page.description | default: site.description | escape }}</p>
+                        <a class="read-link" href="{{ page.url | relative_url }}">Open guide <span aria-hidden="true">&rarr;</span></a>
+                      </article>
+                    {% endfor %}
+                  </div>
+                </details>
+              {% endif %}
             </section>
           {% endfor %}
           {% if article_count == 0 %}
