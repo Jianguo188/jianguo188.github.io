@@ -132,7 +132,7 @@
             <section class="category" id="category-{{ forloop.index }}" aria-label="{{ category_name | escape }}">
               <h3 class="category-title">{{ category_name | escape }}</h3>
               <div class="cards">
-                {% for page in category_pages limit: 3 %}
+                {% for page in category_pages limit: 4 %}
                   {% assign fallback_title = page.name | remove: ".html" | replace: "-", " " | replace: "_", " " %}
                   <article class="card">
                     <h4>{{ page.title | default: fallback_title | escape }}</h4>
@@ -141,9 +141,9 @@
                   </article>
                 {% endfor %}
               </div>
-              {% assign extra_count = category_pages.size | minus: 3 %}
+              {% assign extra_count = category_pages.size | minus: 4 %}
               {% if extra_count > 0 %}
-                {% assign extra_pages = category_pages | slice: 3, extra_count %}
+                {% assign extra_pages = category_pages | slice: 4, extra_count %}
                 <details class="more-guides">
                   <summary>Show {{ extra_count }} more {% if extra_count == 1 %}guide{% else %}guides{% endif %}</summary>
                   <div class="cards">
