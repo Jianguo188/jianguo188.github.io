@@ -1,0 +1,293 @@
+---
+title: "M10: POS Tagging and Named Entity Recognition"
+description: "A beginner-friendly guide to sequence labeling, part-of-speech tagging, and named entity recognition."
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% include folder-nav-head.html %}
+  <meta name="description" content="A beginner-friendly guide to sequence labeling, part-of-speech tagging, and named entity recognition.">
+  <title>M10 Beginner Study Guide: POS Tagging and NER</title>
+  <style>
+    :root {
+      --ink: #1f2937;
+      --muted: #536273;
+      --paper: #fff;
+      --canvas: #f2f6fa;
+      --blue: #155e8a;
+      --blue-pale: #e8f4fb;
+      --green-pale: #e9f7ef;
+      --gold-pale: #fff5d9;
+      --line: #d7e0e8;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font: 17px/1.65 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: #075985; }
+    a:focus-visible, summary:focus-visible { outline: 3px solid #f0a202; outline-offset: 3px; }
+    .page { max-width: 1020px; margin: 0 auto; padding: 28px 20px 64px; }
+    header, main, footer {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 8px 26px rgb(31 41 55 / 5%);
+    }
+    header { padding: clamp(24px, 5vw, 52px); border-top: 7px solid var(--blue); }
+    main { margin-top: 20px; padding: clamp(20px, 4vw, 42px); }
+    footer { margin-top: 20px; padding: 20px 26px; color: var(--muted); }
+    h1, h2, h3 { line-height: 1.2; }
+    h1 { max-width: 800px; margin: 0 0 14px; font-size: clamp(2rem, 5vw, 3.2rem); }
+    h2 { margin: 0 0 16px; font-size: clamp(1.45rem, 3vw, 2rem); }
+    h3 { margin: 24px 0 8px; font-size: 1.18rem; }
+    p { margin: 10px 0 16px; }
+    .eyebrow { color: var(--blue); font-weight: 750; letter-spacing: .07em; text-transform: uppercase; }
+    .lede { max-width: 780px; color: var(--muted); font-size: 1.15rem; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+    .chip { padding: 5px 11px; border-radius: 999px; background: var(--blue-pale); color: #123f5b; font-size: .9rem; font-weight: 650; }
+    nav { margin-top: 24px; padding: 18px 20px; border-radius: 12px; background: var(--canvas); }
+    nav strong { display: block; margin-bottom: 6px; }
+    nav ul { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0; padding-left: 20px; }
+    section { scroll-margin-top: 16px; padding-top: 30px; }
+    section + section { margin-top: 28px; border-top: 1px solid var(--line); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+    .card { padding: 17px 18px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+    .card h3 { margin-top: 0; }
+    .callout { margin: 18px 0; padding: 15px 18px; border-left: 5px solid var(--blue); border-radius: 8px; background: var(--blue-pale); }
+    .memory { border-left-color: #23804a; background: var(--green-pale); }
+    .caution { border-left-color: #b77900; background: var(--gold-pale); }
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    th, td { padding: 10px 12px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: var(--blue-pale); }
+    code { overflow-wrap: anywhere; }
+    .formula {
+      overflow-x: auto;
+      margin: 16px 0;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #f8fbfd;
+      font: .95rem/1.8 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      white-space: pre;
+    }
+    .tag { display: inline-block; margin: 2px; padding: 1px 7px; border: 1px solid #b7cedb; border-radius: 6px; background: #f4f8fb; font: .93em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    ol, ul { padding-left: 1.35em; }
+    li { margin: 5px 0; }
+    details { margin: 12px 0; padding: 13px 16px; border: 1px solid var(--line); border-radius: 10px; }
+    summary { cursor: pointer; color: #123f5b; font-weight: 700; }
+    .small { color: var(--muted); font-size: .93rem; }
+    .sources li { overflow-wrap: anywhere; margin-bottom: 9px; }
+    @media (max-width: 600px) {
+      body { font-size: 16px; }
+      .page { padding: 12px 10px 36px; }
+      header, main { border-radius: 12px; }
+      nav ul { display: block; }
+    }
+    @media print {
+      body { background: #fff; color: #000; font-size: 11pt; }
+      .page { max-width: none; padding: 0; }
+      header, main, footer { box-shadow: none; border-color: #aaa; }
+      nav { display: none; }
+      section { break-inside: avoid; }
+      a { color: #000; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <p class="eyebrow">Week 10 · Module 10</p>
+      <h1>Sequence Labeling: POS Tagging and Named Entities</h1>
+      <p class="lede">A plain-language guide to labeling each word for its grammatical job (POS) and finding names such as people, places, and organizations (NER).</p>
+      <div class="chips" aria-label="Topics">
+        <span class="chip">Beginner friendly</span>
+        <span class="chip">Real-world example</span>
+        <span class="chip">BIO / IOB tags</span>
+        <span class="chip">Self-checks</span>
+      </div>
+      <nav aria-label="Guide contents">
+        <strong>Jump to a section</strong>
+        <ul>
+          <li><a href="#roadmap">Learning map</a></li>
+          <li><a href="#sequence-labeling">Sequence labeling</a></li>
+          <li><a href="#pos">POS tagging</a></li>
+          <li><a href="#ner">NER</a></li>
+          <li><a href="#worked-example">Worked example</a></li>
+          <li><a href="#models">How models do it</a></li>
+          <li><a href="#self-check">Self-check</a></li>
+          <li><a href="#sources">Materials reviewed</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <section id="roadmap">
+        <h2>1. The learning map</h2>
+        <p>Imagine an email that says: <em>“Maya Chen joined Acme Health in Seattle on 12 May.”</em> A computer can first split it into tokens. Sequence labeling then assigns a label to each token or finds spans made from multiple tokens.</p>
+        <div class="callout"><strong>POS asks:</strong> “What grammatical role is this word playing here?” <strong>NER asks:</strong> “Is this word part of a named entity, and what kind?”</div>
+        <p>Both tasks add structure to unstructured text. That structure can help other systems search, translate, summarize, answer questions, or interpret speech.</p>
+      </section>
+
+      <section id="sequence-labeling">
+        <h2>2. What is sequence labeling?</h2>
+        <p>A <strong>sequence</strong> is an ordered series—in this case, the words or tokens of a sentence. In <strong>sequence labeling</strong>, a model reads that sequence and assigns one or more labels to its parts, while using clues from nearby words and the larger context.</p>
+        <p>For “Maya Chen joined Acme Health,” the word “Maya” may look like a person’s name, while “joined” provides context that a company or team may follow. Labels are not just attached by looking at each word in isolation.</p>
+        <div class="callout memory"><strong>Memory cue:</strong> sequence labeling = keep the text in order, then attach labels along it.</div>
+      </section>
+
+      <section id="pos">
+        <h2>3. POS tagging: identify each word’s grammatical job</h2>
+        <p><strong>Part-of-speech (POS) tagging</strong> assigns a grammatical category to each word, such as noun, verb, adjective, adverb, pronoun, preposition, or determiner. Fine-grained tag sets add details such as tense, number, or whether a noun is a proper name.</p>
+        <h3>Context resolves ambiguity</h3>
+        <p>The same spelling can have different grammatical roles. In <em>“the sitting area”</em>, <em>sitting</em> describes the area; in <em>“I was sitting”</em>, it is part of the verb. A tagger uses the word’s context to choose a likely role.</p>
+        <p>Likewise, <em>read</em> has different pronunciations in <em>“I read every day”</em> and <em>“I read yesterday.”</em> A POS tagger can help a speech system distinguish present from past tense.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Example word</th><th>Possible role</th><th>Common tag illustration</th></tr></thead>
+            <tbody>
+              <tr><td>book in “a book”</td><td>Noun</td><td><span class="tag">NN</span></td></tr>
+              <tr><td>book in “book a room”</td><td>Verb</td><td><span class="tag">VB</span></td></tr>
+              <tr><td>quickly</td><td>Adverb</td><td><span class="tag">RB</span></td></tr>
+              <tr><td>Atlanta</td><td>Proper noun</td><td><span class="tag">NNP</span></td></tr>
+              <tr><td>traveled</td><td>Past-tense verb</td><td><span class="tag">VBD</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Tag names vary by tag set and software. For example, the lecture’s NLTK example uses labels such as <code>NNP</code> for a singular proper noun, <code>VBD</code> for a past-tense verb, <code>IN</code> for a preposition, and <code>DT</code> for a determiner.</p>
+        <h3>Why POS tagging is useful</h3>
+        <ul>
+          <li><strong>Machine translation:</strong> knowing that a word is an adjective can help a translation system place it correctly in another language.</li>
+          <li><strong>Text-to-speech:</strong> grammatical context can help choose pronunciation, as with present and past forms of <em>read</em>.</li>
+          <li><strong>Speech transcription evaluation:</strong> POS information can be compared between a reference transcript and a system’s output.</li>
+          <li><strong>Downstream NLP:</strong> POS tags can provide useful features to other language-processing tasks, including some NER systems.</li>
+        </ul>
+        <div class="callout memory"><strong>Memory cue:</strong> POS labels the word’s <em>job</em>, not its real-world identity.</div>
+      </section>
+
+      <section id="ner">
+        <h2>4. NER: find and classify names</h2>
+        <p><strong>Named Entity Recognition (NER)</strong> identifies text spans that refer to named things and assigns each span a category. Common categories include:</p>
+        <div class="grid">
+          <article class="card"><h3>PER</h3><p>A person, such as “Maya Chen.”</p></article>
+          <article class="card"><h3>LOC</h3><p>A location, such as “Mount Rainier.”</p></article>
+          <article class="card"><h3>ORG</h3><p>An organization, such as “Acme Health.”</p></article>
+          <article class="card"><h3>GPE</h3><p>A geopolitical entity, often a country, city, or state, such as “Seattle” or “France.”</p></article>
+          <article class="card"><h3>Other labels</h3><p>Some tag sets include dates, times, money, products, events, or a general “miscellaneous” type. The exact categories depend on the task and dataset.</p></article>
+        </div>
+        <p>NER is more than spotting capital letters. It must decide where an entity begins and ends, and what it refers to in context. “Franklin” might be a person or a place. “United Airlines” is one organization name made of two words.</p>
+        <h3>BIO / IOB tags mark entity boundaries</h3>
+        <p>A common format assigns a tag to each token:</p>
+        <ul>
+          <li><strong>B-</strong> means the <strong>B</strong>eginning of an entity span.</li>
+          <li><strong>I-</strong> means a token <strong>I</strong>nside the same entity span after its beginning.</li>
+          <li><strong>O</strong> means <strong>O</strong>utside any entity.</li>
+        </ul>
+        <p>The category follows the boundary marker: <code>B-PER</code> begins a person span; <code>I-PER</code> continues it; <code>B-ORG</code> begins an organization. Some formats are called BIO or IOB; implementations may differ in tag conventions, but the key purpose is to make the entity boundaries explicit.</p>
+        <div class="callout memory"><strong>Memory cue:</strong> B = begin, I = inside, O = outside. Use the entity type to say what kind of name it is.</div>
+        <h3>Why NER is useful</h3>
+        <p>NER can turn a paragraph into structured facts for search, question answering, summarization, and information extraction. A travel app might extract city names and dates from a message; a news search tool might index people and organizations separately.</p>
+      </section>
+
+      <section id="worked-example">
+        <h2>5. Worked real-world example: organize a travel email</h2>
+        <p>Suppose a travel-support team receives this message:</p>
+        <p><em>“Maya Chen joined Acme Health in Seattle on 12 May.”</em></p>
+        <p>The following annotations are illustrative examples. Exact POS and NER labels can vary with the model, tag set, context, and entity scheme.</p>
+        <h3>POS view: each token gets a grammatical label</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Token</th><th>Illustrative POS label</th><th>Plain-language role</th></tr></thead>
+            <tbody>
+              <tr><td>Maya</td><td><code>NNP</code></td><td>Proper noun</td></tr>
+              <tr><td>Chen</td><td><code>NNP</code></td><td>Proper noun</td></tr>
+              <tr><td>joined</td><td><code>VBD</code></td><td>Past-tense verb</td></tr>
+              <tr><td>Acme</td><td><code>NNP</code></td><td>Proper noun</td></tr>
+              <tr><td>Health</td><td><code>NNP</code></td><td>Proper noun</td></tr>
+              <tr><td>in</td><td><code>IN</code></td><td>Preposition</td></tr>
+              <tr><td>Seattle</td><td><code>NNP</code></td><td>Proper noun</td></tr>
+              <tr><td>on</td><td><code>IN</code></td><td>Preposition</td></tr>
+              <tr><td>12</td><td><code>CD</code></td><td>Number</td></tr>
+              <tr><td>May</td><td><code>NNP</code></td><td>Proper noun in this illustrative tag set</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>NER view: locate the named spans</h3>
+        <div class="formula">
+          Maya      → B-PER<br>
+          Chen      → I-PER<br>
+          joined    → O<br>
+          Acme      → B-ORG<br>
+          Health    → I-ORG<br>
+          in        → O<br>
+          Seattle   → B-GPE<br>
+          on        → O<br>
+          12        → B-DATE<br>
+          May       → I-DATE
+        </div>
+        <p>The POS labels describe grammar; the NER labels identify names and entity spans. A system could use the extracted organization and location to index the message for an employee-relocation or travel-support workflow.</p>
+        <div class="callout caution"><strong>Keep the tasks distinct:</strong> “Seattle” can be a proper noun under POS tagging and a location-like entity under NER. One label answers a grammar question; the other answers an entity question.</div>
+      </section>
+
+      <section id="models">
+        <h2>6. How do models produce the labels?</h2>
+        <p>The module introduces a traditional tagger and encoder-based transformer models. In practice, the system is trained or fine-tuned using examples where people have already assigned the desired tags.</p>
+        <div class="grid">
+          <article class="card">
+            <h3>Average Perceptron tagger</h3>
+            <p>The lecture describes NLTK’s POS tagger as an average-perceptron model. At a high level, a perceptron scores possible tags using learned weights and word/context features, then adjusts its weights when predictions disagree with training labels. NLTK’s ready-to-use tagger hides much of this training detail.</p>
+          </article>
+          <article class="card">
+            <h3>NER chunker</h3>
+            <p>The lecture presents an NLTK named-entity chunker that uses a Maximum Entropy classifier. It can use features such as words and POS tags to identify entity chunks, then represent the chunks in BIO/IOB form.</p>
+          </article>
+          <article class="card">
+            <h3>BERT / transformer token classifier</h3>
+            <p>A pretrained transformer can be fine-tuned to predict a tag for each token. Context helps distinguish ambiguous words. BERT may split a name into subword pieces, so tools need to align model tokens back to the original words or entity spans.</p>
+          </article>
+        </div>
+        <p>Performance depends on the examples and label conventions used to train the model. A name or term rarely seen during training may be split oddly or mislabeled. Fine-tuning on relevant, representative data can help, but results should still be checked on examples that reflect the real task.</p>
+        <div class="callout caution"><strong>Important:</strong> the lecture’s model outputs illustrate behavior on a particular example; they are not a guarantee that every model will make the same predictions on all text.</div>
+      </section>
+
+      <section id="self-check">
+        <h2>7. Self-check</h2>
+        <details>
+          <summary>1. What is the main difference between POS tagging and NER?</summary>
+          <p>POS identifies each word’s grammatical role. NER locates spans that name entities and classifies them, such as person, organization, or place.</p>
+        </details>
+        <details>
+          <summary>2. Why might “sitting” receive different POS tags in two sentences?</summary>
+          <p>Its role depends on context. In “the sitting area” it modifies a noun; in “I was sitting” it functions as part of a verb phrase.</p>
+        </details>
+        <details>
+          <summary>3. In BIO tagging, what does I-ORG mean?</summary>
+          <p>The token is inside or continues an organization entity span whose first token was marked B-ORG.</p>
+        </details>
+        <details>
+          <summary>4. Why does NER need boundary tags?</summary>
+          <p>Many names contain several words. Boundary tags help show where one entity begins and which following words belong to that same name.</p>
+        </details>
+        <details>
+          <summary>5. Could “Franklin” be tagged differently in different sentences?</summary>
+          <p>Yes. It could refer to a person or to a place. NER uses context and learned patterns to infer the likely entity type.</p>
+        </details>
+        <details>
+          <summary>6. Why might a BERT-based tagger split an unfamiliar name?</summary>
+          <p>Many transformer tokenizers use subword pieces. If a name is uncommon, it may be represented as several pieces; the system must align those pieces with the original word and label correctly.</p>
+        </details>
+      </section>
+
+    </main>
+    <footer>
+      <p><strong>Quick recall:</strong> POS = grammatical job; NER = named span and category; BIO = mark where each entity begins, continues, and ends outside.</p>
+    </footer>
+  </div>
+</body>
+</html>
