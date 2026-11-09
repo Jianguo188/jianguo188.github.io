@@ -1,0 +1,324 @@
+---
+title: "M11: Topic Modeling"
+description: "A beginner-friendly guide to unsupervised topic modeling with LSI, SVD, LDA, and runnable Python examples."
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% include folder-nav-head.html %}
+  <meta name="description" content="A beginner-friendly guide to unsupervised topic modeling with LSI, SVD, LDA, and runnable Python examples.">
+  <title>M11 Beginner Study Guide: Topic Modeling</title>
+  <style>
+    :root {
+      --ink: #1f2937;
+      --muted: #536273;
+      --paper: #fff;
+      --canvas: #f2f6fa;
+      --blue: #155e8a;
+      --blue-pale: #e8f4fb;
+      --green-pale: #e9f7ef;
+      --gold-pale: #fff5d9;
+      --line: #d7e0e8;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font: 17px/1.65 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    a { color: #075985; }
+    a:focus-visible, summary:focus-visible { outline: 3px solid #f0a202; outline-offset: 3px; }
+    .page { max-width: 1080px; margin: 0 auto; padding: 28px 20px 64px; }
+    header, main, footer {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 8px 26px rgb(31 41 55 / 5%);
+    }
+    header { padding: clamp(24px, 5vw, 52px); border-top: 7px solid var(--blue); }
+    main { margin-top: 20px; padding: clamp(20px, 4vw, 42px); }
+    footer { margin-top: 20px; padding: 20px 26px; color: var(--muted); }
+    h1, h2, h3 { line-height: 1.2; }
+    h1 { max-width: 850px; margin: 0 0 14px; font-size: clamp(2rem, 5vw, 3.2rem); }
+    h2 { margin: 0 0 16px; font-size: clamp(1.45rem, 3vw, 2rem); }
+    h3 { margin: 24px 0 8px; font-size: 1.18rem; }
+    p { margin: 10px 0 16px; }
+    .eyebrow { color: var(--blue); font-weight: 750; letter-spacing: .07em; text-transform: uppercase; }
+    .lede { max-width: 800px; color: var(--muted); font-size: 1.15rem; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+    .chip { padding: 5px 11px; border-radius: 999px; background: var(--blue-pale); color: #123f5b; font-size: .9rem; font-weight: 650; }
+    nav { margin-top: 24px; padding: 18px 20px; border-radius: 12px; background: var(--canvas); }
+    nav strong { display: block; margin-bottom: 6px; }
+    nav ul { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0; padding-left: 20px; }
+    section { scroll-margin-top: 16px; padding-top: 30px; }
+    section + section { margin-top: 28px; border-top: 1px solid var(--line); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+    .card { padding: 17px 18px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
+    .card h3 { margin-top: 0; }
+    .callout { margin: 18px 0; padding: 15px 18px; border-left: 5px solid var(--blue); border-radius: 8px; background: var(--blue-pale); }
+    .memory { border-left-color: #23804a; background: var(--green-pale); }
+    .caution { border-left-color: #b77900; background: var(--gold-pale); }
+    .formula { overflow-x: auto; margin: 14px 0; padding: 14px 18px; border-radius: 10px; background: #f4f7fa; font: 1rem/1.8 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    pre { overflow-x: auto; margin: 16px 0; padding: 18px; border-radius: 12px; background: #17212b; color: #f4f7fb; font: .89rem/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; tab-size: 4; }
+    pre code { color: inherit; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .table-wrap { overflow-x: auto; margin: 16px 0; }
+    table { width: 100%; border-collapse: collapse; min-width: 560px; }
+    th, td { padding: 10px 12px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: var(--blue-pale); }
+    ol, ul { padding-left: 1.35em; }
+    li { margin: 5px 0; }
+    details { margin: 12px 0; padding: 13px 16px; border: 1px solid var(--line); border-radius: 10px; }
+    summary { cursor: pointer; color: #123f5b; font-weight: 700; }
+    .small { color: var(--muted); font-size: .93rem; }
+    .sources li { overflow-wrap: anywhere; margin-bottom: 9px; }
+    @media (max-width: 600px) {
+      body { font-size: 16px; }
+      .page { padding: 12px 10px 36px; }
+      header, main { border-radius: 12px; }
+      nav ul { display: block; }
+      pre { font-size: .8rem; }
+    }
+    @media print {
+      body { background: #fff; color: #000; font-size: 11pt; }
+      .page { max-width: none; padding: 0; }
+      header, main, footer { box-shadow: none; border-color: #aaa; }
+      nav { display: none; }
+      section { break-inside: avoid; }
+      pre { white-space: pre-wrap; color: #000; background: #f1f1f1; }
+      a { color: #000; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <p class="eyebrow">Week 11 · Module 11</p>
+      <h1>Discovering Topics in a Collection of Documents</h1>
+      <p class="lede">A beginner’s guide to unsupervised topic modeling: how LSI uses SVD to find latent concepts, how LDA represents documents as mixtures of topics, and how to try both ideas in Python with a real-world-style support-ticket example.</p>
+      <div class="chips" aria-label="Topics">
+        <span class="chip">Beginner friendly</span>
+        <span class="chip">LSI and SVD</span>
+        <span class="chip">LDA</span>
+        <span class="chip">Runnable Python examples</span>
+      </div>
+      <nav aria-label="Guide contents">
+        <strong>Jump to a section</strong>
+        <ul>
+          <li><a href="#roadmap">Learning map</a></li>
+          <li><a href="#basics">Topic modeling basics</a></li>
+          <li><a href="#lsi">LSI and SVD</a></li>
+          <li><a href="#lda">LDA</a></li>
+          <li><a href="#compare">Compare methods</a></li>
+          <li><a href="#python">Python examples</a></li>
+          <li><a href="#practice">Practical workflow</a></li>
+          <li><a href="#self-check">Self-check</a></li>
+          <li><a href="#sources">Materials reviewed</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <section id="roadmap">
+        <h2>1. The learning map</h2>
+        <p>Suppose a company has thousands of customer messages but no labels saying what each message is about. Topic modeling can help surface recurring themes—such as delivery, billing, or account access—without first asking a person to label every message.</p>
+        <div class="callout"><strong>Core idea:</strong> topic modeling looks for patterns in which words appear together across documents. It can organize text into hidden themes, but people usually interpret and name the themes afterward.</div>
+        <p>This module introduces two approaches:</p>
+        <div class="grid">
+          <article class="card"><h3>LSI (Latent Semantic Indexing)</h3><p>Uses Singular Value Decomposition (SVD) to compress a document-term matrix into a smaller latent concept space.</p></article>
+          <article class="card"><h3>LDA (Latent Dirichlet Allocation)</h3><p>Models each document as a mixture of topics and each topic as a distribution over words.</p></article>
+        </div>
+      </section>
+
+      <section id="basics">
+        <h2>2. Topic modeling basics</h2>
+        <p><strong>Unsupervised learning</strong> means the algorithm is not given the correct topic label for every document. Instead, it searches the text for structure. A topic is not automatically a human-written label like “billing”; it is first represented by patterns or probabilities over words.</p>
+        <h3>Start with a document-term matrix</h3>
+        <p>A document-term matrix has one row per document and one column per vocabulary term. A cell may contain a count, weight, or other numeric value indicating how a term relates to a document.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Document</th><th>delivery</th><th>refund</th><th>password</th><th>login</th></tr></thead>
+            <tbody>
+              <tr><th>Message 1</th><td>2</td><td>1</td><td>0</td><td>0</td></tr>
+              <tr><th>Message 2</th><td>0</td><td>0</td><td>2</td><td>1</td></tr>
+              <tr><th>Message 3</th><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Here, Messages 1 and 3 share delivery-related words, while Message 2 uses account-access words. Topic models try to find patterns like these across a much larger collection.</p>
+        <div class="callout memory"><strong>Memory cue:</strong> the matrix is the map; topic modeling finds groups of columns and rows that tend to belong together.</div>
+      </section>
+
+      <section id="lsi">
+        <h2>3. LSI: compress documents into latent concepts</h2>
+        <p><strong>Latent Semantic Indexing (LSI)</strong> looks for hidden associations between terms and documents. The module uses SVD to decompose the document-term matrix into lower-dimensional factors.</p>
+        <p>Let <code>A</code> be an <code>n × d</code> document-term matrix: <code>n</code> documents by <code>d</code> terms. Its SVD can be written:</p>
+        <div class="formula" role="math" aria-label="A approximately equals U k times Sigma k times V k transpose">
+          A ≈ U<sub>k</sub> Σ<sub>k</sub> V<sub>k</sub><sup>T</sup>
+        </div>
+        <ul>
+          <li><code>U<sub>k</sub></code> describes how documents relate to the selected latent concepts.</li>
+          <li><code>Σ<sub>k</sub></code> contains the strength of the retained dimensions, ordered from stronger to weaker.</li>
+          <li><code>V<sub>k</sub><sup>T</sup></code> describes how terms relate to those concepts.</li>
+          <li><code>k</code> is the number of retained latent dimensions; choosing a smaller <code>k</code> compresses the original matrix.</li>
+        </ul>
+        <p>Think of a concept as a weighted group of related terms. A hidden “database” concept might give higher weights to <em>data</em>, <em>system</em>, and <em>retrieval</em>. The model does not know that the concept should be called “database”; a person can assign a readable name after inspecting the term patterns.</p>
+        <h3>Why latent concepts help search</h3>
+        <p>Two documents may be related even if they do not use exactly the same words. By mapping terms and documents into a shared concept space, LSI can find a document about “information retrieval” for a query containing “data,” even when one exact keyword is missing.</p>
+        <div class="callout caution"><strong>Trade-off:</strong> reducing dimensions loses some information. A basic document-term matrix also does not preserve word order, so LSI cannot fully understand sentence structure, negation, or all meanings of a word.</div>
+        <div class="callout memory"><strong>Memory cue:</strong> LSI uses SVD to make a smaller “concept map” linking terms and documents.</div>
+      </section>
+
+      <section id="lda">
+        <h2>4. LDA: documents mix topics, and topics mix words</h2>
+        <p><strong>Latent Dirichlet Allocation (LDA)</strong> is a probabilistic topic model. Before fitting it, choose a topic count <code>K</code>. LDA then estimates two useful distributions:</p>
+        <div class="grid">
+          <article class="card"><h3>Document-topic distribution</h3><p>For each document, how much is it associated with each topic? A message might be 70% delivery, 20% refunds, and 10% account access.</p></article>
+          <article class="card"><h3>Topic-word distribution</h3><p>For each topic, which words are likely? A delivery topic might assign higher probability to “package,” “tracking,” and “arrived.”</p></article>
+        </div>
+        <p>In the lecture’s generative explanation, a document has a distribution over topics; each word gets a topic according to that distribution; then the word is drawn from the selected topic’s word distribution. The algorithm tries to find distributions that explain the observed documents well.</p>
+        <p><strong>Dirichlet distributions</strong> are probability distributions over probability distributions. In practical terms, they act as priors that influence whether a document tends to use many topics or only a few, and whether a topic tends to use many words or only a few. These influences are controlled by parameters often written <code>α</code> and <code>β</code> (software may call the word-topic prior <code>eta</code>).</p>
+        <p>The slides describe Gibbs sampling as one way to iteratively revise word-topic assignments. Some software packages use other inference methods, such as variational inference; you do not need to implement the inference algorithm by hand to use an LDA library.</p>
+        <h3>Topics need human interpretation</h3>
+        <p>LDA initially labels topics with IDs such as Topic 0 and Topic 1. A person inspects each topic’s highest-probability words and representative documents to decide whether it resembles “sports,” “billing,” or something else. A topic’s label is an interpretation, not a supervised answer supplied to the model.</p>
+        <div class="callout caution"><strong>Important setup choice:</strong> basic LDA requires choosing <code>K</code> in advance. If <code>K</code> is too small, distinct themes may be merged; if too large, a theme may be split into several less coherent topics. Try plausible values and assess whether the results are useful.</div>
+        <div class="callout memory"><strong>Memory cue:</strong> LDA answers two questions: “Which topics are in this document?” and “Which words describe each topic?”</div>
+      </section>
+
+      <section id="compare">
+        <h2>5. LSI and LDA side by side</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th></th><th>LSI</th><th>LDA</th></tr></thead>
+            <tbody>
+              <tr><th>Main idea</th><td>Compress a document-term matrix into latent dimensions using SVD.</td><td>Represent documents as mixtures of topics and topics as mixtures of words.</td></tr>
+              <tr><th>Typical input</th><td>Often a term-count or TF-IDF matrix.</td><td>Usually nonnegative word-count features for a bag-of-words model.</td></tr>
+              <tr><th>Number of topics/dimensions</th><td>Choose how many SVD dimensions to retain.</td><td>Choose the number of topics <code>K</code> before fitting.</td></tr>
+              <tr><th>Useful output</th><td>Low-dimensional document and term representations, useful for concept-based retrieval.</td><td>Document-topic probabilities and topic-word probabilities.</td></tr>
+              <tr><th>Key caveat</th><td>Low-rank compression loses information; basic input ignores word order.</td><td>Topics are probabilistic patterns, not guaranteed human categories; the result depends on preprocessing and <code>K</code>.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="python">
+        <h2>6. Python examples: try LDA and LSI</h2>
+        <p>The following self-contained example uses invented support tickets. It trains both models and prints the strongest words for each discovered component/topic. The particular output can vary with the text, settings, and library version; the topic names in comments are human interpretations, not model-provided truths.</p>
+        <p>Install scikit-learn if needed with <code>python -m pip install scikit-learn</code>. Save the code as <code>topic_models_demo.py</code> and run <code>python topic_models_demo.py</code>.</p>
+        <pre><code>from sklearn.decomposition import LatentDirichletAllocation, TruncatedSVD
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+
+# Illustrative customer-support messages; no labels are provided to the models.
+documents = [
+    "package delivery is late tracking number has not updated",
+    "my parcel arrived late and delivery tracking is confusing",
+    "please refund my payment the order was cancelled",
+    "I need a refund because I was charged twice for my order",
+    "I cannot reset my password and cannot log in",
+    "login failed after I changed my account password",
+    "the delivery package arrived but I want to return the item",
+    "how can I update my account email and password",
+]
+
+# LDA typically uses nonnegative word counts.
+count_vectorizer = CountVectorizer(stop_words="english")
+counts = count_vectorizer.fit_transform(documents)
+count_terms = count_vectorizer.get_feature_names_out()
+
+lda = LatentDirichletAllocation(
+    n_components=3,       # choose K before fitting
+    random_state=7,        # makes this example more reproducible
+    learning_method="batch",
+    max_iter=30,
+)
+document_topic = lda.fit_transform(counts)
+
+print("LDA: likely words for each topic")
+for topic_id, weights in enumerate(lda.components_):
+    top_ids = weights.argsort()[-6:][::-1]
+    top_words = [count_terms[i] for i in top_ids]
+    print(f"Topic {topic_id}: {', '.join(top_words)}")
+
+print("\\nLDA: topic mixture for each ticket")
+for doc_id, distribution in enumerate(document_topic, start=1):
+    print(f"Ticket {doc_id}: {distribution.round(2)}")
+
+# LSI-style concept space: TF-IDF followed by truncated SVD.
+tfidf_vectorizer = TfidfVectorizer(stop_words="english")
+tfidf = tfidf_vectorizer.fit_transform(documents)
+lsi = TruncatedSVD(n_components=3, random_state=7)
+document_concepts = lsi.fit_transform(tfidf)
+term_concepts = lsi.components_
+tfidf_terms = tfidf_vectorizer.get_feature_names_out()
+
+print("\\nLSI: strongest words for each latent component")
+for component_id, weights in enumerate(term_concepts):
+    top_ids = weights.argsort()[-6:][::-1]
+    top_words = [tfidf_terms[i] for i in top_ids]
+    print(f"Component {component_id}: {', '.join(top_words)}")
+
+print("\\nLSI: document coordinates in concept space")
+for doc_id, coordinates in enumerate(document_concepts, start=1):
+    print(f"Ticket {doc_id}: {coordinates.round(2)}")</code></pre>
+        <h3>How to read the output</h3>
+        <ul>
+          <li>For LDA, the printed words summarize each topic; the row of document-topic values shows each ticket’s estimated topic mixture. The values in a row are proportions and sum approximately to 1.</li>
+          <li>For LSI, each ticket is represented by coordinates in the retained SVD concept dimensions. Component weights indicate which terms contribute to those dimensions.</li>
+          <li>Topic/component IDs have no inherent names or ranking such as “Topic 1 is always delivery.” Inspect top words and sample documents before assigning a human-readable label.</li>
+        </ul>
+        <div class="callout caution"><strong>Feature choice matters:</strong> LDA in this example receives count features, while LSI receives TF-IDF values. For your own data, follow the assumptions of the implementation, fit vectorizers on training data only when evaluating a predictive pipeline, and check that preprocessing has not removed important terms.</div>
+      </section>
+
+      <section id="practice">
+        <h2>7. A practical topic-modeling workflow</h2>
+        <ol>
+          <li><strong>Define the purpose.</strong> Are you exploring a large archive, improving search, or summarizing common themes?</li>
+          <li><strong>Prepare documents.</strong> Remove empty or irrelevant records, choose tokenization and stop-word handling, and preserve useful domain terms.</li>
+          <li><strong>Build features.</strong> Create a document-term matrix. Use the representation expected by the chosen method.</li>
+          <li><strong>Try a sensible range of settings.</strong> For LSI choose a retained dimension count; for LDA try plausible topic counts and, if appropriate, prior settings.</li>
+          <li><strong>Inspect both sides.</strong> Review top words per topic and representative documents per topic. A word list alone can be misleading.</li>
+          <li><strong>Check usefulness with people.</strong> Ask whether the topics are understandable and whether they help the real users’ task. Topic coherence metrics can assist, but they do not replace task-based review.</li>
+          <li><strong>Iterate and document.</strong> Adjust preprocessing or settings, then record the choices so results can be reproduced.</li>
+        </ol>
+        <div class="callout memory"><strong>Quick recap:</strong> LSI = SVD concept space; LDA = document-topic and topic-word distributions; both discover patterns without labeled topic answers.</div>
+      </section>
+
+      <section id="self-check">
+        <h2>8. Self-check</h2>
+        <details>
+          <summary>1. Why is topic modeling called unsupervised?</summary>
+          <p>The algorithm is not given a correct topic label for every document. It discovers patterns from the text features.</p>
+        </details>
+        <details>
+          <summary>2. In LSI, what does SVD help create?</summary>
+          <p>A lower-dimensional latent space relating documents and terms through shared concepts. A person interprets the dimensions after inspecting their strongest terms and documents.</p>
+        </details>
+        <details>
+          <summary>3. What are the two main distributions returned by an LDA-style model?</summary>
+          <p>A topic mixture for each document, and a word distribution for each topic.</p>
+        </details>
+        <details>
+          <summary>4. Does LDA automatically know that a topic is “sports”?</summary>
+          <p>No. It produces topic IDs and word probabilities. A person inspects the topic’s words and documents and may name it “sports.”</p>
+        </details>
+        <details>
+          <summary>5. What can happen if the chosen topic count K is too small?</summary>
+          <p>Distinct themes may be merged into the same topic. If K is too large, a theme may be split into multiple topics.</p>
+        </details>
+        <details>
+          <summary>6. What should you inspect before trusting a discovered topic?</summary>
+          <p>Its most probable words and representative documents, and whether people find it useful for the intended task. A short list of top words alone may be ambiguous.</p>
+        </details>
+      </section>
+
+    </main>
+    <footer>
+      <p><strong>Quick recall:</strong> LSI compresses a term-document matrix into latent concepts with SVD. LDA estimates topic mixtures for documents and word mixtures for topics. Neither discovers guaranteed “true” labels—inspect and validate the patterns.</p>
+    </footer>
+  </div>
+</body>
+</html>
